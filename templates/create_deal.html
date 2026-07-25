@@ -1,0 +1,1343 @@
+﻿{% extends "base.html" %}
+
+{% block title %}{{ t('create_deal_title') }} - {{ bot_name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+/* Black Diamond Deal Creation Wizard */
+:root {
+  /* Design System Colors - Theme aware */
+  --onyx-black: #0A0A0A;
+  --black: #000000;
+  --gray: #888888;
+  --silver: #888888;
+  --white: #FFFFFF;
+  --onyx-alpha-90: rgba(10, 10, 10, 0.9);
+  --onyx-alpha-80: rgba(10, 10, 10, 0.8);
+  --onyx-alpha-70: rgba(10, 10, 10, 0.7);
+  --black-alpha-50: rgba(0, 0, 0, 0.5);
+  --white-alpha-10: rgba(255, 255, 255, 0.1);
+  --white-alpha-20: rgba(255, 255, 255, 0.2);
+  --success: #4ade80;
+  --error: #f87171;
+  --info: #60a5fa;
+
+  /* Typography */
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  /* Border radius */
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* Shadows */
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 4px 6px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 10px 15px rgba(0, 0, 0, 0.3);
+
+  /* Transitions */
+  --transition: all 0.3s ease;
+}
+
+
+.theme-current .step-card {
+  background: var(--onyx-alpha-80);
+  border-color: var(--silver);
+  color: var(--white);
+}
+
+.theme-black .step-card {
+  background: rgba(0, 0, 0, 0.9);
+  border-color: rgba(170, 170, 170, 0.3);
+  color: var(--white);
+}
+
+.theme-white .step-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(136, 136, 136, 0.3);
+  color: #1a1a1a;
+}
+
+.theme-current .form-input {
+  background: var(--onyx-alpha-70);
+  border-color: var(--silver);
+  color: var(--white);
+}
+
+.theme-black .form-input {
+  background: rgba(0, 0, 0, 0.8);
+  border-color: rgba(170, 170, 170, 0.3);
+  color: var(--white);
+}
+
+.theme-white .form-input {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(136, 136, 136, 0.3);
+  color: #1a1a1a;
+}
+
+.theme-current .currency-option {
+  background: var(--onyx-alpha-70);
+  border-color: var(--silver);
+  color: var(--white);
+}
+
+.theme-black .currency-option {
+  background: rgba(0, 0, 0, 0.8);
+  border-color: rgba(170, 170, 170, 0.3);
+  color: var(--white);
+}
+
+.theme-white .currency-option {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(136, 136, 136, 0.3);
+  color: #1a1a1a;
+}
+
+.theme-current .preview-card {
+  background: var(--onyx-alpha-70);
+  border-color: var(--silver);
+}
+
+.theme-black .preview-card {
+  background: rgba(0, 0, 0, 0.8);
+  border-color: rgba(170, 170, 170, 0.3);
+}
+
+.theme-white .preview-card {
+  background: #ffffff;
+  border-color: rgba(2, 6, 23, 0.10);
+  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.06), 0 0 0 1px rgba(2, 6, 23, 0.03);
+  backdrop-filter: none;
+}
+
+.theme-current .confirmation-summary {
+  background: var(--onyx-alpha-70);
+  border-color: var(--silver);
+}
+
+.theme-black .confirmation-summary {
+  background: rgba(0, 0, 0, 0.8);
+  border-color: rgba(170, 170, 170, 0.3);
+}
+
+.theme-white .confirmation-summary {
+  background: #ffffff;
+  border-color: rgba(2, 6, 23, 0.10);
+  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.06), 0 0 0 1px rgba(2, 6, 23, 0.03);
+  backdrop-filter: none;
+}
+
+.theme-current .summary-row {
+  background: var(--black-alpha-50);
+}
+
+.theme-black .summary-row {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.theme-white .summary-row {
+  background: #ffffff;
+  border: 1px solid rgba(2, 6, 23, 0.06);
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.06);
+}
+
+.theme-white .preview-item {
+  background: #ffffff;
+  border: 1px solid rgba(2, 6, 23, 0.06);
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.06);
+}
+
+/* Button theme overrides */
+.theme-current .btn-primary,
+.theme-black .btn-primary {
+  background: var(--white);
+  color: var(--black);
+}
+
+.theme-white .btn-primary {
+  background: var(--black);
+  color: var(--white);
+}
+
+.theme-current .btn-secondary,
+.theme-black .btn-secondary {
+  background: var(--onyx-alpha-70);
+  color: var(--white);
+  border-color: var(--silver);
+}
+
+.theme-white .btn-secondary {
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--black);
+  border-color: rgba(136, 136, 136, 0.3);
+}
+
+/* Text color overrides */
+.theme-current .step-title,
+.theme-current .form-label,
+.theme-current .currency-name,
+.theme-current .preview-title,
+.theme-current .summary-title,
+.theme-current .summary-value,
+.theme-current .preview-label,
+.theme-current .preview-value,
+.theme-black .step-title,
+.theme-black .form-label,
+.theme-black .currency-name,
+.theme-black .preview-title,
+.theme-black .summary-title,
+.theme-black .summary-value,
+.theme-black .preview-label,
+.theme-black .preview-value {
+  color: var(--white);
+}
+
+.theme-white .step-title,
+.theme-white .form-label,
+.theme-white .currency-name,
+.theme-white .preview-title,
+.theme-white .summary-title,
+.theme-white .summary-value,
+.theme-white .preview-label,
+.theme-white .preview-value {
+  color: #1a1a1a;
+}
+
+.theme-current .step-description,
+.theme-current .currency-desc,
+.theme-current .summary-label,
+.theme-black .step-description,
+.theme-black .currency-desc,
+.theme-black .summary-label {
+  color: var(--gray);
+}
+
+.theme-white .step-description,
+.theme-white .currency-desc,
+.theme-white .summary-label {
+  color: #555555;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-primary);
+  color: var(--white);
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* Main Container */
+.create-deal-container {
+  padding: var(--space-4);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Removed the gradient overlay that was causing visual issues */
+
+
+/* Step Content */
+.step-content {
+  max-width: 600px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.step-card {
+  background: var(--onyx-alpha-80);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--silver);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-xl);
+  display: none;
+  animation: fadeIn 0.5s ease;
+}
+
+.step-card.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.step-header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.step-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto var(--space-4);
+  background: var(--white);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-lg);
+}
+
+.step-icon svg {
+  width: 32px;
+  height: 32px;
+  color: var(--black);
+}
+
+.step-title {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: var(--space-2);
+}
+
+.step-description {
+  color: var(--gray);
+  font-size: var(--text-base);
+  line-height: 1.5;
+}
+
+/* Form Elements */
+.form-group {
+  margin-bottom: var(--space-6);
+}
+
+.form-label {
+  display: block;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.form-input {
+  width: 100%;
+  padding: var(--space-4);
+  background: var(--onyx-alpha-70);
+  border: 1px solid var(--silver);
+  border-radius: var(--radius);
+  color: var(--white);
+  font-size: var(--text-base);
+  transition: var(--transition);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--white);
+  box-shadow: 0 0 0 2px var(--white-alpha-20);
+}
+
+.form-input::placeholder {
+  color: var(--gray);
+}
+
+.form-textarea {
+  min-height: 120px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.char-counter {
+  font-size: var(--text-xs);
+  color: var(--gray);
+  margin-top: var(--space-1);
+}
+
+/* Currency Selection */
+.currency-grid {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+.currency-option {
+  background: var(--onyx-alpha-70);
+  border: 2px solid var(--silver);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: center;
+  position: relative;
+}
+
+.currency-option:hover {
+  border-color: var(--white);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.currency-option.selected {
+  border-color: var(--white);
+  background: var(--white-alpha-10);
+}
+
+.currency-option.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  border-color: var(--silver);
+  box-shadow: none;
+  transform: none;
+  filter: grayscale(0.6);
+}
+
+.currency-option.disabled:hover {
+  border-color: var(--silver);
+  transform: none;
+  box-shadow: none;
+}
+
+.currency-option.disabled .currency-rate {
+  display: none;
+}
+
+.currency-option.selected::after {
+  content: '✓';
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  width: 24px;
+  height: 24px;
+  background: var(--success);
+  color: var(--white);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.currency-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto var(--space-3);
+  opacity: 0.7;
+  transition: var(--transition);
+}
+
+.currency-option.selected .currency-icon {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.currency-name {
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: var(--space-1);
+  font-size: var(--text-lg);
+}
+
+.currency-desc {
+  font-size: var(--text-sm);
+  color: var(--gray);
+  margin-bottom: var(--space-3);
+}
+
+.currency-rate {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--info);
+  font-family: 'Courier New', monospace;
+}
+
+.currency-rate.loading {
+  opacity: 0.5;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.currency-soon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--gray);
+}
+
+.loading-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 0.5rem;
+}
+
+.loading-text {
+  font-size: 0.9rem;
+  color: var(--gray);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* Preview Card */
+.preview-card {
+  background: var(--onyx-alpha-70);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--silver);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  margin-top: var(--space-6);
+}
+
+.preview-title {
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.preview-title svg {
+  width: 20px;
+  height: 20px;
+  color: var(--info);
+}
+
+.preview-grid {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.preview-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3);
+  background: var(--black-alpha-50);
+  border-radius: var(--radius);
+}
+
+.preview-label {
+  font-size: var(--text-sm);
+  color: var(--gray);
+}
+
+.preview-value {
+  font-weight: 600;
+  color: var(--white);
+}
+
+/* Confirmation Summary */
+.confirmation-summary {
+  background: var(--onyx-alpha-70);
+  border: 1px solid var(--silver);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  margin: var(--space-6) 0;
+}
+
+.summary-title {
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: var(--space-4);
+}
+
+.summary-grid {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3);
+  background: var(--black-alpha-50);
+  border-radius: var(--radius);
+}
+
+.summary-label {
+  font-weight: 500;
+  color: var(--gray);
+}
+
+.summary-value {
+  font-weight: 600;
+  color: var(--white);
+}
+
+/* Action Buttons */
+.step-actions {
+  display: flex;
+  gap: var(--space-4);
+  justify-content: center;
+  margin-top: var(--space-8);
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: var(--space-4) var(--space-8);
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: var(--text-base);
+  cursor: pointer;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  text-decoration: none;
+  min-height: 48px;
+}
+
+.btn-primary {
+  background: var(--white);
+  color: var(--black);
+  box-shadow: var(--shadow);
+}
+
+.btn-primary:hover {
+  background: var(--black);
+  color: var(--white);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-secondary {
+  background: var(--onyx-alpha-70);
+  color: var(--white);
+  border: 1px solid var(--silver);
+}
+
+.btn-secondary:hover {
+  border-color: var(--white);
+  color: var(--white);
+}
+
+.btn-success {
+  background: var(--success);
+  color: var(--white);
+  box-shadow: var(--shadow);
+}
+
+.btn-success:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Loading States */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid currentColor;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error States */
+.error-message {
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid var(--error);
+  color: var(--error);
+  padding: var(--space-3);
+  border-radius: var(--radius);
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .create-deal-container {
+    padding: var(--space-2);
+  }
+
+  .step-card {
+    padding: var(--space-6);
+  }
+
+  .currency-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .step-actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+}
+
+@media (max-width: 480px) {
+  .step-title {
+    font-size: var(--text-xl);
+  }
+
+  .step-card {
+    padding: var(--space-4);
+  }
+}
+
+/* Override main background for create deal page */
+main.main.diamond-accent {
+  background: var(--bg-gradient) !important;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="create-deal-container">
+
+  <!-- Step Content -->
+  <div class="step-content">
+    <!-- Step 1: Deal Details -->
+    <div class="step-card active" data-step="1">
+      <div class="step-header">
+        <div class="step-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+          </svg>
+        </div>
+        <h2 class="step-title">{{ t('deal_details') }}</h2>
+        <p class="step-description">{{ t('deal_details_desc') }}</p>
+      </div>
+
+      <form id="dealForm">
+        <div class="form-group">
+          <label class="form-label">{{ t('amount') }}</label>
+          <input type="number" id="amount" class="form-input" placeholder="100.00" min="1" step="0.01" required>
+          <div class="char-counter"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">{{ t('description') }}</label>
+          <textarea id="description" class="form-input form-textarea" placeholder="{{ t('deal_description_placeholder') }}" maxlength="500" required></textarea>
+          <div class="char-counter">
+            <span id="charCount">0</span>/500 {{ t('max_characters') }}
+          </div>
+        </div>
+
+        <!-- Live Preview -->
+        <div class="preview-card" id="previewCard" style="display: none;">
+          <div class="preview-title">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+            {{ t('deal_preview') }}
+          </div>
+          <div class="preview-grid">
+            <div class="preview-item">
+              <div class="preview-label">{{ t('amount') }}</div>
+              <div class="preview-value" id="previewAmount">-</div>
+            </div>
+            <div class="preview-item">
+              <div class="preview-label">{{ t('commission') }}</div>
+              <div class="preview-value" id="previewCommission">-</div>
+            </div>
+            <div class="preview-item">
+              <div class="preview-label">{{ t('seller_receives_label') }}</div>
+              <div class="preview-value" id="previewSellerReceives">-</div>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <div class="step-actions">
+        <button class="btn btn-primary" onclick="nextStep(1)">
+          {{ t('next') }}
+          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+            <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 2: Currency Selection -->
+    <div class="step-card" data-step="2">
+      <div class="step-header">
+        <div class="step-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6V12L16 14"/>
+          </svg>
+        </div>
+        <h2 class="step-title">{{ t('select_payment_currency') }}</h2>
+        <p class="step-description">{{ t('select_payment_currency_desc') }}</p>
+      </div>
+
+      <div class="currency-grid">
+        <div class="currency-option disabled" data-currency="USDT" data-disabled="true">
+          <div class="currency-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6V12L16 14"/>
+            </svg>
+          </div>
+          <div class="currency-name">{{ t('currency_usdt') }}</div>
+          <div class="currency-desc">{{ t('usdt_description') }}</div>
+          <div class="currency-soon">{{ t('currency_coming_soon') }}</div>
+          <div class="currency-rate" id="usdtRate">{{ t('currency_coming_soon') }}</div>
+        </div>
+
+        <div class="currency-option" data-currency="TON">
+          <div class="currency-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M8 12h8M12 8v8"/>
+            </svg>
+          </div>
+          <div class="currency-name">{{ t('currency_ton') }}</div>
+          <div class="currency-desc">{{ t('ton_description') }}</div>
+          <div class="currency-rate loading" id="tonRate">
+              <img src="/static/icons/loading.svg" alt="Loading" class="loading-icon">
+              <span class="loading-text">Loading...</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="step-actions">
+        <button class="btn btn-secondary" onclick="prevStep(2)">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+            <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/>
+          </svg>
+          {{ t('back') }}
+        </button>
+        <button class="btn btn-primary" onclick="nextStep(2)">
+          {{ t('next') }}
+          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+            <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 3: Confirmation -->
+    <div class="step-card" data-step="3">
+      <div class="step-header">
+        <div class="step-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+          </svg>
+        </div>
+        <h2 class="step-title">{{ t('confirm_deal') }}</h2>
+        <p class="step-description">{{ t('confirm_deal_desc') }}</p>
+      </div>
+
+      <div class="confirmation-summary">
+        <div class="summary-title">{{ t('deal_summary') }}</div>
+        <div class="summary-grid">
+          <div class="summary-row">
+            <span class="summary-label">{{ t('amount') }}</span>
+            <span class="summary-value" id="confirmAmount">-</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">{{ t('currency') }}</span>
+            <span class="summary-value" id="confirmCurrency">-</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">{{ t('description') }}</span>
+            <span class="summary-value" id="confirmDescription">-</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">{{ t('commission') }}</span>
+            <span class="summary-value" id="confirmCommission">-</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">{{ t('seller_receives_label') }}</span>
+            <span class="summary-value" id="confirmSellerReceives">-</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn btn-secondary" onclick="prevStep(3)">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+            <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z"/>
+          </svg>
+          {{ t('back') }}
+        </button>
+        <button type="button" class="btn btn-success" onclick="createDeal()">
+          <span id="createBtnText">{{ t('create_deal') }}</span>
+          <div class="spinner" id="createSpinner" style="display: none;"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Black Diamond Deal Creation Wizard
+let currentStep = 1;
+let dealData = {
+  amount: '',
+  description: '',
+  currency: 'TON'
+};
+let commissionRate = 0.05; // default, will be updated from API
+let rateUpdateInterval = null;
+const exchangeRates = {
+  usdtUsd: 1,
+  tonUsd: null
+};
+
+function parseAmount(value) {
+  const amount = parseFloat(value);
+  return Number.isFinite(amount) ? amount : null;
+}
+
+function getBaseAmount() {
+  return parseAmount(dealData.amount);
+}
+
+function convertUsdToCurrency(amountUsd, currency) {
+  if (amountUsd === null) {
+    return null;
+  }
+  const code = (currency || '').toUpperCase();
+  if (code === 'USDT') {
+    const rate = exchangeRates.usdtUsd || 1;
+    return amountUsd / rate;
+  }
+  if (code === 'TON') {
+    if (!exchangeRates.tonUsd) {
+      return null;
+    }
+    return amountUsd / exchangeRates.tonUsd;
+  }
+  return amountUsd;
+}
+
+function formatCurrencyAmount(amount, currency) {
+  if (!Number.isFinite(amount)) {
+    return '-';
+  }
+  const decimals = currency === 'TON' ? 4 : 2;
+  return `${amount.toFixed(decimals)} ${currency}`;
+}
+
+function formatCurrencyDisplay(amountText, baseAmount) {
+  const template = '{{ t("currency_amount_display") }}';
+  return template
+    .replace('{amount}', amountText)
+    .replace('{base_amount}', baseAmount.toFixed(2));
+}
+
+// Load commission rate from API
+async function loadCommissionRate() {
+  try {
+    const response = await fetch('/api/settings/commission-rate');
+    const data = await response.json();
+    if (data.commission_rate !== undefined) {
+      commissionRate = data.commission_rate;
+      console.log(`Loaded commission rate: ${commissionRate}`);
+    }
+  } catch (error) {
+    console.error('Failed to load commission rate:', error);
+  }
+}
+
+// Step Navigation
+function goToStep(step) {
+  console.log(`Going to step ${step}`);
+
+  // Update step cards
+  document.querySelectorAll('.step-card').forEach(card => {
+    card.classList.toggle('active', parseInt(card.dataset.step) === step);
+  });
+
+  currentStep = step;
+
+  // Handle step-specific logic
+  if (step === 2) {
+    loadExchangeRates();
+    // Start automatic rate updates
+    if (!rateUpdateInterval) {
+      rateUpdateInterval = setInterval(loadExchangeRates, 10000); // Update every 10 seconds
+    }
+  } else {
+    // Stop automatic rate updates when leaving step 2
+    if (rateUpdateInterval) {
+      clearInterval(rateUpdateInterval);
+      rateUpdateInterval = null;
+    }
+    if (step === 3) {
+      updateConfirmation();
+    }
+  }
+}
+
+function nextStep(fromStep) {
+  if (fromStep === 1) {
+    const amount = document.getElementById('amount').value;
+    const description = document.getElementById('description').value;
+
+    if (!amount || amount < 1) {
+      showError('amount', '{{ t("amount_too_small") }}');
+      return;
+    }
+
+    if (!description.trim()) {
+      showError('description', '{{ t("description_required") }}');
+      return;
+    }
+
+    dealData.amount = amount;
+    dealData.description = description;
+    updatePreview();
+    goToStep(2);
+  } else if (fromStep === 2) {
+    if (!dealData.currency) {
+      showNotification('{{ t("select_payment_currency") }}', 'error');
+      return;
+    }
+    goToStep(3);
+  }
+}
+
+function prevStep(fromStep) {
+  goToStep(fromStep - 1);
+}
+
+// Error Handling
+function showError(fieldId, message) {
+  const field = document.getElementById(fieldId);
+  const existingError = field.parentNode.querySelector('.error-message');
+
+  if (existingError) {
+    existingError.remove();
+  }
+
+  const errorDiv = document.createElement('div');
+  errorDiv.className = 'error-message';
+  errorDiv.textContent = message;
+
+  field.parentNode.appendChild(errorDiv);
+  field.focus();
+}
+
+// Preview Updates
+function updatePreview() {
+  const previewCard = document.getElementById('previewCard');
+  const previewAmount = document.getElementById('previewAmount');
+  const previewCommission = document.getElementById('previewCommission');
+  const previewSellerReceives = document.getElementById('previewSellerReceives');
+
+  const baseAmount = getBaseAmount();
+  if (baseAmount !== null && dealData.description) {
+    previewCard.style.display = 'block';
+    previewAmount.textContent = `$${baseAmount.toFixed(2)}`;
+
+    // Use dynamic commission rate from settings
+    const commission = baseAmount * commissionRate;
+    const sellerReceives = baseAmount - commission;
+
+    previewCommission.textContent = `$${commission.toFixed(2)} (${(commissionRate * 100).toFixed(1)}%)`;
+    previewSellerReceives.textContent = `$${sellerReceives.toFixed(2)}`;
+  } else {
+    previewCard.style.display = 'none';
+  }
+}
+
+function setSelectedCurrency(currencyCode) {
+  const option = document.querySelector(`[data-currency="${currencyCode}"]`);
+  if (!option || option.classList.contains('disabled')) {
+    return false;
+  }
+  document.querySelectorAll('.currency-option').forEach(opt => {
+    opt.classList.remove('selected');
+  });
+  option.classList.add('selected');
+  dealData.currency = currencyCode;
+  return true;
+}
+
+// Currency Selection
+document.querySelectorAll('.currency-option').forEach(option => {
+  option.addEventListener('click', () => {
+    if (option.classList.contains('disabled')) {
+      return;
+    }
+    setSelectedCurrency(option.dataset.currency);
+  });
+});
+
+// Load Exchange Rates
+async function loadExchangeRates() {
+  console.log('Loading exchange rates...');
+  try {
+    const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=tether,the-open-network&vs_currencies=usd&t=' + Date.now());
+    const data = await response.json();
+    console.log('Exchange rates data:', data);
+
+    const usdtOption = document.querySelector('.currency-option[data-currency="USDT"]');
+    const usdtEnabled = usdtOption && !usdtOption.classList.contains('disabled');
+    if (usdtEnabled && data.tether?.usd) {
+      exchangeRates.usdtUsd = data.tether.usd;
+    }
+    if (data['the-open-network']?.usd) {
+      exchangeRates.tonUsd = data['the-open-network'].usd;
+    }
+    updateCurrencyRates();
+  } catch (error) {
+    console.error('Failed to load exchange rates:', error);
+  }
+}
+
+function updateCurrencyRates() {
+  const baseAmount = getBaseAmount();
+  const usdtRate = document.getElementById('usdtRate');
+  const tonRate = document.getElementById('tonRate');
+  const usdtOption = document.querySelector('.currency-option[data-currency="USDT"]');
+  const usdtEnabled = usdtOption && !usdtOption.classList.contains('disabled');
+
+  if (baseAmount !== null) {
+    if (usdtEnabled) {
+      const usdtAmount = convertUsdToCurrency(baseAmount, 'USDT');
+      if (usdtAmount !== null) {
+        usdtRate.textContent = formatCurrencyDisplay(formatCurrencyAmount(usdtAmount, 'USDT'), baseAmount);
+        usdtRate.classList.remove('loading');
+      }
+    }
+
+    const tonAmount = convertUsdToCurrency(baseAmount, 'TON');
+    if (tonAmount !== null) {
+      tonRate.textContent = formatCurrencyDisplay(formatCurrencyAmount(tonAmount, 'TON'), baseAmount);
+      tonRate.classList.remove('loading');
+    }
+  }
+}
+
+// Confirmation Update
+function updateConfirmation() {
+  document.getElementById('confirmCurrency').textContent = dealData.currency;
+  document.getElementById('confirmDescription').textContent = dealData.description;
+
+  const baseAmount = getBaseAmount();
+  const dealAmount = convertUsdToCurrency(baseAmount, dealData.currency);
+
+  if (dealAmount !== null) {
+    document.getElementById('confirmAmount').textContent = formatCurrencyAmount(dealAmount, dealData.currency);
+
+    // Use dynamic commission rate from settings
+    const commission = dealAmount * commissionRate;
+    const sellerReceives = dealAmount - commission;
+
+    document.getElementById('confirmCommission').textContent = `${formatCurrencyAmount(commission, dealData.currency)} (${(commissionRate * 100).toFixed(1)}%)`;
+    document.getElementById('confirmSellerReceives').textContent = formatCurrencyAmount(sellerReceives, dealData.currency);
+  } else {
+    document.getElementById('confirmAmount').textContent = '-';
+    document.getElementById('confirmCommission').textContent = '-';
+    document.getElementById('confirmSellerReceives').textContent = '-';
+  }
+}
+
+// Create Deal
+async function createDeal() {
+  const btn = document.querySelector('.step-card[data-step="3"] .btn-success');
+  const btnText = document.getElementById('createBtnText');
+  const spinner = document.getElementById('createSpinner');
+
+  btn.classList.add('loading');
+  btnText.style.display = 'none';
+  spinner.style.display = 'block';
+
+  try {
+    const dealAmount = convertUsdToCurrency(getBaseAmount(), dealData.currency);
+    if (!Number.isFinite(dealAmount)) {
+      throw new Error('{{ t("alert_create_error") }}');
+    }
+    const payload = {
+      ...dealData,
+      amount: dealAmount
+    };
+    const response = await fetch('/api/create-deal', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      // Redirect to deal detail page instead of showing success step
+      window.location.href = `/deal/${data.deal_code}`;
+    } else {
+      throw new Error(data.message || 'Failed to create deal');
+    }
+  } catch (error) {
+    console.error('Deal creation failed:', error);
+    showNotification(error.message || '{{ t("alert_create_error") }}', 'error');
+  } finally {
+    btn.classList.remove('loading');
+    btnText.style.display = 'inline';
+    spinner.style.display = 'none';
+  }
+}
+
+// Character Counter
+document.getElementById('description').addEventListener('input', function() {
+  const count = this.value.length;
+  document.getElementById('charCount').textContent = count;
+  dealData.description = this.value;
+  updatePreview();
+});
+
+// Amount input
+document.getElementById('amount').addEventListener('input', function() {
+  dealData.amount = this.value;
+  updatePreview();
+  updateCurrencyRates();
+});
+
+// Notification System
+function showNotification(message, type = 'info', duration = 3000) {
+  const notification = document.createElement('div');
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: ${type === 'error' ? '#f87171' : type === 'success' ? '#4ade80' : '#60a5fa'};
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    font-weight: 500;
+    max-width: 400px;
+    transform: translateX(400px);
+    transition: transform 0.3s ease;
+    font-family: 'Inter', sans-serif;
+  `;
+
+  notification.innerHTML = `
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        ${type === 'error' ? '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>' :
+         type === 'success' ? '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>' :
+         '<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><path d="M12 8V14M8 12H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'}
+      </svg>
+      <span>${message}</span>
+    </div>
+  `;
+
+  document.body.appendChild(notification);
+
+  // Animate in
+  setTimeout(() => {
+    notification.style.transform = 'translateX(0)';
+  }, 100);
+
+  // Remove after duration
+  setTimeout(() => {
+    notification.style.transform = 'translateX(400px)';
+    setTimeout(() => notification.remove(), 300);
+  }, duration);
+}
+
+// Prevent form submission
+document.getElementById('dealForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  return false;
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', async function() {
+  // Load commission rate from API
+  await loadCommissionRate();
+
+  // Load saved data from localStorage if available
+  const saved = localStorage.getItem('dealData');
+  if (saved) {
+    try {
+      const parsed = JSON.parse(saved);
+      dealData = { ...dealData, ...parsed };
+
+      // Populate form fields
+      if (dealData.amount) {
+        document.getElementById('amount').value = dealData.amount;
+      }
+      if (dealData.description) {
+        document.getElementById('description').value = dealData.description;
+        document.getElementById('charCount').textContent = dealData.description.length;
+      }
+      if (!setSelectedCurrency(dealData.currency)) {
+        setSelectedCurrency('TON');
+      }
+
+      updatePreview();
+    } catch (error) {
+      console.error('Failed to load saved deal data:', error);
+    }
+  }
+  if (!document.querySelector('.currency-option.selected')) {
+    setSelectedCurrency('TON');
+  }
+
+  // Check URL hash for initial step
+  const hash = window.location.hash.replace('#', '');
+  if (hash.match(/^step\d+$/)) {
+    const step = parseInt(hash.replace('step', ''));
+    if (step >= 1 && step <= 3) {
+      goToStep(step);
+    }
+  }
+});
+
+// Save data to localStorage
+function saveDealData() {
+  try {
+    localStorage.setItem('dealData', JSON.stringify(dealData));
+  } catch (error) {
+    console.error('Failed to save deal data:', error);
+  }
+}
+
+// Auto-save on input changes
+document.getElementById('amount').addEventListener('input', saveDealData);
+document.getElementById('description').addEventListener('input', saveDealData);
+</script>
+{% endblock %}

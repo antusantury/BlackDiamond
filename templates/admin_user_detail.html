@@ -1,0 +1,819 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('admin_user_details') }} - {{ bot_name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.admin-user-detail {
+    max-width: 1400px;
+    margin: 2.5rem auto 4rem;
+    padding: 0 1.5rem;
+    display: grid;
+    gap: 1.5rem;
+}
+
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.5rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 1.75rem 2rem;
+    box-shadow: var(--shadow-subtle);
+    position: relative;
+    overflow: hidden;
+}
+
+.detail-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-diamond);
+    opacity: 0.08;
+    pointer-events: none;
+}
+
+.header-meta {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 0.4rem;
+}
+
+.header-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.85rem;
+    border-radius: 999px;
+    background: var(--gradient-primary);
+    border: 1px solid var(--border-light);
+    color: var(--secondary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+
+.detail-title {
+    margin: 0;
+    font-size: clamp(1.8rem, 2vw + 1rem, 2.4rem);
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.detail-subtitle {
+    margin: 0;
+    color: var(--secondary);
+    font-size: 0.95rem;
+}
+
+.detail-actions {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.detail-column {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.detail-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 1.5rem;
+    box-shadow: var(--shadow-subtle);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border: 1px solid transparent;
+}
+
+.status-chip.status-active {
+    background: rgba(34, 197, 94, 0.12);
+    color: var(--success);
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+.status-chip.status-banned {
+    background: rgba(239, 68, 68, 0.12);
+    color: var(--error);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.detail-grid-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.detail-item {
+    display: grid;
+    gap: 0.25rem;
+}
+
+.detail-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--secondary);
+    font-weight: 600;
+}
+
+.detail-value {
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.detail-value.mono {
+    font-family: "Courier New", monospace;
+    font-variant-numeric: tabular-nums;
+}
+
+.support-chat {
+    display: flex;
+    flex-direction: column;
+    height: clamp(420px, 70vh, 680px);
+    min-height: 360px;
+    overflow: hidden;
+}
+
+.support-messages {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+}
+
+.message {
+    max-width: 75%;
+    padding: 0.75rem 1rem;
+    border-radius: 14px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    position: relative;
+}
+
+.message-user {
+    align-self: flex-end;
+    background: var(--diamond-gradient);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+}
+
+.message-admin {
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--primary);
+    border-bottom-left-radius: 4px;
+}
+
+.message-time {
+    margin-top: 0.35rem;
+    font-size: 0.75rem;
+    opacity: 0.75;
+}
+
+.message-role {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+    opacity: 0.8;
+    text-transform: uppercase;
+}
+
+.message-user .message-role {
+    color: rgba(255, 255, 255, 0.85);
+    text-align: right;
+}
+
+.message-admin .message-role {
+    color: var(--secondary);
+    text-align: left;
+}
+
+.support-form {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    border-top: 1px solid var(--border-light);
+    padding-top: 1.25rem;
+}
+
+.support-input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-secondary);
+    color: var(--primary);
+}
+
+.support-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--border-glow);
+}
+
+.support-send {
+    padding: 0.7rem 1.2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    background: var(--gradient-accent);
+    border: 1px solid var(--border-glow);
+    color: #ffffff;
+    cursor: pointer;
+    transition: all var(--animation-speed) var(--animation-timing);
+}
+
+.support-send:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-light);
+}
+
+.support-send:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.disputes-list {
+    display: grid;
+    gap: 0.9rem;
+}
+
+.dispute-item {
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    padding: 0.9rem 1rem;
+    background: var(--bg-tertiary);
+    display: grid;
+    gap: 0.5rem;
+}
+
+.dispute-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.dispute-id {
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.dispute-status {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--secondary);
+}
+
+.dispute-meta {
+    font-size: 0.85rem;
+    color: var(--secondary);
+}
+
+.dispute-reason {
+    color: var(--primary);
+    font-size: 0.9rem;
+}
+
+.loading-state,
+.empty-state {
+    text-align: center;
+    color: var(--secondary);
+    padding: 2rem 1rem;
+}
+
+@media (max-width: 1024px) {
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .support-chat {
+        height: clamp(360px, 60vh, 540px);
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-user-detail {
+        padding: 0 1rem;
+    }
+
+    .detail-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .detail-actions {
+        width: 100%;
+    }
+
+    .support-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .support-chat {
+        height: clamp(320px, 55vh, 480px);
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-user-detail">
+    <div class="detail-header">
+        <div class="header-meta">
+            <span class="header-tag">{{ t('admin_users') }}</span>
+            <h1 class="detail-title" id="userTitle">{{ t('admin_user_details') }}</h1>
+            <p class="detail-subtitle" id="userSubtitle">{{ t('admin_user_management_desc') }}</p>
+        </div>
+        <div class="detail-actions">
+            <a class="btn btn-secondary" href="/admin/users">{{ t('admin_back_to_users') }}</a>
+            <a class="btn btn-secondary" href="/admin">{{ t('admin_back_to_panel') }}</a>
+            <button class="btn btn-primary" id="toggleBanBtn" type="button" style="display: none;"></button>
+        </div>
+    </div>
+
+    <div class="detail-grid">
+        <div class="detail-column">
+            <section class="detail-card">
+                <div class="card-header">
+                    <h2>{{ t('admin_user_details') }}</h2>
+                    <span class="status-chip" id="userStatusChip"></span>
+                </div>
+                <div id="userDetailBody" class="loading-state">
+                    {{ t('admin_loading') }}
+                </div>
+            </section>
+
+            <section class="detail-card">
+                <div class="card-header">
+                    <h2>{{ t('admin_disputes') }}</h2>
+                </div>
+                <div id="userDisputesBody" class="loading-state">
+                    {{ t('admin_loading_disputes') }}
+                </div>
+            </section>
+        </div>
+
+        <section class="detail-card support-chat">
+            <div class="card-header">
+                <h2>{{ t('admin_support_chat') }}</h2>
+            </div>
+            <div id="adminSupportMessages" class="support-messages">
+                <div class="loading-state">{{ t('admin_loading') }}</div>
+            </div>
+            <form id="adminSupportForm" class="support-form">
+                <input
+                    type="text"
+                    id="adminSupportInput"
+                    class="support-input"
+                    placeholder="{{ t('admin_support_message_placeholder') }}"
+                    maxlength="1000"
+                    required
+                >
+                <button type="submit" id="adminSupportSendBtn" class="support-send">{{ t('admin_send_message') }}</button>
+            </form>
+        </section>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const userId = {{ user_id | int }};
+let supportPollTimer = null;
+let supportStickToBottom = true;
+const supportScrollThreshold = 80;
+let currentUserSnapshot = null;
+
+const userDetailTranslations = {
+    loading: '{{ t("admin_loading") }}',
+    noMessages: '{{ t("admin_no_support_messages") }}',
+    noDisputes: '{{ t("admin_no_disputes_found") }}',
+    active: '{{ t("admin_active") }}',
+    banned: '{{ t("admin_banned") }}',
+    buyer: '{{ t("admin_buyer") }}',
+    seller: '{{ t("admin_seller") }}',
+    sendError: '{{ t("message_send_error") }}',
+    networkError: '{{ t("network_error") }}',
+    ban: '{{ t("admin_ban") }}',
+    unban: '{{ t("admin_unban") }}',
+    confirmBan: '{{ t("admin_confirm_ban_user") }}',
+    confirmUnban: '{{ t("admin_confirm_unban_user") }}',
+    roleUser: '{{ t("support_role_user") }}',
+    roleAdmin: '{{ t("support_role_admin") }}'
+};
+
+function escapeHtml(text) {
+    if (!text) {
+        return '';
+    }
+    return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;');
+}
+
+function formatDate(dateString) {
+    if (!dateString) {
+        return '-';
+    }
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) {
+        return '-';
+    }
+    return date.toLocaleDateString();
+}
+
+function formatDateTime(dateString) {
+    if (!dateString) {
+        return '-';
+    }
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) {
+        return '-';
+    }
+    return date.toLocaleString();
+}
+
+function formatCurrency(amount) {
+    const value = Number(amount);
+    if (Number.isNaN(value)) {
+        return '$0.00';
+    }
+    return `$${value.toFixed(2)}`;
+}
+
+function notifyUser(message, type = 'info') {
+    if (typeof window.siteNotify === 'function') {
+        window.siteNotify(message, type);
+        return;
+    }
+    if (typeof window.showToast === 'function') {
+        window.showToast(message, type);
+        return;
+    }
+    alert(message);
+}
+
+function isSupportNearBottom(container) {
+    if (!container) {
+        return true;
+    }
+    return (container.scrollHeight - container.scrollTop - container.clientHeight) <= supportScrollThreshold;
+}
+
+function scrollSupportToBottom(container, force = false) {
+    if (!container) {
+        return;
+    }
+    if (!force && !supportStickToBottom) {
+        return;
+    }
+    requestAnimationFrame(() => {
+        container.scrollTop = container.scrollHeight;
+        requestAnimationFrame(() => {
+            container.scrollTop = container.scrollHeight;
+        });
+    });
+}
+
+function updateAdminSupportSendState() {
+    const input = document.getElementById('adminSupportInput');
+    const button = document.getElementById('adminSupportSendBtn');
+    if (!input || !button) {
+        return;
+    }
+    button.disabled = input.value.trim().length === 0;
+}
+
+async function loadUserDetails() {
+    try {
+        const response = await fetch(`/api/admin/users/${userId}`);
+        const data = await response.json();
+
+        if (!data.success) {
+            notifyUser(data.message || userDetailTranslations.networkError, 'error');
+            return;
+        }
+
+        renderUserDetails(data.user);
+    } catch (error) {
+        console.error('Error loading user details:', error);
+        notifyUser(userDetailTranslations.networkError, 'error');
+    }
+}
+
+function renderUserDetails(user) {
+    currentUserSnapshot = user;
+    const statusChip = document.getElementById('userStatusChip');
+    const title = document.getElementById('userTitle');
+    const subtitle = document.getElementById('userSubtitle');
+    const detailsBody = document.getElementById('userDetailBody');
+    const toggleBanBtn = document.getElementById('toggleBanBtn');
+
+    const isBanned = Boolean(user.is_banned);
+    const statusText = isBanned ? userDetailTranslations.banned : userDetailTranslations.active;
+    statusChip.textContent = statusText;
+    statusChip.className = `status-chip ${isBanned ? 'status-banned' : 'status-active'}`;
+
+    const displayName = user.first_name || user.username || `ID ${user.user_id}`;
+    const username = user.username ? `@${user.username}` : '-';
+    title.textContent = `${displayName}`;
+    subtitle.textContent = `${username} • ID ${user.user_id}`;
+
+    toggleBanBtn.style.display = 'inline-flex';
+    toggleBanBtn.textContent = isBanned ? userDetailTranslations.unban : userDetailTranslations.ban;
+    toggleBanBtn.dataset.ban = String(!isBanned);
+
+    const stats = user.stats || {};
+
+    detailsBody.innerHTML = `
+        <div class="detail-grid-list">
+            <div class="detail-item">
+                <div class="detail-label">{{ t('admin_user_id') }}</div>
+                <div class="detail-value mono">${escapeHtml(user.user_id)}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">{{ t('admin_username') }}</div>
+                <div class="detail-value">${escapeHtml(username)}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">{{ t('admin_full_name') }}</div>
+                <div class="detail-value">${escapeHtml(user.first_name || '{{ t("admin_unknown") }}')}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">{{ t('admin_language') }}</div>
+                <div class="detail-value">${escapeHtml(user.language || 'en')}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">{{ t('admin_registration_date') }}</div>
+                <div class="detail-value">${formatDate(user.registered_date)}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">{{ t('admin_total_deals') }}</div>
+                <div class="detail-value">${stats.total_deals ?? user.deals_count ?? 0}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">{{ t('admin_total_volume') }}</div>
+                <div class="detail-value">${formatCurrency(stats.total_volume ?? user.total_deal_amount ?? 0)}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">{{ t('admin_status') }}</div>
+                <div class="detail-value">${statusText}</div>
+            </div>
+        </div>
+    `;
+}
+
+async function loadSupportMessages() {
+    const container = document.getElementById('adminSupportMessages');
+    try {
+        const response = await fetch(`/api/support/messages?user_id=${userId}`);
+        const data = await response.json();
+
+        if (!data.success) {
+            container.innerHTML = `<div class="empty-state">${escapeHtml(data.message || userDetailTranslations.networkError)}</div>`;
+            return;
+        }
+
+        renderSupportMessages(data.messages || []);
+    } catch (error) {
+        console.error('Error loading support messages:', error);
+        container.innerHTML = `<div class="empty-state">${userDetailTranslations.networkError}</div>`;
+    }
+}
+
+function renderSupportMessages(messages) {
+    const container = document.getElementById('adminSupportMessages');
+    supportStickToBottom = isSupportNearBottom(container);
+    if (!messages.length) {
+        container.innerHTML = `<div class="empty-state">${userDetailTranslations.noMessages}</div>`;
+        return;
+    }
+
+    container.innerHTML = messages.map(message => {
+        const content = escapeHtml(message.message).replace(/\n/g, '<br>');
+        const time = formatDateTime(message.created_at);
+        const roleLabel = message.is_from_user ? userDetailTranslations.roleUser : userDetailTranslations.roleAdmin;
+        return `
+            <div class="message message-${message.is_from_user ? 'user' : 'admin'}">
+                <div class="message-role">${roleLabel}</div>
+                ${content}
+                <div class="message-time">${time}</div>
+            </div>
+        `;
+    }).join('');
+
+    scrollSupportToBottom(container);
+}
+
+async function sendSupportMessage(event) {
+    event.preventDefault();
+
+    const input = document.getElementById('adminSupportInput');
+    const button = document.getElementById('adminSupportSendBtn');
+    const message = input.value.trim();
+
+    if (!message) {
+        return;
+    }
+
+    input.disabled = true;
+    button.disabled = true;
+    const originalText = button.textContent;
+    button.textContent = userDetailTranslations.loading;
+
+    try {
+        const response = await fetch('/api/support/admin/send-message', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId, message })
+        });
+        const data = await response.json();
+
+        if (data.success) {
+            input.value = '';
+            supportStickToBottom = true;
+            await loadSupportMessages();
+            updateAdminSupportSendState();
+        } else {
+            notifyUser(data.message || userDetailTranslations.sendError, 'error');
+        }
+    } catch (error) {
+        console.error('Error sending support message:', error);
+        notifyUser(userDetailTranslations.networkError, 'error');
+    } finally {
+        input.disabled = false;
+        button.textContent = originalText;
+        updateAdminSupportSendState();
+    }
+}
+
+async function loadUserDisputes() {
+    const container = document.getElementById('userDisputesBody');
+    try {
+        const response = await fetch(`/api/admin/users/${userId}/disputes`);
+        const data = await response.json();
+
+        if (!data.success) {
+            container.innerHTML = `<div class="empty-state">${escapeHtml(data.message || userDetailTranslations.networkError)}</div>`;
+            return;
+        }
+
+        renderDisputes(data.disputes || []);
+    } catch (error) {
+        console.error('Error loading user disputes:', error);
+        container.innerHTML = `<div class="empty-state">${userDetailTranslations.networkError}</div>`;
+    }
+}
+
+function renderDisputes(disputes) {
+    const container = document.getElementById('userDisputesBody');
+    if (!disputes.length) {
+        container.innerHTML = `<div class="empty-state">${userDetailTranslations.noDisputes}</div>`;
+        return;
+    }
+
+    container.innerHTML = `
+        <div class="disputes-list">
+            ${disputes.map(dispute => {
+                const role = dispute.user_role === 'buyer' ? userDetailTranslations.buyer : userDetailTranslations.seller;
+                const counterparty = dispute.user_role === 'buyer'
+                    ? (dispute.seller_username || dispute.seller_name || `ID ${dispute.seller_id}`)
+                    : (dispute.buyer_username || dispute.buyer_name || `ID ${dispute.buyer_id}`);
+                const amount = `${dispute.amount} ${dispute.currency}`;
+                return `
+                    <div class="dispute-item">
+                        <div class="dispute-header">
+                            <div class="dispute-id">#${escapeHtml(dispute.dispute_id)}</div>
+                            <div class="dispute-status">${escapeHtml(dispute.status || '')}</div>
+                        </div>
+                        <div class="dispute-meta">
+                            {{ t('admin_deal_code') }}: ${escapeHtml(dispute.deal_code || '-')} • ${role}: ${escapeHtml(counterparty)}
+                        </div>
+                        <div class="dispute-meta">
+                            {{ t('admin_amount') }}: ${escapeHtml(amount)}
+                        </div>
+                        <div class="dispute-reason">${escapeHtml(dispute.reason || '')}</div>
+                        <div class="dispute-meta">{{ t('admin_created') }}: ${formatDate(dispute.created_at)}</div>
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+}
+
+async function toggleBanUser() {
+    const toggleBanBtn = document.getElementById('toggleBanBtn');
+    const shouldBan = toggleBanBtn.dataset.ban === 'true';
+    const confirmationText = shouldBan ? userDetailTranslations.confirmBan : userDetailTranslations.confirmUnban;
+    const runAction = async () => {
+        try {
+            const response = await fetch(`/api/admin/users/${userId}/ban`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ban: shouldBan })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                await loadUserDetails();
+            } else {
+                notifyUser(data.message || userDetailTranslations.networkError, 'error');
+            }
+        } catch (error) {
+            console.error('Error updating ban status:', error);
+            notifyUser(userDetailTranslations.networkError, 'error');
+        }
+    };
+
+    if (typeof showConfirmationModal === 'function') {
+        showConfirmationModal(confirmationText, runAction);
+    } else if (confirm(confirmationText)) {
+        runAction();
+    }
+}
+
+function startSupportPolling() {
+    supportPollTimer = setInterval(loadSupportMessages, 10000);
+}
+
+function stopSupportPolling() {
+    if (supportPollTimer) {
+        clearInterval(supportPollTimer);
+        supportPollTimer = null;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const supportContainer = document.getElementById('adminSupportMessages');
+    if (supportContainer) {
+        supportContainer.addEventListener('scroll', () => {
+            supportStickToBottom = isSupportNearBottom(supportContainer);
+        });
+    }
+    const supportInput = document.getElementById('adminSupportInput');
+    if (supportInput) {
+        supportInput.addEventListener('input', updateAdminSupportSendState);
+        updateAdminSupportSendState();
+    }
+
+    loadUserDetails();
+    loadSupportMessages();
+    loadUserDisputes();
+
+    document.getElementById('adminSupportForm').addEventListener('submit', sendSupportMessage);
+    document.getElementById('toggleBanBtn').addEventListener('click', toggleBanUser);
+
+    startSupportPolling();
+});
+
+window.addEventListener('beforeunload', stopSupportPolling);
+</script>
+{% endblock %}

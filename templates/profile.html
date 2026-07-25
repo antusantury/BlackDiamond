@@ -1,0 +1,873 @@
+﻿{% extends "base.html" %}
+
+{% block title %}{{ t('profile_title') }} - {{ bot_name }}{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <h1>{{ t('profile_title') }}</h1>
+        <p class="profile-subtitle">{{ t('profile_subtitle') }}</p>
+    </div>
+
+    <div class="profile-content">
+        <!-- User Information Section -->
+        <div class="profile-section user-info-section">
+            <div class="user-avatar-container">
+                {% if user_data.avatar_url %}
+                <img src="{{ user_data.avatar_url }}" alt="{{ t('user_avatar') }}" class="user-avatar" id="user-avatar" onclick="refreshAvatar()">
+                {% else %}
+                <div class="default-avatar" id="user-avatar" onclick="refreshAvatar()">
+                    <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="50" cy="50" r="50" fill="#666"/>
+                        <text x="50" y="60" font-family="Arial" font-size="40" fill="white" text-anchor="middle">{{ user_data.first_name[0] if user_data.first_name else 'U' }}</text>
+                    </svg>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="user-details">
+                <h2>{{ user_data.first_name }} {{ user_data.last_name if user_data.last_name else '' }}</h2>
+                <p class="user-username">@{{ user_data.username }}</p>
+                <p class="user-id">{{ t('user_id') }}: {{ user_data.user_id }}</p>
+
+                <div class="user-actions">
+                    <button class="btn-logout" onclick="window.location.href='/logout'">
+                        <i class="icon-logout"></i> {{ t('logout') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Statistics Section -->
+        <div class="profile-section stats-section">
+             <h3>{{ t('user_statistics') }}</h3>
+             <div class="stats-grid">
+                <div class="stat-card stat-card--total-deals">
+                     <div class="stat-value" id="total-deals">-</div>
+                     <div class="stat-label">{{ t('total_deals') }}</div>
+                 </div>
+                <div class="stat-card stat-card--completed-deals">
+                     <div class="stat-value" id="completed-deals">-</div>
+                     <div class="stat-label">{{ t('completed_deals') }}</div>
+                 </div>
+                <div class="stat-card stat-card--active-deals">
+                     <div class="stat-value" id="active-deals">-</div>
+                     <div class="stat-label">{{ t('active_deals') }}</div>
+                 </div>
+                <div class="stat-card stat-card--success-rate">
+                     <div class="stat-value" id="success-rate">-</div>
+                     <div class="stat-label">{{ t('success_rate') }}</div>
+                 </div>
+                <div class="stat-card stat-card--total-volume">
+                     <div class="stat-value" id="total-volume">-</div>
+                     <div class="stat-label">{{ t('total_volume') }}</div>
+                 </div>
+             </div>
+         </div>
+
+
+        <!-- User Deals Section -->
+        <div class="profile-section deals-section">
+            <h3>{{ t('my_deals') }}</h3>
+            
+
+            
+            <div class="deals-list-container">
+                <div class="deals-list" id="deals-list">
+                    <div class="loading-state">
+                        <span class="loading-text">{{ t('loading_deals') }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+.profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    color: var(--text-color);
+}
+
+.profile-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.profile-header h1 {
+    font-size: 28px;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.profile-subtitle {
+    color: var(--text-secondary);
+    font-size: 16px;
+}
+
+.profile-section {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-info-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+}
+
+.user-avatar-container {
+    flex: 0 0 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary-color);
+}
+
+.default-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 48px;
+    font-weight: bold;
+}
+
+.btn-refresh-avatar {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.btn-refresh-avatar:hover {
+    background: var(--primary-dark);
+}
+
+.user-details {
+    flex: 1;
+    min-width: 300px;
+}
+
+.user-details h2 {
+    font-size: 24px;
+    margin-bottom: 8px;
+    color: var(--text-color);
+}
+
+.user-username {
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    font-size: 16px;
+}
+
+.user-id {
+    color: var(--text-tertiary);
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.user-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-edit-profile, .btn-logout {
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s;
+    border: none;
+}
+
+.btn-edit-profile {
+    background: var(--secondary-color);
+    color: white;
+}
+
+.btn-edit-profile:hover {
+    background: var(--secondary-dark);
+}
+
+.btn-logout {
+    background: var(--danger-color);
+    color: white;
+}
+
+.btn-logout:hover {
+    background: var(--danger-dark);
+}
+
+.deals-section h3,
+.activity-section h3 {
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    color: var(--text-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.deals-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.stat-card {
+    background: var(--stat-card-bg);
+    padding: 14px 12px;
+    border-radius: 8px;
+    text-align: center;
+    transition: transform 0.3s;
+    min-width: 0;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+}
+
+.stat-value {
+    font-size: clamp(20px, 6vw, 28px);
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+@media (min-width: 900px) {
+    .stats-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 15px;
+    }
+}
+
+@media (max-width: 380px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-grid .stat-card:last-child {
+        grid-column: auto;
+        justify-self: stretch;
+        width: auto;
+        max-width: none;
+    }
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--primary-color);
+    width: 0%;
+    transition: width 0.5s ease;
+}
+
+.activity-list, .deals-list {
+    min-height: 100px;
+}
+
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: var(--text-secondary);
+}
+
+.loading-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 10px;
+    animation: spin 1s linear infinite;
+}
+
+.loading-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.deals-overview {
+    margin-bottom: 20px;
+}
+
+.deals-summary {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.summary-item {
+    text-align: center;
+    padding: 15px;
+    background: var(--stat-card-bg);
+    border-radius: 8px;
+    flex: 1;
+    max-width: 120px;
+}
+
+.summary-number {
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+}
+
+.summary-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.deals-list-container {
+    background: var(--card-bg);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.profile-container .loading-state,
+.profile-container .empty-state {
+    background: var(--card-bg);
+    border: 1px dashed var(--border);
+    border-radius: 14px;
+    padding: 28px 20px;
+    margin: 14px;
+    text-align: center;
+    color: var(--secondary);
+    box-shadow: var(--shadow-subtle);
+    backdrop-filter: blur(14px);
+}
+
+.profile-container .empty-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 6px 0;
+    color: var(--primary);
+}
+
+.profile-container .empty-description {
+    font-size: 14px;
+    margin: 0 0 16px 0;
+    color: var(--secondary);
+}
+
+.profile-container .empty-cta {
+    display: inline-flex;
+}
+
+.deals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+    padding: 20px;
+}
+
+.deal-card {
+    background: var(--stat-card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.deal-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.deal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.deal-code {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--primary-color);
+    font-family: 'Courier New', monospace;
+}
+
+.deal-status {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-active {
+    background: #e8f5e8;
+    color: #2e7d32;
+}
+
+.status-completed {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.status-pending {
+    background: #fff3e0;
+    color: #ef6c00;
+}
+
+.status-cancelled {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.deal-body {
+    margin-bottom: 15px;
+}
+
+.deal-amount {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--text-color);
+    margin-bottom: 5px;
+}
+
+.deal-date {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.deal-footer {
+    text-align: center;
+}
+
+.btn-view-deal {
+    display: inline-block;
+    padding: 8px 16px;
+    background: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.3s ease;
+}
+
+.btn-view-deal:hover {
+    background: var(--primary-dark);
+    color: white;
+}
+
+.no-deals {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+}
+
+.no-deals p:first-child {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: var(--text-color);
+}
+
+@media (max-width: 768px) {
+    .profile-container {
+        padding: 10px;
+    }
+
+    .user-info-section {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .user-details {
+        margin-top: 15px;
+    }
+
+    .user-actions {
+        justify-content: center;
+    }
+
+    .stats-grid {
+        --stats-gap: 10px;
+        grid-template-columns: 1fr;
+        gap: var(--stats-gap);
+    }
+
+    .stat-card {
+        padding: 12px 10px;
+    }
+
+    /* Mobile: show only 3 main stats */
+    .stat-card--active-deals,
+    .stat-card--success-rate {
+        display: none;
+    }
+
+    .deals-summary {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .summary-item {
+        max-width: none;
+    }
+
+    .deals-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        padding: 12px 12px calc(12px + 120px + env(safe-area-inset-bottom)) 12px;
+    }
+
+    .deal-card {
+        padding: 12px;
+        border-radius: 10px;
+    }
+
+    .deal-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        margin-bottom: 10px;
+    }
+
+    .deal-code {
+        font-size: 13px;
+    }
+
+    .deal-status {
+        font-size: 10px;
+        padding: 2px 8px;
+        letter-spacing: 0.4px;
+    }
+
+    .deal-amount {
+        font-size: 16px;
+        margin-bottom: 4px;
+    }
+
+    .deal-date {
+        font-size: 11px;
+    }
+
+    .deal-description,
+    .deal-footer {
+        display: none;
+    }
+}
+
+@media (max-width: 520px) {
+    .deals-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 360px) {
+    .deals-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+const profileTexts = {
+    noDealsTitle: {{ t("no_deals_found")|tojson }},
+    noDealsDesc: {{ t("profile_no_deals_yet")|tojson }},
+    createDealLabel: {{ t("profile_create_deal")|tojson }}
+};
+
+// Load user statistics
+async function loadUserStats() {
+    try {
+        const response = await fetch('/api/user/stats');
+        if (response.ok) {
+            const stats = await response.json();
+            document.getElementById('total-deals').textContent = stats.total_deals;
+            document.getElementById('completed-deals').textContent = stats.completed_deals;
+            document.getElementById('active-deals').textContent = stats.active_deals;
+            document.getElementById('success-rate').textContent = stats.success_rate;
+            const totalVolume = Number(stats.total_volume || 0);
+            document.getElementById('total-volume').textContent = `${totalVolume.toFixed(2)} USD`;
+        }
+    } catch (error) {
+        console.error('Error loading user stats:', error);
+    }
+}
+
+
+// Load user deals
+async function loadUserDeals() {
+    try {
+        const response = await fetch('/api/user/deals');
+        if (response.ok) {
+            const data = await response.json();
+
+            // Summary counts removed - no longer updating these elements
+
+            // Display all deals
+            displayDeals(data.all_deals, 'deals-list');
+        }
+    } catch (error) {
+        console.error('Error loading user deals:', error);
+    }
+}
+
+function formatDealAmount(amount, currency) {
+    const value = parseFloat(amount);
+    if (!Number.isFinite(value)) {
+        return `${amount} ${currency}`;
+    }
+    const decimals = currency === 'TON' ? 4 : 2;
+    return `${value.toFixed(decimals)} ${currency}`;
+}
+
+function displayDeals(deals, containerId) {
+    const container = document.getElementById(containerId);
+
+    if (deals.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <h3 class="empty-title">${escapeHtml(profileTexts.noDealsTitle)}</h3>
+                <a href="/create-deal" class="btn btn-primary empty-cta">${escapeHtml(profileTexts.createDealLabel)}</a>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '<div class="deals-grid">';
+
+    deals.forEach(deal => {
+        const dealCode = (deal.deal_code || '').toString().trim();
+        const status = (deal.status || 'unknown').toString();
+        const statusClass = status.toLowerCase().replace(/\s+/g, '-');
+        const statusText = status.charAt(0).toUpperCase() + status.slice(1);
+        const formattedDate = new Date(deal.created_at).toLocaleDateString();
+        
+        // Get counterparty info - if user is buyer (created deal), show seller. If user is seller (joined deal), show buyer.
+        const isBuyer = deal.buyer_id == window.currentUserId;
+        const counterpartyRaw = isBuyer ? deal.seller_username : deal.buyer_username;
+        const counterparty = counterpartyRaw ? escapeHtml(counterpartyRaw) : '';
+        const formattedAmount = formatDealAmount(deal.amount, deal.currency);
+
+        html += `
+        <div class="deal-card ${statusClass}" data-deal-code="${dealCode}" role="button" tabindex="0">
+            <div class="deal-header">
+                <div class="deal-code">#${dealCode}</div>
+                <div class="deal-status status-${statusClass}">
+                    ${statusText}
+                </div>
+            </div>
+            <div class="deal-amount">
+                ${formattedAmount}
+            </div>
+            <div class="deal-date">
+                ${formattedDate}
+            </div>
+            <div class="deal-description">
+                ${deal.description ? escapeHtml(deal.description) : 'No description'}
+            </div>
+            <div class="deal-footer">
+                ${counterparty ? `
+                <div class="deal-counterparty">
+                    ${counterparty}
+                </div>` : ''}
+                <div class="deal-actions">
+                    <a href="/deal/${encodeURIComponent(dealCode)}" class="btn-action" title="View Deal">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+        `;
+    });
+
+    html += '</div>';
+    container.innerHTML = html;
+    
+    // Add keyboard navigation support
+    const dealCards = container.querySelectorAll('.deal-card');
+    dealCards.forEach(card => {
+        card.addEventListener('click', function(e) {
+            if (e.target.closest('a')) {
+                return;
+            }
+            const viewLink = this.querySelector('.btn-action');
+            if (viewLink && viewLink.href) {
+                window.location.href = viewLink.href;
+            }
+        });
+
+        card.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                const viewLink = this.querySelector('.btn-action');
+                if (viewLink && viewLink.href) {
+                    window.location.href = viewLink.href;
+                }
+            }
+        });
+    });
+}
+
+// Refresh avatar from Telegram when clicking on avatar
+async function refreshAvatar() {
+    // Show loading state
+    const avatarElement = document.getElementById('user-avatar');
+    if (avatarElement) {
+        avatarElement.style.opacity = '0.7';
+        avatarElement.style.cursor = 'progress';
+    }
+
+    try {
+        const response = await fetch('/api/user/refresh-avatar', {
+            method: 'POST'
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            // Update avatar immediately
+            if (avatarElement && avatarElement.tagName === 'IMG') {
+                avatarElement.src = result.avatar_url + '?t=' + new Date().getTime();
+            } else if (avatarElement && avatarElement.classList.contains('default-avatar')) {
+                // If it was a default avatar, replace it with the new image
+                const newImg = document.createElement('img');
+                newImg.src = result.avatar_url + '?t=' + new Date().getTime();
+                newImg.alt = 'User Avatar';
+                newImg.className = 'user-avatar';
+                newImg.onclick = refreshAvatar;
+                
+                avatarElement.parentNode.replaceChild(newImg, avatarElement);
+            }
+            
+            // Show success message
+            showToast(result.message || 'Avatar refreshed successfully', 'success');
+        } else {
+            showToast(result.message || 'Failed to refresh avatar', 'error');
+        }
+    } catch (error) {
+        console.error('Error refreshing avatar:', error);
+        showToast('{{ t("error_refreshing_avatar") }}', 'error');
+    } finally {
+        // Reset avatar style
+        if (avatarElement) {
+            avatarElement.style.opacity = '1';
+            avatarElement.style.cursor = 'pointer';
+        }
+    }
+}
+
+// Toast notification function
+function showToast(message, type = 'info') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.right = '20px';
+    toast.style.padding = '12px 20px';
+    toast.style.borderRadius = '6px';
+    toast.style.backgroundColor = type === 'success' ? '#4CAF50' : '#F44336';
+    toast.style.color = 'white';
+    toast.style.zIndex = '1000';
+    toast.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(20px)';
+    toast.style.transition = 'opacity 0.3s, transform 0.3s';
+
+    document.body.appendChild(toast);
+
+    // Show toast
+    setTimeout(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+    }, 100);
+
+    // Hide and remove toast
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// Load all data when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadUserStats();
+    loadUserDeals();
+
+    // Add hover effect to avatar
+    const avatarElement = document.getElementById('user-avatar');
+    if (avatarElement) {
+        avatarElement.style.cursor = 'pointer';
+        avatarElement.style.transition = 'opacity 0.3s';
+        
+        avatarElement.addEventListener('mouseenter', function() {
+            this.style.opacity = '0.9';
+        });
+
+        avatarElement.addEventListener('mouseleave', function() {
+            this.style.opacity = '1';
+        });
+    }
+});
+</script>
+{% endblock %}

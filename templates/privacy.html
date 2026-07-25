@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ t('footer_privacy') }} - {{ bot_name }}{% endblock %}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='favicon/photo_2025-10-16_11-30-00 (2).jpg') }}">
+    <link rel="shortcut icon" type="image/jpeg" href="{{ url_for('static', filename='favicon/photo_2025-10-16_11-30-00 (2).jpg') }}">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modern-language-selector.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/unified.css') }}">
+</head>
+<body class="bg-unified">
+    <!-- Modern Header -->
+    <header class="header diamond-accent" role="banner">
+        <div class="container">
+            <div class="header-content">
+                <!-- Logo -->
+                <a href="/" class="logo" aria-label="{{ bot_name }} - {{ t('web_home') }}">
+                    <svg class="logo-icon" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+                        <path d="M16 4L26 12L16 20L6 12L16 4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        <path d="M16 20L26 28L16 30L6 28L16 20Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        <line x1="6" y1="12" x2="16" y2="20" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        <line x1="26" y1="12" x2="16" y2="20" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="logo-text">{{ bot_name }}</span>
+                </a>
+
+                <!-- Desktop Navigation - Simplified -->
+                <nav class="nav" role="navigation" aria-label="Main navigation">
+                    <a href="/" class="nav-link" aria-current="{% if request.path == '/' %}page{% endif %}" title="{{ t('web_home') }}">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9,22 9,12 15,12 15,22"/>
+                        </svg>
+                        <span>{{ t('web_home') }}</span>
+                        <div class="nav-link-indicator"></div>
+                    </a>
+                </nav>
+
+                <!-- Desktop Actions - Simplified -->
+                <div class="header-actions">
+                    <!-- Standalone Theme Toggle Button -->
+                    <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="{{ t('toggle_theme') }}" title="{{ t('toggle_theme') }}">
+                        <svg class="theme-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M12 2L13.09 8.26L19 9L13.09 9.74L12 16L10.91 9.74L5 9L10.91 8.26L12 2Z"/>
+                            <path d="M3 17V19H9V17H3Z"/>
+                            <path d="M3 20V22H15V20H3Z"/>
+                        </svg>
+                    </button>
+
+                    <!-- Modern Language Selector -->
+                    <div class="language-selector">
+                        <label for="languageSelect" class="sr-only">{{ t('language_select') }}</label>
+                        <div class="language-dropdown">
+                            <button class="language-btn" id="languageBtn" aria-expanded="false" aria-haspopup="true">
+                                <div class="language-btn-content">
+                                    <div class="current-language-display">
+                                        <span class="current-lang-code">
+                                            {% if current_lang == 'en' %}EN{% elif current_lang == 'ua' %}UA{% endif %}
+                                        </span>
+                                    </div>
+                                    <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                        <path d="M7 10L12 15L17 10H7Z"/>
+                                    </svg>
+                                </div>
+                                <div class="language-btn-glow"></div>
+                            </button>
+                            <div class="language-dropdown-menu" id="languageDropdown" role="menu">
+                                <div class="language-menu-header">
+                                    <span class="menu-title">{{ t('select_language') }}</span>
+                                </div>
+                                <div class="language-options-grid">
+
+                                    <button class="language-option" data-lang="en" role="menuitem" {% if current_lang == 'en' %}aria-current="true"{% endif %}>
+                                        <div class="option-content">
+                                            <div class="flag-container">
+                                                <span class="language-flag">EN</span>
+                                                <div class="flag-glow"></div>
+                                            </div>
+                                            <div class="language-info">
+                                                <span class="language-name">{{ t('lang_en_name') }}</span>
+                                                <span class="language-code">EN</span>
+                                            </div>
+                                        </div>
+                                        {% if current_lang == 'en' %}
+                                        <div class="active-indicator">
+                                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                            </svg>
+                                        </div>
+                                        {% endif %}
+                                    </button>
+                                    <button class="language-option" data-lang="ua" role="menuitem" {% if current_lang == 'ua' %}aria-current="true"{% endif %}>
+                                        <div class="option-content">
+                                            <div class="flag-container">
+                                                <span class="language-flag">UA</span>
+                                                <div class="flag-glow"></div>
+                                            </div>
+                                            <div class="language-info">
+                                                <span class="language-name">{{ t('lang_ua_name') }}</span>
+                                                <span class="language-code">UA</span>
+                                            </div>
+                                        </div>
+                                        {% if current_lang == 'ua' %}
+                                        <div class="active-indicator">
+                                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                            </svg>
+                                        </div>
+                                        {% endif %}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if not session.get('user_id') %}
+                    {% if is_mobile_device %}
+                    <!-- Telegram Web App Login Button for Mobile -->
+                    <button class="telegram-web-app-login-btn" id="telegramWebAppLoginBtn" aria-label="{{ t('login_via_telegram_mobile') }}">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                        </svg>
+                        <span>{{ t('open_telegram') }}</span>
+                    </button>
+                    {% endif %}
+                    {% endif %}
+
+                    {% if session.get('user_id') %}
+                    <!-- Quick Actions (moved to more convenient position after language selector) -->
+                    <div class="quick-actions-dropdown">
+                        <button class="quick-actions-btn-elegant"
+                                id="quickActionsBtn"
+                                aria-expanded="false"
+                                aria-haspopup="true"
+                                aria-controls="quickActionsDropdown"
+                                aria-label="{{ t('quick_actions') }}"
+                                title="{{ t('quick_actions') }}">
+                            <div class="btn-content">
+                                <svg class="btn-icon-elegant" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <line x1="3" y1="12" x2="21" y2="12"/>
+                                    <line x1="3" y1="6" x2="21" y2="6"/>
+                                    <line x1="3" y1="18" x2="21" y2="18"/>
+                                </svg>
+                                <span class="btn-text">{{ t('actions') }}</span>
+                            </div>
+                            <div class="btn-shine"></div>
+                        </button>
+                        <div class="quick-actions-menu" id="quickActionsDropdown" role="menu" aria-labelledby="quickActionsBtn">
+                            <a href="/create-deal" class="quick-action-item" role="menuitem" title="{{ t('create_deal') }} - {{ t('create_new_deal') }}">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M12 2L2 7L12 12L22 7L12 2Z"></path>
+                                    <path d="M2 17L12 22L22 17"></path>
+                                    <path d="M2 12L12 17L22 12"></path>
+                                </svg>
+                                <span>{{ t('create_deal') }}</span>
+                            </a>
+                            <a href="/join-deal" class="quick-action-item" role="menuitem" title="{{ t('join_deal_title') }} - {{ t('join_deal_prompt') }}">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M16 4C18.2 4 20 5.8 20 8C20 10.2 18.2 12 16 12C13.8 12 12 10.2 12 8C12 5.8 13.8 4 16 4Z"></path>
+                                    <path d="M8 12C10.2 12 12 13.8 12 16C12 18.2 10.2 20 8 20C5.8 20 4 18.2 4 16C4 13.8 5.8 12 8 12Z"></path>
+                                    <path d="M8 12C8 8 12 4 16 4"></path>
+                                </svg>
+                                <span>{{ t('join_deal') }}</span>
+                            </a>
+                            <a href="/profile" class="quick-action-item" role="menuitem" title="{{ t('profile_settings') }} - {{ t('profile_subtitle') }}">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                                <span>{{ t('profile_settings') }}</span>
+                            </a>
+
+                            {% if is_admin %}
+                            <a href="/admin" class="quick-action-item admin-item" role="menuitem" title="{{ t('admin_panel') }} - {{ t('admin_panel_subtitle') }}">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M5 4V19C5 20.1 5.9 21 7 21H17C18.1 21 19 20.1 19 19V4C19 2.9 18.1 2 17 2H7C5.9 2 5 2.9 5 4Z"></path>
+                                    <path d="M9 9H15V11H9V9Z"></path>
+                                    <path d="M9 13H15V15H9V13Z"></path>
+                                    <circle cx="12" cy="6" r="1"></circle>
+                                </svg>
+                                <span>{{ t('admin_panel_button') }}</span>
+                            </a>
+                            {% endif %}
+
+                            <div class="user-menu-divider" role="separator"></div>
+                            <a href="/logout" class="quick-action-item logout-item" role="menuitem" title="{{ t('logout') }}">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9"></path>
+                                    <path d="M16 17L21 12L16 7"></path>
+                                    <path d="M21 12H9"></path>
+                                </svg>
+                                <span>{{ t('logout') }}</span>
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            <!-- Mobile Menu - Simplified -->
+            <div class="mobile-menu" id="mobileMenu" role="navigation" aria-label="Mobile navigation">
+                <nav class="mobile-nav">
+                    <a href="/" class="mobile-nav-link" aria-current="{% if request.path == '/' %}page{% endif %}" title="{{ t('web_home') }}">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9,22 9,12 15,12 15,22"/>
+                        </svg>
+                        <span>{{ t('web_home') }}</span>
+                    </a>
+                </nav>
+                <div class="mobile-actions">
+                    <!-- Mobile Theme Toggle Button -->
+                    <button class="mobile-theme-toggle-btn" id="mobileThemeToggleBtn" aria-label="{{ t('toggle_theme') }}" title="{{ t('toggle_theme') }}">
+                        <svg class="theme-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M12 2L13.09 8.26L19 9L13.09 9.74L12 16L10.91 9.74L5 9L10.91 8.26L12 2Z"/>
+                            <path d="M3 17V19H9V17H3Z"/>
+                            <path d="M3 20V22H15V20H3Z"/>
+                        </svg>
+                        <span>{{ t('theme') }}</span>
+                    </button>
+
+                    {% if session.get('user_id') %}
+                    <div class="mobile-quick-actions-dropdown">
+                        <button class="mobile-quick-actions-btn-elegant"
+                                id="mobileQuickActionsBtn"
+                                aria-expanded="false"
+                                aria-haspopup="true"
+                                aria-controls="mobileQuickActionsDropdown"
+                                aria-label="{{ t('quick_actions') }}"
+                                title="{{ t('quick_actions') }}">
+                            <div class="btn-content">
+                                <svg class="btn-icon-elegant" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <line x1="3" y1="12" x2="21" y2="12"/>
+                                    <line x1="3" y1="6" x2="21" y2="6"/>
+                                    <line x1="3" y1="18" x2="21" y2="18"/>
+                                </svg>
+                                <span class="btn-text">{{ t('actions') }}</span>
+                            </div>
+                            <div class="btn-shine"></div>
+                        </button>
+                        <div class="mobile-quick-actions-menu"
+                              id="mobileQuickActionsDropdown"
+                              role="menu"
+                              aria-labelledby="mobileQuickActionsBtn">
+                            <a href="/create-deal" class="mobile-quick-action-item" role="menuitem" title="{{ t('create_deal') }} - {{ t('create_new_deal') }}">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M12 2L2 7L12 12L22 7L12 2Z"></path>
+                                    <path d="M2 17L12 22L22 17"></path>
+                                    <path d="M2 12L12 17L22 12"></path>
+                                </svg>
+                                <span>{{ t('create_deal') }}</span>
+                            </a>
+                            <a href="/join-deal" class="mobile-quick-action-item" role="menuitem" title="{{ t('join_deal_title') }} - {{ t('join_deal_prompt') }}">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M16 4C18.2 4 20 5.8 20 8C20 10.2 18.2 12 16 12C13.8 12 12 10.2 12 8C12 5.8 13.8 4 16 4Z"></path>
+                                    <path d="M8 12C10.2 12 12 13.8 12 16C12 18.2 10.2 20 8 20C5.8 20 4 18.2 4 16C4 13.8 5.8 12 8 12Z"></path>
+                                    <path d="M8 12C8 8 12 4 16 4"></path>
+                                </svg>
+                                <span>{{ t('join_deal') }}</span>
+                            </a>
+                            <a href="/profile" class="mobile-quick-action-item" role="menuitem" title="{{ t('profile_settings') }} - {{ t('profile_subtitle') }}">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                                <span>{{ t('profile_settings') }}</span>
+                            </a>
+
+                            {% if is_admin %}
+                            <a href="/admin" class="mobile-quick-action-item admin-item" role="menuitem" title="{{ t('admin_panel') }} - {{ t('admin_panel_subtitle') }}">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M5 4V19C5 20.1 5.9 21 7 21H17C18.1 21 19 20.1 19 19V4C19 2.9 18.1 2 17 2H7C5.9 2 5 2.9 5 4Z"></path>
+                                    <path d="M9 9H15V11H9V9Z"></path>
+                                    <path d="M9 13H15V15H9V13Z"></path>
+                                    <circle cx="12" cy="6" r="1"></circle>
+                                </svg>
+                                <span>{{ t('admin_panel_button') }}</span>
+                            </a>
+                            {% endif %}
+
+                            <div class="user-menu-divider" role="separator"></div>
+                            <a href="/logout" class="mobile-quick-action-item logout-item" role="menuitem" title="{{ t('logout') }}">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9"></path>
+                                    <path d="M16 17L21 12L16 7"></path>
+                                    <path d="M21 12H9"></path>
+                                </svg>
+                                <span>{{ t('logout') }}</span>
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Mobile User Menu (on authenticated pages) -->
+                    {% if request.path.startswith('/profile') or request.path.startswith('/statistics') %}
+                    <div class="mobile-user-menu">
+                        <button class="mobile-user-menu-btn"
+                                id="mobileUserMenuBtn"
+                                aria-expanded="false"
+                                aria-haspopup="true"
+                                aria-controls="mobileUserMenuDropdown">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M12.22 2H11.78C10.87 2 10.22 2.65 10.22 3.56V4.44C10.22 5.35 10.87 6 11.78 6H12.22C13.13 6 13.78 5.35 13.78 4.44V3.56C13.78 2.65 13.13 2 12.22 2Z"/>
+                                <path d="M12.22 18H11.78C10.87 18 10.22 18.65 10.22 19.56V20.44C10.22 21.35 10.87 22 11.78 22H12.22C13.13 22 13.78 21.35 13.78 20.44V19.56C13.78 18.65 13.13 18 12.22 18Z"/>
+                                <path d="M6 12.22V11.78C6 10.87 6.65 10.22 7.56 10.22H8.44C9.35 10.22 10 10.87 10 11.78V12.22C10 13.13 9.35 13.78 8.44 13.78H7.56C6.65 13.78 6 13.13 6 12.22Z"/>
+                                <path d="M18 12.22V11.78C18 10.87 17.35 10.22 16.44 10.22H15.56C14.65 10.22 14 10.87 14 11.78V12.22C14 13.13 14.65 13.78 15.56 13.78H16.44C17.35 13.78 18 13.13 18 12.22Z"/>
+                            </svg>
+                            <span>{{ t('settings') }}</span>
+                        </button>
+                        <div class="mobile-user-menu-dropdown"
+                             id="mobileUserMenuDropdown"
+                             role="menu"
+                             aria-labelledby="mobileUserMenuBtn">
+                            <a href="/profile" class="mobile-user-menu-item" role="menuitem">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                                <span>{{ t('profile_settings') }}</span>
+                            </a>
+                            <a href="/statistics" class="mobile-user-menu-item" role="menuitem">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M21 21V19C21 17.9391 20.5786 16.9217 19.8284 16.1716C19.0783 15.4214 18.0609 15 17 15H7C5.93913 15 4.92172 15.4214 4.17157 16.1716C3.42143 16.9217 3 17.9391 3 19V21"/>
+                                    <path d="M3 3V21"/>
+                                    <path d="M21 3V21"/>
+                                    <path d="M6 8H18"/>
+                                    <path d="M6 12H18"/>
+                                    <path d="M6 16H18"/>
+                                </svg>
+                                <span>{{ t('statistics') }}</span>
+                            </a>
+                            <div class="user-menu-divider" role="separator"></div>
+                            <a href="/logout" class="mobile-user-menu-item logout-item" role="menuitem">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9"/>
+                                    <path d="M16 17L21 12L16 7"/>
+                                    <path d="M21 12H9"/>
+                                </svg>
+                                <span>{{ t('logout') }}</span>
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="mobile-language">
+                    <label for="mobileLanguageSelect" class="sr-only">{{ t('language_select') }}</label>
+                    <select id="mobileLanguageSelect" class="language-select" aria-label="{{ t('language_select') }}">
+
+                        <option value="en" {% if current_lang == 'en' %}selected{% endif %}>EN</option>
+                        <option value="ua" {% if current_lang == 'ua' %}selected{% endif %}>UA</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content" class="main diamond-accent" role="main">
+        <div class="container">
+            <div class="terms-content">
+                <div class="terms-header">
+                    <h1>{{ t('footer_privacy') }}</h1>
+                    <p class="terms-subtitle">{{ t('privacy_subtitle') }}</p>
+                </div>
+
+                <div class="terms-body">
+                    <div class="terms-section">
+                        <h2>{{ t('privacy_info_collection') }}</h2>
+                        <p>{{ t('privacy_info_collection_desc') }}</p>
+                        <ul>
+                            <li>{{ t('privacy_info_collection_item1') }}</li>
+                            <li>{{ t('privacy_info_collection_item2') }}</li>
+                            <li>{{ t('privacy_info_collection_item3') }}</li>
+                        </ul>
+                    </div>
+
+                    <div class="terms-section">
+                        <h2>{{ t('privacy_data_usage') }}</h2>
+                        <p>{{ t('privacy_data_usage_desc') }}</p>
+                        <ul>
+                            <li>{{ t('privacy_data_usage_item1') }}</li>
+                            <li>{{ t('privacy_data_usage_item2') }}</li>
+                            <li>{{ t('privacy_data_usage_item3') }}</li>
+                        </ul>
+                    </div>
+
+                    <div class="terms-section">
+                        <h2>{{ t('privacy_data_sharing') }}</h2>
+                        <p>{{ t('privacy_data_sharing_desc') }}</p>
+                    </div>
+
+                    <div class="terms-section">
+                        <h2>{{ t('privacy_data_security') }}</h2>
+                        <p>{{ t('privacy_data_security_desc') }}</p>
+                    </div>
+
+                    <div class="terms-section">
+                        <h2>{{ t('privacy_user_rights') }}</h2>
+                        <p>{{ t('privacy_user_rights_desc') }}</p>
+                        <ul>
+                            <li>{{ t('privacy_user_rights_item1') }}</li>
+                            <li>{{ t('privacy_user_rights_item2') }}</li>
+                            <li>{{ t('privacy_user_rights_item3') }}</li>
+                        </ul>
+                    </div>
+
+                    <div class="terms-section">
+                        <h2>{{ t('privacy_cookies') }}</h2>
+                        <p>{{ t('privacy_cookies_desc') }}</p>
+                    </div>
+
+                    <div class="terms-section">
+                        <h2>{{ t('privacy_contact') }}</h2>
+                        <p>{{ t('privacy_contact_desc') }}</p>
+                    </div>
+
+                    <div class="terms-section">
+                        <h2>{{ t('privacy_updates') }}</h2>
+                        <p>{{ t('privacy_updates_desc') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>{{ bot_name }}</h3>
+                    <p>{{ t('footer_tagline') }}</p>
+                </div>
+                <div class="footer-section">
+                    <h4>{{ t('footer_support') }}</h4>
+                    <p>{{ t('footer_support_desc1') }}</p>
+                    <p>{{ t('footer_support_desc2') }}</p>
+                </div>
+                <div class="footer-section">
+                    <h4>{{ t('footer_currencies') }}</h4>
+                    <p>{{ t('footer_currencies_desc1') }}</p>
+                    <p>{{ t('footer_currencies_desc2') }}</p>
+                </div>
+                <div class="footer-section">
+                    <h4>{{ t('footer_legal') }}</h4>
+                    <button class="footer-link terms-btn" onclick="window.open('/terms', '_blank'); return false;">{{ t('footer_terms') }}</button>
+                    <button class="footer-link privacy-btn" onclick="window.open('/privacy', '_blank'); return false;">{{ t('footer_privacy') }}</button>
+                    <button class="footer-link support-chat-btn" onclick="document.getElementById('supportButton').click(); return false;">{{ t('footer_support_chat') }}</button>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 {{ bot_name }}. {{ t('footer_rights') }}.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/white_rollback.js') }}"></script>
+</body>
+</html>

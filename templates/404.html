@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}404 — {{ bot_name }}{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="card" style="max-width: 720px; margin: 0 auto; padding: 48px;">
+      <div style="text-align: center;">
+        <div style="font-weight: 700; font-size: 72px; line-height: 1; margin-bottom: 16px; color: var(--accent-silver);">
+          404
+        </div>
+        <h1 style="font-size: 28px; font-weight: 600; color: var(--text-white); margin-bottom: 12px;">
+          {{ t('page_not_found_title') }}
+        </h1>
+        <p style="color: var(--text-medium); margin-bottom: 32px; font-size: 16px;">
+          {{ t('page_not_found_description') }}
+        </p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary">{{ t('back_to_home') }}</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

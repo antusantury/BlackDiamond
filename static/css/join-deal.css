@@ -1,0 +1,804 @@
+/* ==========================================================================
+   JOIN DEAL INTERFACE - REDESIGNED TO MATCH WEBSITE DESIGN SYSTEM
+   ========================================================================== */
+
+/* Import Inter font to match website typography */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ==========================================================================
+   CSS VARIABLES - MATCHING WEBSITE DESIGN SYSTEM
+   ========================================================================== */
+
+:root {
+  /* Colors - Exact match with website */
+  --primary-blue: #3b82f6;
+  --primary-blue-dark: #2563eb;
+  --primary-blue-light: #60a5fa;
+  
+  --bg-primary: #0f172a;
+  --bg-secondary: #111827;
+  --bg-tertiary: #1f2937;
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #e2e8f0;
+  --text-muted: #94a3b8;
+  
+  --border-primary: rgba(59, 130, 246, 0.3);
+  --border-secondary: rgba(148, 163, 184, 0.2);
+  
+  --success-green: #10b981;
+  --warning-yellow: #f59e0b;
+  --error-red: #ef4444;
+  
+  /* Typography - Website standard */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* Spacing - Website standard */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 4rem;
+  
+  /* Border radius - Website standard */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  
+  /* Shadows - Website glassmorphic style */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-blue: 0 10px 25px -5px rgba(59, 130, 246, 0.2), 0 10px 10px -5px rgba(59, 130, 246, 0.1);
+  
+  /* Transitions - Website standard */
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 300ms ease-in-out;
+  --transition-slow: 500ms ease-in-out;
+}
+
+/* ==========================================================================
+   RESET AND BASE STYLES - MATCHING WEBSITE
+   ========================================================================== */
+
+.join-deal-container {
+  font-family: var(--font-family);
+  color: var(--text-primary);
+  padding: var(--spacing-xl) var(--spacing-md);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* ==========================================================================
+    MAIN CARD - MATCHING GENERAL CARD SYSTEM
+    ========================================================================== */
+
+.join-deal-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-subtle);
+  padding: var(--spacing-2xl);
+  width: 100%;
+  max-width: 480px;
+  margin: var(--spacing-xl) auto;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition);
+}
+
+.join-deal-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  opacity: 0.5;
+}
+
+.join-deal-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border-accent);
+}
+
+/* ==========================================================================
+   HEADER SECTION - WEBSITE STANDARD STYLING
+   ========================================================================== */
+
+.join-deal-header {
+  text-align: center;
+  margin-bottom: var(--spacing-2xl);
+}
+
+.join-deal-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+  line-height: 1.2;
+}
+
+.join-deal-subtitle {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-normal);
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   DEAL PREVIEW CARD - MATCHING WEBSITE CARD PATTERN
+   ========================================================================== */
+
+.deal-preview {
+  background: rgba(31, 41, 55, 0.6);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-2xl);
+  position: relative;
+}
+
+.deal-preview::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+  border-radius: var(--radius-xl);
+  pointer-events: none;
+}
+
+.deal-info {
+  position: relative;
+  z-index: 1;
+}
+
+.deal-name {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-md);
+  line-height: 1.3;
+}
+
+.deal-details {
+  display: grid;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.deal-detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.deal-detail-item:last-child {
+  border-bottom: none;
+}
+
+.deal-detail-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+.deal-detail-value {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ==========================================================================
+   FORM STYLING - WEBSITE STANDARD
+   ========================================================================== */
+
+.join-deal-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.form-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.required-indicator {
+  color: var(--error-red);
+  margin-left: 0.25rem;
+}
+
+.form-help {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.form-input {
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: var(--font-size-base);
+  font-family: var(--font-family);
+  color: var(--text-primary);
+  transition: all var(--transition-normal);
+  outline: none;
+}
+
+.form-input:focus {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  background: rgba(0, 0, 0, 0.9);
+}
+
+.form-input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   BUTTONS - WEBSITE STANDARD PATTERN
+   ========================================================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md) var(--spacing-xl);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-family);
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  outline: none;
+  position: relative;
+  overflow: hidden;
+  min-height: 48px;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn-primary {
+  background: #000000;
+  color: white;
+  box-shadow: var(--shadow-md);
+  width: 100%;
+  border: 1px solid var(--border-secondary);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #111111;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: rgba(148, 163, 184, 0.1);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-secondary);
+  width: 100%;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(148, 163, 184, 0.2);
+  border-color: var(--primary-blue);
+  color: var(--text-primary);
+}
+
+/* ==========================================================================
+   LOADING STATES - WEBSITE PATTERN
+   ========================================================================== */
+
+.btn-loading {
+  position: relative;
+  color: transparent;
+}
+
+.btn-loading::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: 50%;
+  left: 50%;
+  margin-left: -10px;
+  margin-top: -10px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   ERROR STYLING - WEBSITE STANDARD
+   ========================================================================== */
+
+.error-message {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  color: #fca5a5;
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.error-message::before {
+  content: '⚠️';
+  font-size: var(--font-size-base);
+}
+
+.form-input.error {
+  border-color: var(--error-red);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.form-input.error:focus {
+  border-color: var(--error-red);
+}
+
+/* ==========================================================================
+   SUCCESS STATES - WEBSITE PATTERN
+   ========================================================================== */
+
+.success-message {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md);
+  color: #6ee7b7;
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.success-message::before {
+  content: '✅';
+  font-size: var(--font-size-base);
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN - WEBSITE APPROACH
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .join-deal-container {
+    padding: var(--spacing-md) var(--spacing-sm);
+  }
+  
+  .join-deal-card {
+    padding: var(--spacing-xl);
+    margin: var(--spacing-lg) auto;
+  }
+  
+  .join-deal-title {
+    font-size: var(--font-size-xl);
+  }
+  
+  .deal-preview {
+    padding: var(--spacing-lg);
+  }
+  
+  .form-input {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .join-deal-card {
+    padding: var(--spacing-lg);
+  }
+  
+  .join-deal-title {
+    font-size: var(--font-size-lg);
+  }
+  
+  .deal-detail-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+}
+
+/* ==========================================================================
+   ACCESSIBILITY - WEBSITE STANDARDS
+   ========================================================================== */
+
+.btn:focus-visible {
+  outline: 2px solid var(--primary-blue);
+  outline-offset: 2px;
+}
+
+.form-input:focus-visible {
+  outline: 2px solid var(--primary-blue);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .join-deal-card {
+    border-width: 2px;
+  }
+  
+  .btn-primary {
+    border: 2px solid var(--primary-blue);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==========================================================================
+   CONTENT GRID - CENTERED LAYOUT
+   ========================================================================== */
+
+.content-grid {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-xl);
+}
+
+/* ==========================================================================
+   JOIN DEAL CARD SIZE ADJUSTMENTS
+   ========================================================================== */
+
+.card {
+  max-width: 600px;
+  padding: var(--spacing-3xl);
+}
+
+.card-title {
+  font-size: var(--font-size-3xl);
+  margin-bottom: var(--spacing-lg);
+}
+
+.card-subtitle {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-2xl);
+}
+
+.form-label {
+  font-size: var(--font-size-lg);
+}
+
+.form-input {
+  padding: var(--spacing-lg) var(--spacing-xl);
+  font-size: var(--font-size-lg);
+  height: auto;
+}
+
+.btn {
+  padding: var(--spacing-lg) var(--spacing-2xl);
+  font-size: var(--font-size-lg);
+  min-height: 56px;
+}
+
+.input-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.btn svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* ==========================================================================
+   BACK LINK STYLING
+   ========================================================================== */
+
+.back-link {
+  display: inline-block;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  margin-top: var(--spacing-md);
+  transition: color var(--transition-normal);
+}
+
+.back-link:hover {
+  color: var(--text-secondary);
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   VALIDATION MESSAGE STYLES
+   ========================================================================== */
+
+.validation-message {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-lg);
+  display: none;
+  align-items: center;
+  font-size: var(--font-size-sm);
+  transform: translateY(-10px);
+  transition: all var(--transition-normal);
+}
+
+.validation-message.visible {
+  display: flex;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.message-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.message-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.validation-message.error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+
+.validation-message.error .message-icon {
+  color: var(--error-red);
+}
+
+.validation-message.success {
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #6ee7b7;
+}
+
+.validation-message.success .message-icon {
+  color: var(--success-green);
+}
+
+/* ==========================================================================
+   INFO CARD STYLES - REDESIGNED WITH MODERN GRID LAYOUT
+   ========================================================================== */
+
+.info-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.info-step-card {
+  background: rgba(31, 41, 55, 0.6);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-lg);
+  text-align: center;
+  transition: all var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.info-step-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, transparent 50%);
+  border-radius: var(--radius-xl);
+  pointer-events: none;
+}
+
+.info-step-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg), 0 8px 25px rgba(59, 130, 246, 0.15);
+  border-color: var(--primary-blue);
+}
+
+.step-icon {
+  width: 3rem;
+  height: 3rem;
+  margin: 0 auto var(--spacing-md);
+  color: var(--primary-blue);
+  position: relative;
+  z-index: 1;
+}
+
+.step-number {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  background: var(--primary-blue);
+  color: white;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-sm);
+}
+
+.step-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--spacing-sm);
+  color: var(--text-primary);
+  position: relative;
+  z-index: 1;
+}
+
+.step-description {
+  color: var(--text-secondary);
+  line-height: 1.5;
+  font-size: var(--font-size-sm);
+  position: relative;
+  z-index: 1;
+}
+
+/* Responsive for Info Card */
+@media (max-width: 768px) {
+  .info-steps-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .info-step-card {
+    padding: var(--spacing-md);
+  }
+
+  .step-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+
+/* ==========================================================================
+   THEME ADJUSTMENTS (WHITE THEME)
+   ========================================================================== */
+
+.theme-white .join-deal-container {
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --border-secondary: rgba(2, 6, 23, 0.12);
+}
+
+.theme-white .join-deal-card {
+  background: linear-gradient(145deg, #ffffff 0%, #fafafa 100%);
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.06), 0 0 0 1px rgba(2, 6, 23, 0.03);
+}
+
+.theme-white .join-deal-card::before {
+  background: linear-gradient(90deg, transparent, rgba(2, 6, 23, 0.12), transparent);
+}
+
+.theme-white .join-deal-card:hover {
+  transform: translateY(-4px);
+  border-color: #d1d5db;
+  box-shadow: 0 16px 30px rgba(2, 6, 23, 0.10);
+}
+
+.theme-white .join-deal-title {
+  color: #0f172a;
+}
+
+.theme-white .join-deal-subtitle {
+  color: #475569;
+}
+
+.theme-white .form-label {
+  color: #64748b;
+}
+
+.theme-white .form-help {
+  color: rgba(2, 6, 23, 0.55);
+}
+
+.theme-white .form-input {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(2, 6, 23, 0.12);
+  color: #0f172a;
+}
+
+.theme-white .form-input:focus {
+  border-color: var(--primary-blue);
+  background: #ffffff;
+}
+
+.theme-white .form-input::placeholder {
+  color: #94a3b8;
+}
+
+.theme-white .btn-primary {
+  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
+  border-color: rgba(2, 6, 23, 0.10);
+}
+
+.theme-white .btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--primary-blue-dark) 0%, var(--primary-blue) 100%);
+  box-shadow: var(--shadow-lg), var(--shadow-blue);
+}
+
+.theme-white .back-link {
+  color: rgba(2, 6, 23, 0.6);
+}
+
+.theme-white .back-link:hover {
+  color: rgba(2, 6, 23, 0.8);
+}
+
+.theme-white .validation-message.error {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: #dc2626;
+}
+
+.theme-white .validation-message.success {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.2);
+  color: #059669;
+}

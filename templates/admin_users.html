@@ -1,0 +1,991 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('admin_user_management') }} - {{ bot_name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.admin-users-shell {
+    max-width: 1200px;
+    margin: 2.5rem auto 4rem;
+    padding: 0 1.5rem;
+    display: grid;
+    gap: 1.75rem;
+}
+
+.admin-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: var(--shadow-subtle);
+    position: relative;
+    overflow: hidden;
+}
+
+.users-hero {
+    padding: 2rem 2.25rem;
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 2rem;
+}
+
+.users-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-diamond);
+    opacity: 0.08;
+    pointer-events: none;
+}
+
+.users-title {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    background: var(--gradient-primary);
+    border: 1px solid var(--border-light);
+    color: var(--primary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    margin-bottom: 0.75rem;
+}
+
+.users-title h1 {
+    margin: 0 0 0.5rem;
+    font-size: clamp(1.9rem, 2.2vw + 1rem, 2.6rem);
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.users-title p {
+    margin: 0;
+    color: var(--secondary);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.users-search {
+    background: var(--gradient-primary);
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    padding: 1.25rem;
+    display: grid;
+    gap: 0.75rem;
+    position: relative;
+    z-index: 1;
+}
+
+.search-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--secondary);
+}
+
+.search-form {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.search-input {
+    flex: 1 1 220px;
+    min-width: 220px;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-secondary);
+    color: var(--primary);
+    font-size: 0.95rem;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--border-glow);
+}
+
+.search-btn,
+.clear-btn {
+    padding: 0.7rem 1.2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all var(--animation-speed) var(--animation-timing);
+    border: 1px solid transparent;
+}
+
+.search-btn {
+    background: var(--gradient-accent);
+    color: #ffffff;
+    border-color: var(--border-glow);
+    box-shadow: var(--shadow-subtle);
+}
+
+.search-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-light);
+}
+
+.clear-btn {
+    background: var(--bg-tertiary);
+    color: var(--primary);
+    border-color: var(--border);
+}
+
+.clear-btn:hover {
+    background: var(--bg-secondary);
+}
+
+.users-table-container {
+    padding: 0;
+}
+
+.table-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-light);
+    background: var(--card-bg);
+}
+
+.summary-chips {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.summary-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    background: var(--gradient-primary);
+    border: 1px solid var(--border-light);
+    color: var(--secondary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.summary-chip strong {
+    color: var(--primary);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.table-meta {
+    color: var(--secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.table-scroll {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.users-table {
+    width: 100%;
+    min-width: 860px;
+    border-collapse: collapse;
+}
+
+.users-table th,
+.users-table td {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--primary);
+}
+
+.users-table th {
+    background: var(--gradient-primary);
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+
+.users-table tbody tr:hover {
+    background: var(--bg-tertiary);
+}
+
+.users-table tbody tr.user-row {
+    cursor: pointer;
+}
+
+.user-id {
+    font-family: "Courier New", monospace;
+    font-weight: 600;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.user-name {
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.user-username {
+    color: var(--secondary);
+    font-size: 0.9rem;
+}
+
+.user-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.stat-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    background: var(--gradient-primary);
+    border: 1px solid var(--border-light);
+    font-size: 0.75rem;
+    color: var(--secondary);
+}
+
+.stat-chip strong {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.user-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border: 1px solid transparent;
+}
+
+.status-active {
+    background: rgba(34, 197, 94, 0.12);
+    color: var(--success);
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+.status-banned {
+    background: rgba(239, 68, 68, 0.12);
+    color: var(--error);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.user-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    padding: 0.5rem 0.9rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--animation-speed) var(--animation-timing);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border: 1px solid transparent;
+    background: var(--gradient-primary);
+    color: var(--primary);
+}
+
+.action-btn-primary {
+    background: var(--gradient-accent);
+    border-color: var(--border-glow);
+    color: #ffffff;
+}
+
+.action-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-light);
+}
+
+.action-btn-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--error);
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+.action-btn-danger:hover {
+    background: rgba(239, 68, 68, 0.25);
+    transform: translateY(-1px);
+}
+
+.action-btn-secondary {
+    background: var(--bg-tertiary);
+    color: var(--primary);
+    border-color: var(--border);
+}
+
+.action-btn-secondary:hover {
+    background: var(--bg-secondary);
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--card-bg);
+    border-top: 1px solid var(--border-light);
+}
+
+.pagination-btn {
+    padding: 0.65rem 1.2rem;
+    background: var(--bg-tertiary);
+    color: var(--primary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--animation-speed) var(--animation-timing);
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: var(--bg-secondary);
+    transform: translateY(-1px);
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.page-info {
+    font-weight: 600;
+    color: var(--secondary);
+}
+
+.loading,
+.no-users {
+    text-align: center;
+    padding: 3rem;
+    color: var(--secondary);
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(3, 7, 18, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(6px);
+}
+
+.modal-content {
+    background: var(--modal-bg, var(--card-bg));
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 2rem;
+    max-width: 520px;
+    width: 92%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow);
+    position: relative;
+}
+
+.modal-content::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.5;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.modal-close {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--primary);
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    transition: all var(--animation-speed) var(--animation-timing);
+}
+
+.modal-close:hover {
+    background: var(--bg-secondary);
+}
+
+.user-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: var(--secondary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+
+.detail-value {
+    color: var(--primary);
+    font-size: 1rem;
+}
+
+.detail-value.mono {
+    font-family: "Courier New", monospace;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-light);
+}
+
+@media (max-width: 980px) {
+    .users-hero {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-users-shell {
+        margin: 1.5rem auto 3rem;
+        padding: 0 1rem;
+    }
+
+    .users-hero {
+        padding: 1.5rem;
+    }
+
+    .search-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .users-table th,
+    .users-table td {
+        padding: 0.75rem 0.85rem;
+    }
+
+    .user-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .action-btn {
+        justify-content: center;
+    }
+
+    .user-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .pagination {
+        flex-direction: column;
+    }
+
+    .table-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-users-shell">
+    <section class="users-hero admin-card">
+        <div class="users-title">
+            <span class="hero-tag">{{ bot_name }}</span>
+            <h1>{{ t('admin_user_management') }}</h1>
+            <p>{{ t('admin_user_management_desc') }}</p>
+        </div>
+        <div class="users-search">
+            <div class="search-title">{{ t('admin_search') }}</div>
+            <form class="search-form" id="searchForm">
+                <input type="text" class="search-input" id="searchInput" placeholder="{{ t('admin_search_users_placeholder') }}" value="">
+                <button type="submit" class="search-btn">
+                    <i class="fas fa-search"></i> {{ t('admin_search') }}
+                </button>
+                <button type="button" class="clear-btn" id="clearBtn">
+                    <i class="fas fa-times"></i> {{ t('admin_clear') }}
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <section class="users-table-container admin-card">
+        <div class="table-toolbar">
+            <div class="summary-chips">
+                <span class="summary-chip">{{ t('admin_users') }} <strong id="usersCount">0</strong></span>
+                <span class="summary-chip">{{ t('admin_active') }} <strong id="activeCount">0</strong></span>
+                <span class="summary-chip">{{ t('admin_banned') }} <strong id="bannedCount">0</strong></span>
+            </div>
+            <div class="table-meta" id="pageSummary">{{ t('admin_page') }} 1 {{ t('admin_of') }} 1</div>
+        </div>
+        <div class="table-scroll">
+            <table class="users-table" id="usersTable">
+                <thead>
+                    <tr>
+                        <th>{{ t('admin_user_id') }}</th>
+                        <th>{{ t('admin_user_name') }}</th>
+                        <th>{{ t('admin_user_stats') }}</th>
+                        <th>{{ t('admin_registration_date') }}</th>
+                        <th>{{ t('admin_status') }}</th>
+                        <th>{{ t('admin_actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <tr>
+                        <td colspan="6" class="loading">
+                            <i class="fas fa-spinner fa-spin"></i> {{ t('admin_loading_users') }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination" id="pagination" style="display: none;">
+            <button class="pagination-btn" id="prevPage">
+                <i class="fas fa-chevron-left"></i> {{ t('admin_previous') }}
+            </button>
+            <span class="page-info" id="pageInfo">{{ t('admin_page') }} 1</span>
+            <button class="pagination-btn" id="nextPage">
+                {{ t('admin_next') }} <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </section>
+</div>
+
+<!-- User Detail Modal -->
+<div class="modal" id="userModal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title" id="userModalTitle">{{ t('admin_user_details') }}</h2>
+            <button class="modal-close" id="userModalClose">&times;</button>
+        </div>
+
+        <div id="userDetails">
+            <!-- User details will be loaded here -->
+        </div>
+
+        <div class="modal-actions">
+            <button class="action-btn action-btn-secondary" id="closeModalBtn">{{ t('admin_close') }}</button>
+            <button class="action-btn action-btn-danger" id="banUserBtn" style="display: none;">
+                <i class="fas fa-ban"></i> {{ t('admin_ban_user') }}
+            </button>
+            <button class="action-btn action-btn-primary" id="unbanUserBtn" style="display: none;">
+                <i class="fas fa-check"></i> {{ t('admin_unban_user') }}
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Global variables
+let currentPage = 1;
+let currentSearch = '';
+let currentUserId = null;
+
+function notifyUser(message, type = 'info') {
+    if (typeof window.siteNotify === 'function') {
+        window.siteNotify(message, type);
+        return;
+    }
+    if (typeof window.showToast === 'function') {
+        window.showToast(message, type);
+        return;
+    }
+    alert(message);
+}
+
+function updateSummary(total, active, banned) {
+    const totalEl = document.getElementById('usersCount');
+    const activeEl = document.getElementById('activeCount');
+    const bannedEl = document.getElementById('bannedCount');
+
+    if (totalEl) {
+        totalEl.textContent = total;
+    }
+    if (activeEl) {
+        activeEl.textContent = active;
+    }
+    if (bannedEl) {
+        bannedEl.textContent = banned;
+    }
+}
+
+// Translation object for JavaScript
+window.usersTranslations = {
+    'loading': '{{ t("admin_loading_users", default="Loading users...") }}',
+    'no_users': '{{ t("admin_no_users_found", default="No users found") }}',
+    'error_loading': '{{ t("admin_error_loading_users", default="Error loading users") }}',
+    'confirm_ban': '{{ t("admin_confirm_ban_user", default="Are you sure you want to ban this user?") }}',
+    'confirm_unban': '{{ t("admin_confirm_unban_user", default="Are you sure you want to unban this user?") }}',
+    'ban_success': '{{ t("admin_user_banned", default="User banned successfully") }}',
+    'unban_success': '{{ t("admin_user_unbanned", default="User unbanned successfully") }}',
+    'action_error': '{{ t("admin_action_error", default="Action failed") }}',
+    'network_error': '{{ t("admin_network_error", default="Network error occurred") }}'
+};
+
+// Load users on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadUsers();
+    updateSummary(0, 0, 0);
+
+    // Search form
+    document.getElementById('searchForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        currentSearch = document.getElementById('searchInput').value.trim();
+        currentPage = 1;
+        loadUsers();
+    });
+
+    // Clear search
+    document.getElementById('clearBtn').addEventListener('click', function() {
+        document.getElementById('searchInput').value = '';
+        currentSearch = '';
+        currentPage = 1;
+        loadUsers();
+    });
+
+    // Pagination
+    document.getElementById('prevPage').addEventListener('click', function() {
+        if (currentPage > 1) {
+            currentPage--;
+            loadUsers();
+        }
+    });
+
+    document.getElementById('nextPage').addEventListener('click', function() {
+        currentPage++;
+        loadUsers();
+    });
+
+    // Modal events
+    document.getElementById('userModalClose').addEventListener('click', closeUserModal);
+    document.getElementById('closeModalBtn').addEventListener('click', closeUserModal);
+
+    document.getElementById('banUserBtn').addEventListener('click', function() {
+        showConfirmationModal(window.usersTranslations.confirm_ban, () => {
+            banUser(currentUserId, true);
+        });
+    });
+
+    document.getElementById('unbanUserBtn').addEventListener('click', function() {
+        showConfirmationModal(window.usersTranslations.confirm_unban, () => {
+            banUser(currentUserId, false);
+        });
+    });
+
+    // Close modal on outside click
+    document.getElementById('userModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeUserModal();
+        }
+    });
+
+    document.getElementById('usersTableBody').addEventListener('click', function(e) {
+        const button = e.target.closest('button, a');
+        if (button) {
+            return;
+        }
+
+        const row = e.target.closest('tr[data-user-id]');
+        if (row) {
+            openUserDetailsPage(row.dataset.userId);
+        }
+    });
+});
+
+// Load users from API
+async function loadUsers() {
+    const tableBody = document.getElementById('usersTableBody');
+    tableBody.innerHTML = `
+        <tr>
+            <td colspan="6" class="loading">
+                <i class="fas fa-spinner fa-spin"></i> ${window.usersTranslations.loading}
+            </td>
+        </tr>
+    `;
+
+    try {
+        const params = new URLSearchParams({
+            page: currentPage,
+            search: currentSearch
+        });
+
+        const response = await fetch(`/api/admin/users?${params}`);
+        const data = await response.json();
+
+        if (data.success) {
+            const payload = data.data || {};
+            const users = Array.isArray(payload.users) ? payload.users : [];
+            renderUsers(users);
+            updatePagination(payload.pagination || {});
+        } else {
+            updateSummary(0, 0, 0);
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="no-users">
+                        <i class="fas fa-exclamation-triangle"></i> ${window.usersTranslations.error_loading}
+                    </td>
+                </tr>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading users:', error);
+        updateSummary(0, 0, 0);
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="no-users">
+                    <i class="fas fa-exclamation-triangle"></i> ${window.usersTranslations.network_error}
+                </td>
+            </tr>
+        `;
+    }
+}
+
+// Render users table
+function renderUsers(users) {
+    const tableBody = document.getElementById('usersTableBody');
+
+    if (users.length === 0) {
+        updateSummary(0, 0, 0);
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="no-users">
+                    <i class="fas fa-users"></i> ${window.usersTranslations.no_users}
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    const activeCount = users.filter(user => !user.is_banned).length;
+    const bannedCount = users.length - activeCount;
+    updateSummary(users.length, activeCount, bannedCount);
+
+    const rows = users.map(user => {
+        const registeredDate = new Date(user.registered_date).toLocaleDateString();
+        const statusClass = user.is_banned ? 'status-banned' : 'status-active';
+        const statusText = user.is_banned ? '{{ t("admin_banned") }}' : '{{ t("admin_active") }}';
+        const statusIcon = user.is_banned ? 'fas fa-ban' : 'fas fa-check-circle';
+
+        return `
+            <tr class="user-row" data-user-id="${user.user_id}">
+                <td>
+                    <span class="user-id">${user.user_id}</span>
+                </td>
+                <td>
+                    <div class="user-name">${user.first_name || '{{ t("admin_unknown") }}'}</div>
+                    <div class="user-username">@${user.username || 'unknown'}</div>
+                </td>
+                <td>
+                    <div class="user-stats">
+                        <span class="stat-chip">{{ t('admin_deals') }} <strong>${user.deals_count || 0}</strong></span>
+                        <span class="stat-chip">{{ t('admin_volume') }} <strong>$${(user.total_deal_amount || 0).toFixed(2)} USD</strong></span>
+                    </div>
+                </td>
+                <td>${registeredDate}</td>
+                <td>
+                    <span class="user-status ${statusClass}">
+                        <i class="${statusIcon}"></i> ${statusText}
+                    </span>
+                </td>
+                <td>
+                    <div class="user-actions">
+                        <a class="action-btn action-btn-primary" href="/admin/users/${user.user_id}">
+                            <i class="fas fa-eye"></i> {{ t('admin_view') }}
+                        </a>
+                        ${user.is_banned ?
+                            `<button class="action-btn action-btn-primary" onclick="banUser(${user.user_id}, false)">
+                                <i class="fas fa-check"></i> {{ t('admin_unban') }}
+                            </button>` :
+                            `<button class="action-btn action-btn-danger" onclick="banUser(${user.user_id}, true)">
+                                <i class="fas fa-ban"></i> {{ t('admin_ban') }}
+                            </button>`
+                        }
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    tableBody.innerHTML = rows;
+}
+
+// Update pagination
+function updatePagination(pagination) {
+    const paginationEl = document.getElementById('pagination');
+    const pageInfo = document.getElementById('pageInfo');
+    const prevBtn = document.getElementById('prevPage');
+    const nextBtn = document.getElementById('nextPage');
+    const pageSummary = document.getElementById('pageSummary');
+
+    if (pagination.total_pages > 1) {
+        paginationEl.style.display = 'flex';
+        pageInfo.textContent = `{{ t('admin_page') }} ${pagination.current_page} {{ t('admin_of') }} ${pagination.total_pages}`;
+        prevBtn.disabled = !pagination.has_previous;
+        nextBtn.disabled = !pagination.has_next;
+    } else {
+        paginationEl.style.display = 'none';
+    }
+
+    if (pageSummary) {
+        pageSummary.textContent = `{{ t('admin_page') }} ${pagination.current_page} {{ t('admin_of') }} ${pagination.total_pages}`;
+    }
+}
+
+// View user details
+function openUserDetailsPage(userId) {
+    window.location.href = `/admin/users/${userId}`;
+}
+
+function viewUserDetails(userId) {
+    openUserDetailsPage(userId);
+}
+
+// Show user modal
+function showUserModal(user) {
+    const modal = document.getElementById('userModal');
+    const details = document.getElementById('userDetails');
+    const banBtn = document.getElementById('banUserBtn');
+    const unbanBtn = document.getElementById('unbanUserBtn');
+
+    const registeredDate = new Date(user.registered_date).toLocaleDateString();
+    const lastActivity = user.last_activity ? new Date(user.last_activity).toLocaleDateString() : '{{ t("admin_never") }}';
+
+    details.innerHTML = `
+        <div class="user-detail-grid">
+            <div class="detail-item">
+                <div class="detail-label">{{ t('admin_user_id') }}</div>
+                <div class="detail-value mono">${user.user_id}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">{{ t('admin_username') }}</div>
+                <div class="detail-value">@${user.username || 'unknown'}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">{{ t('admin_full_name') }}</div>
+                <div class="detail-value">${user.first_name || '{{ t("admin_unknown") }}'}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">{{ t('admin_language') }}</div>
+                <div class="detail-value">${user.language || 'en'}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">{{ t('admin_registration_date') }}</div>
+                <div class="detail-value">${registeredDate}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">{{ t('admin_total_deals') }}</div>
+                <div class="detail-value">${user.deals_count || 0}</div>
+            </div>
+                    <div class="detail-item">
+                <div class="detail-label">{{ t('admin_total_volume') }}</div>
+                <div class="detail-value">$${(user.total_deal_amount || 0).toFixed(2)} USD</div>
+            </div>
+        </div>
+    `;
+
+    // Show appropriate button
+    if (user.is_banned) {
+        banBtn.style.display = 'none';
+        unbanBtn.style.display = 'inline-flex';
+    } else {
+        banBtn.style.display = 'inline-flex';
+        unbanBtn.style.display = 'none';
+    }
+
+    modal.style.display = 'flex';
+}
+
+// Close user modal
+function closeUserModal() {
+    document.getElementById('userModal').style.display = 'none';
+    currentUserId = null;
+}
+
+// Ban/unban user
+async function banUser(userId, ban) {
+    try {
+        const response = await fetch(`/api/admin/users/${userId}/ban`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ban: ban })
+        });
+
+        const data = await response.json();
+
+    if (data.success) {
+            notifyUser(ban ? window.usersTranslations.ban_success : window.usersTranslations.unban_success, 'success');
+            loadUsers(); // Reload the users list
+            closeUserModal(); // Close the modal
+        } else {
+            notifyUser(window.usersTranslations.action_error + ': ' + data.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error banning/unbanning user:', error);
+        notifyUser(window.usersTranslations.network_error, 'error');
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,583 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('admin_system_settings') }} - {{ bot_name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.admin-settings {
+    max-width: 980px;
+    margin: 2.5rem auto 3.5rem;
+    padding: 0 1rem;
+    display: grid;
+    gap: 1.5rem;
+}
+
+.settings-header {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: var(--shadow-subtle);
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.settings-header h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.settings-header p {
+    margin: 0;
+    color: var(--secondary);
+    font-size: 1rem;
+}
+
+.settings-form {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.75rem;
+    box-shadow: var(--shadow-subtle);
+    display: grid;
+    gap: 1.5rem;
+}
+
+.settings-section {
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: grid;
+    gap: 1.25rem;
+}
+
+.settings-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px dashed var(--border-light);
+}
+
+.settings-section h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.settings-section h2 i {
+    color: var(--accent);
+}
+
+.settings-group {
+    display: grid;
+    gap: 1rem;
+}
+
+.settings-field {
+    display: grid;
+    grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+    align-items: start;
+    gap: 1.5rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    background: var(--card-bg);
+}
+
+.settings-field label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.field-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.settings-field .field-control {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.input-shell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--input-bg);
+    transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input-shell input {
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    width: 100%;
+    padding: 0;
+    outline: none;
+}
+
+/* Remove spinner arrows from number inputs */
+.input-shell input[type="number"] {
+    -webkit-appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+.input-shell input[type="number"]::-webkit-outer-spin-button,
+.input-shell input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.input-shell:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.input-shell input:disabled {
+    background: var(--disabled-bg);
+    color: var(--text-secondary);
+    cursor: not-allowed;
+}
+
+.settings-field .field-description {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.input-unit {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    padding-left: 0.75rem;
+    border-left: 1px solid var(--border-light);
+    white-space: nowrap;
+}
+
+.settings-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    background: var(--card-bg);
+}
+
+.btn {
+    padding: 0.85rem 1.75rem;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: var(--gradient-primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+.btn-secondary {
+    background: var(--card-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: var(--hover-bg);
+}
+
+.btn-success {
+    background: var(--success);
+    color: white;
+}
+
+.btn-success:hover {
+    background: var(--success-dark);
+}
+
+.btn-warning {
+    background: var(--warning);
+    color: white;
+}
+
+.btn-warning:hover {
+    background: var(--warning-dark);
+}
+
+.btn-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: var(--danger-dark);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.alert-success {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    color: var(--success-dark);
+}
+
+.alert-error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: var(--danger-dark);
+}
+
+.alert i {
+    font-size: 1.1rem;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.loading-content {
+    background: var(--card-bg);
+    padding: 2rem;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: var(--shadow);
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border);
+    border-top: 3px solid var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .settings-field {
+        grid-template-columns: 1fr;
+    }
+
+    .settings-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-settings">
+    <!-- Header -->
+    <div class="settings-header">
+        <h1>{{ t('admin_system_settings') }}</h1>
+        <p>{{ t('admin_system_settings_desc') }}</p>
+    </div>
+
+    <!-- Alert Container -->
+    <div id="alertContainer"></div>
+
+    <!-- Settings Form -->
+    <form class="settings-form" id="settingsForm">
+        <!-- Deal Settings -->
+        <div class="settings-section">
+            <div class="settings-section-header">
+                <h2><i class="fas fa-handshake"></i> {{ t('admin_deal_management') }}</h2>
+            </div>
+
+            <div class="settings-group">
+                <div class="settings-field">
+                    <div class="field-meta">
+                        <label for="commissionRate">{{ t('admin_commission_rate') }}</label>
+                        <div class="field-description">{{ t('admin_commission_rate_desc', default='Commission percentage taken from each deal (0 = free)') }}</div>
+                    </div>
+                    <div class="field-control">
+                        <div class="input-shell">
+                            <input type="number" id="commissionRate" name="commission_rate" step="0.01" min="0" max="50" required>
+                            <span class="input-unit">%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-field">
+                    <div class="field-meta">
+                        <label for="minDealAmount">{{ t('admin_min_deal_amount') }}</label>
+                        <div class="field-description">{{ t('admin_min_deal_amount_desc', default='Minimum deal amount allowed') }}</div>
+                    </div>
+                    <div class="field-control">
+                        <div class="input-shell">
+                            <input type="number" id="minDealAmount" name="min_deal_amount" step="0.01" min="0.01" max="1000" required>
+                            <span class="input-unit">USDT</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-field">
+                    <div class="field-meta">
+                        <label for="maxDealAmount">{{ t('admin_max_deal_amount') }}</label>
+                        <div class="field-description">{{ t('admin_max_deal_amount_desc', default='Maximum deal amount allowed') }}</div>
+                    </div>
+                    <div class="field-control">
+                        <div class="input-shell">
+                            <input type="number" id="maxDealAmount" name="max_deal_amount" step="0.01" min="1" max="100000" required>
+                            <span class="input-unit">USDT</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-field">
+                    <div class="field-meta">
+                        <label for="autoConfirmTimeout">{{ t('admin_auto_confirm_timeout') }}</label>
+                        <div class="field-description">{{ t('admin_auto_confirm_timeout_desc', default='Time to wait before auto-confirming payments') }}</div>
+                    </div>
+                    <div class="field-control">
+                        <div class="input-shell">
+                            <input type="number" id="autoConfirmTimeout" name="auto_confirm_timeout" min="60" max="86400" required>
+                            <span class="input-unit">{{ t('admin_seconds') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Settings -->
+        <div class="settings-section">
+            <div class="settings-section-header">
+                <h2><i class="fas fa-cogs"></i> {{ t('admin_system_config') }}</h2>
+            </div>
+
+            <div class="settings-group">
+                <div class="settings-field">
+                    <div class="field-meta">
+                        <label for="currencyUpdateInterval">{{ t('admin_currency_update_interval') }}</label>
+                        <div class="field-description">{{ t('admin_currency_update_interval_desc', default='How often to update currency rates') }}</div>
+                    </div>
+                    <div class="field-control">
+                        <div class="input-shell">
+                            <input type="number" id="currencyUpdateInterval" name="currency_update_interval" min="60" max="86400" required>
+                            <span class="input-unit">{{ t('admin_seconds') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="settings-actions">
+            <button type="button" class="btn btn-secondary" onclick="resetToDefaults()">
+                <i class="fas fa-undo"></i> {{ t('admin_reset_defaults') }}
+            </button>
+            <button type="submit" class="btn btn-primary" id="saveBtn">
+                <i class="fas fa-save"></i> {{ t('admin_save_settings') }}
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay" style="display: none;">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <p>{{ t('admin_saving_settings') }}</p>
+    </div>
+</div>
+
+<script>
+// Global variables
+let originalSettings = {};
+
+// Translation object for JavaScript
+window.settingsTranslations = {
+    'saving_settings': '{{ t("admin_saving_settings", default="Saving settings...") }}',
+    'settings_saved': '{{ t("admin_settings_saved", default="Settings saved successfully!") }}',
+    'settings_error': '{{ t("admin_settings_error", default="Error saving settings") }}',
+    'loading_settings': '{{ t("admin_loading_settings", default="Loading settings...") }}',
+    'load_failed': '{{ t("admin_settings_load_failed", default="Failed to load settings") }}',
+    'reset_confirm': '{{ t("admin_reset_confirm", default="Are you sure you want to reset all settings to defaults?") }}',
+    'network_error': '{{ t("admin_network_error", default="Network error occurred") }}',
+    'validation_min_max': '{{ t("validation_min_deal_amount_less_than_max", default="Minimum deal amount must be less than maximum deal amount.") }}',
+    'validation_commission_range': '{{ t("validation_commission_rate_range", default="Commission rate must be between 0% and 50%.") }}',
+    'try_again': '{{ t("admin_try_again", default="Try Again") }}'
+};
+
+// Load settings on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadSettings();
+});
+
+// Load current settings
+async function loadSettings() {
+    try {
+        const response = await fetch('/api/admin/settings');
+        const data = await response.json();
+
+        if (data.success) {
+            originalSettings = data.settings;
+
+            // Populate form fields
+            document.getElementById('commissionRate').value = (data.settings.commission_rate * 100).toFixed(2);
+            document.getElementById('minDealAmount').value = data.settings.min_deal_amount;
+            document.getElementById('maxDealAmount').value = data.settings.max_deal_amount;
+            document.getElementById('autoConfirmTimeout').value = data.settings.auto_confirm_timeout;
+            document.getElementById('currencyUpdateInterval').value = data.settings.currency_update_interval;
+        } else {
+            showAlert(window.settingsTranslations.load_failed + (data.message ? (': ' + data.message) : ''), 'error');
+        }
+    } catch (error) {
+        console.error('Error loading settings:', error);
+        showAlert(window.settingsTranslations.network_error, 'error');
+    }
+}
+
+// Save settings
+async function saveSettings(formData) {
+    showLoading(true);
+
+    try {
+        const response = await fetch('/api/admin/settings', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showAlert(window.settingsTranslations.settings_saved, 'success');
+            originalSettings = formData; // Update original settings
+        } else {
+            showAlert(window.settingsTranslations.settings_error + ': ' + data.message, 'error');
+        }
+    } catch (error) {
+        console.error('Error saving settings:', error);
+        showAlert(window.settingsTranslations.network_error, 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// Reset to defaults
+function resetToDefaults() {
+    showConfirmationModal(window.settingsTranslations.reset_confirm, () => {
+        // Set default values
+        document.getElementById('commissionRate').value = '0.00';
+        document.getElementById('minDealAmount').value = '1.00';
+        document.getElementById('maxDealAmount').value = '10000.00';
+        document.getElementById('autoConfirmTimeout').value = '3600';
+        document.getElementById('currencyUpdateInterval').value = '3600';
+    });
+}
+
+// Form submission
+document.getElementById('settingsForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const formData = {
+        commission_rate: parseFloat(document.getElementById('commissionRate').value) / 100,
+        min_deal_amount: parseFloat(document.getElementById('minDealAmount').value),
+        max_deal_amount: parseFloat(document.getElementById('maxDealAmount').value),
+        auto_confirm_timeout: parseInt(document.getElementById('autoConfirmTimeout').value),
+        currency_update_interval: parseInt(document.getElementById('currencyUpdateInterval').value)
+    };
+
+    // Basic validation
+    if (formData.min_deal_amount >= formData.max_deal_amount) {
+        showAlert(window.settingsTranslations.validation_min_max, 'error');
+        return;
+    }
+
+    if (formData.commission_rate < 0 || formData.commission_rate > 0.5) {
+        showAlert(window.settingsTranslations.validation_commission_range, 'error');
+        return;
+    }
+
+    saveSettings(formData);
+});
+
+// Show/hide loading overlay
+function showLoading(show) {
+    document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+    document.getElementById('saveBtn').disabled = show;
+}
+
+// Show alert message
+function showAlert(message, type) {
+    const alertContainer = document.getElementById('alertContainer');
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
+    const iconClass = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+
+    alertContainer.innerHTML = `
+        <div class="alert ${alertClass}">
+            <i class="${iconClass}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        alertContainer.innerHTML = '';
+    }, 5000);
+}
+</script>
+{% endblock %}

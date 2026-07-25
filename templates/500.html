@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}500 — {{ bot_name }}{% endblock %}
+
+{% block content %}
+<section class="section">
+  <div class="container">
+    <div class="card" style="max-width: 720px; margin: 0 auto; padding: 48px;">
+      <div style="text-align: center;">
+        <div style="font-weight: 700; font-size: 72px; line-height: 1; margin-bottom: 12px; color: var(--accent-silver);">
+          500
+        </div>
+        <h1 style="font-size: 26px; font-weight: 600; color: var(--text-white); margin-bottom: 12px;">
+          {{ t('internal_server_error_title') }}
+        </h1>
+        <p style="color: var(--text-medium); margin-bottom: 32px; font-size: 16px;">
+          {{ t('internal_server_error_description') }}
+        </p>
+        <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+          <a href="{{ url_for('index') }}" class="btn btn-primary">{{ t('back_to_home') }}</a>
+          <button type="button" class="btn btn-secondary" onclick="location.reload()">{{ t('refresh_page') }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

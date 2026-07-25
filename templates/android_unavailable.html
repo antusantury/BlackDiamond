@@ -1,0 +1,117 @@
+{% set hide_tg_minimal_nav = true %}
+{% extends "base.html" %}
+
+{% block title %}{{ t('android_unavailable_title') }} - {{ bot_name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.android-unavailable-container {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.android-unavailable-content {
+    text-align: center;
+    max-width: 680px;
+    background: var(--card-bg, rgba(255, 255, 255, 0.06));
+    border-radius: 16px;
+    padding: 3rem;
+    box-shadow: var(--shadow-lg, 0 12px 32px rgba(0,0,0,0.25));
+    border: 1px solid var(--border-color, rgba(255,255,255,0.12));
+}
+
+.android-unavailable-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary, #111);
+    margin: 1rem 0;
+}
+
+.android-unavailable-message {
+    font-size: 1.1rem;
+    color: var(--text-secondary, #333);
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.android-unavailable-hint {
+    font-size: 0.95rem;
+    color: var(--text-muted, #666);
+    margin: 1.25rem 0 2rem;
+}
+
+.android-unavailable-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.android-unavailable-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    border: 1px solid var(--border-color, rgba(0,0,0,0.12));
+}
+
+.android-unavailable-btn-primary {
+    background: var(--accent-bg, #0088cc);
+    color: var(--accent-text, #ffffff);
+    border-color: transparent;
+}
+
+.android-unavailable-btn-secondary {
+    background: transparent;
+    color: var(--text-primary, #111);
+}
+
+.android-unavailable-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+@media (max-width: 768px) {
+    .android-unavailable-content {
+        padding: 2rem 1.5rem;
+    }
+
+    .android-unavailable-title {
+        font-size: 1.6rem;
+    }
+
+    .android-unavailable-message {
+        font-size: 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="android-unavailable-container">
+    <div class="android-unavailable-content">
+        <div style="opacity: 0.85;">
+            <svg viewBox="0 0 24 24" fill="currentColor" style="width: 4rem; height: 4rem;">
+                <path d="M11 7H13V9H11V7ZM11 11H13V17H11V11ZM12 2C6.48 2 2 6.48 2 12S6.48 22 12 22 22 17.52 22 12 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12S7.59 4 12 4 20 7.59 20 12 16.41 20 12 20Z"/>
+            </svg>
+        </div>
+
+        <h1 class="android-unavailable-title">{{ t('android_unavailable_title') }}</h1>
+        <p class="android-unavailable-message">{{ t('android_unavailable_message') }}</p>
+        <p class="android-unavailable-hint">{{ t('android_unavailable_hint') }}</p>
+
+        <div class="android-unavailable-actions">
+            <a class="android-unavailable-btn android-unavailable-btn-secondary" href="/">
+                <span>{{ t('refresh_page') }}</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,258 @@
+/* CSS Variables and Design Tokens */
+
+:root {
+    /* Theme System Variables */
+    /* These will be overridden by theme-specific CSS files */
+    
+    /* Colors - Dark Theme (Current) */
+    --pure-black: #000000;
+    --onyx-black: #0a0a0a;
+    --onyx-alpha-70: rgba(10, 10, 10, 0.7);
+    --onyx-alpha-80: rgba(10, 10, 10, 0.8);
+    --onyx-alpha-90: rgba(10, 10, 10, 0.9);
+    --black-alpha-50: rgba(0, 0, 0, 0.5);
+    
+    /* Primary Colors */
+    --primary: #ffffff;
+    --secondary: #a0a0a0;
+    --accent: #3b82f6;
+    --diamond-blue: #1e40af;
+    --diamond-gradient: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
+    
+    /* Status Colors */
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --info: #3b82f6;
+    
+    /* Background Colors */
+    --bg-primary: #0a0a0a;
+    --bg-secondary: #111111;
+    --bg-tertiary: #1a1a1a;
+    --bg-gradient: linear-gradient(135deg, #0a0a0a 0%, #111111 50%, #1a1a1a 100%);
+    --glass-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    
+    /* Text Colors */
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --text-muted: #6b7280;
+    
+    /* Border Colors */
+    --border-primary: rgba(255, 255, 255, 0.1);
+    --border-secondary: rgba(255, 255, 255, 0.05);
+    --border-accent: rgba(59, 130, 246, 0.5);
+    
+    /* White/Clear Elements */
+    --white: #ffffff;
+    --silver: #c0c0c0;
+    --light-gray: #a0a0a0;
+    --gray: #808080;
+    --darker: #333333;
+    
+    /* Modern UI Variables */
+    --header-bg: rgba(10, 10, 10, 0.95);
+    --card-bg: rgba(17, 17, 17, 0.8);
+    --border: rgba(255, 255, 255, 0.1);
+    --border-glow: rgba(59, 130, 246, 0.3);
+    --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.6);
+    
+    /* Glass Effect Variables */
+    --white-alpha-20: rgba(255, 255, 255, 0.2);
+    --white-alpha-10: rgba(255, 255, 255, 0.1);
+    --onyx-alpha-70: rgba(10, 10, 10, 0.7);
+    
+    /* Typography Scale */
+    --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-base: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+    --font-size-4xl: 2.25rem;
+    
+    /* Font Weights */
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --font-weight-black: 900;
+    
+    /* Line Heights */
+    --line-height-tight: 1.25;
+    --line-height-snug: 1.375;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.625;
+    --line-height-loose: 2;
+    
+    /* Spacing Scale */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-10: 2.5rem;
+    --space-12: 3rem;
+    --space-16: 4rem;
+    --space-20: 5rem;
+    --space-24: 6rem;
+    
+    /* Border Radius */
+    --radius-sm: 0.125rem;
+    --radius: 0.25rem;
+    --radius-md: 0.375rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
+    --radius-2xl: 1rem;
+    --radius-3xl: 1.5rem;
+    --radius-full: 9999px;
+    
+    /* Transitions */
+    --transition-fast: 0.15s ease-in-out;
+    --transition: 0.3s ease-in-out;
+    --transition-slow: 0.5s ease-in-out;
+    --transition-bounce: 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    
+    /* Z-Index Scale */
+    --z-dropdown: 1000;
+    --z-sticky: 1020;
+    --z-fixed: 1030;
+    --z-modal-backdrop: 1040;
+    --z-modal: 1050;
+    --z-popover: 1060;
+    --z-tooltip: 1070;
+    --z-toast: 1080;
+    
+    /* Container Sizes */
+    --container-sm: 640px;
+    --container-md: 768px;
+    --container-lg: 1024px;
+    --container-xl: 1280px;
+    --container-2xl: 1536px;
+    
+    /* Animation Durations */
+    --duration-75: 75ms;
+    --duration-100: 100ms;
+    --duration-150: 150ms;
+    --duration-200: 200ms;
+    --duration-300: 300ms;
+    --duration-500: 500ms;
+    --duration-700: 700ms;
+    --duration-1000: 1000ms;
+    
+    /* Animation Easing Functions */
+    --ease-linear: linear;
+    --ease-in: cubic-bezier(0.4, 0, 1, 1);
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-in-cubic: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+    --ease-out-cubic: cubic-bezier(0.215, 0.61, 0.355, 1);
+    --ease-in-out-cubic: cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+/* Theme Variables Override */
+/* These will be applied by theme-specific CSS files */
+
+/* Current/Default Theme (Dark) - Default Variables above */
+
+/* Black Theme Variables */
+.theme-black {
+    --pure-black: #000000;
+    --onyx-black: #000000;
+    --bg-primary: #000000;
+    --bg-secondary: #000000;
+    --header-bg: rgba(0, 0, 0, 0.95);
+    --card-bg: rgba(0, 0, 0, 0.8);
+    --diamond-gradient: linear-gradient(135deg, #111111 0%, #1f1f1f 50%, #2b2b2b 100%);
+}
+
+/* White Theme Variables */
+.theme-white {
+    --pure-black: #ffffff;
+    --onyx-black: #ffffff;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary: #f1f5f9;
+    
+    /* Override text colors for white theme */
+    --primary: #0f172a;
+    --secondary: #64748b;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
+    
+    /* Override border colors for white theme */
+    --border-primary: rgba(2, 6, 23, 0.1);
+    --border-secondary: rgba(2, 6, 23, 0.05);
+    --border-accent: rgba(59, 130, 246, 0.4);
+    
+    /* Override background colors for white theme */
+    --header-bg: rgba(255, 255, 255, 0.95);
+    --card-bg: rgba(255, 255, 255, 0.9);
+    
+    /* Override glass effects for white theme */
+    --glass-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.8) 100%);
+
+    /* Used by mobile primary CTA (plus) button */
+    --diamond-gradient: linear-gradient(135deg, #1f2937 0%, #374151 50%, #4b5563 100%);
+}
+
+/* Enhanced White Theme Variables (Legacy Support) */
+.theme-white-legacy {
+    --primary: #1a1a1a;
+    --secondary: #555555;
+    --bg-primary: #ffffff;
+    --bg-secondary: #f9f9f9;
+    --header-bg: rgba(255, 255, 255, 0.9);
+    --card-bg: rgba(255, 255, 255, 0.8);
+    --text-primary: #1a1a1a;
+    --text-secondary: #555555;
+    --border-primary: rgba(136, 136, 136, 0.3);
+    --border-secondary: rgba(136, 136, 136, 0.1);
+    --diamond-gradient: linear-gradient(135deg, #111827 0%, #1f2937 50%, #374151 100%);
+}
+
+/* Responsive Design Tokens */
+@media (max-width: 640px) {
+    :root {
+        --font-size-2xl: 1.25rem;
+        --font-size-3xl: 1.5rem;
+        --font-size-4xl: 2rem;
+        --space-8: 1.5rem;
+        --space-12: 2.5rem;
+        --space-16: 3rem;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    :root {
+        --border-primary: rgba(255, 255, 255, 0.3);
+        --border-accent: rgba(59, 130, 246, 0.8);
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --transition-fast: 0ms;
+        --transition: 0ms;
+        --transition-slow: 0ms;
+    }
+}
+
+/* Print Media */
+@media print {
+    :root {
+        --bg-primary: #ffffff;
+        --bg-secondary: #ffffff;
+        --text-primary: #000000;
+        --text-secondary: #333333;
+        --border-primary: #cccccc;
+    }
+}

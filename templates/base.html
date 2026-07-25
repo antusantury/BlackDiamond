@@ -1,0 +1,1893 @@
+﻿<!DOCTYPE html>
+<html lang="en" class="{% if request.args.get('lite') == '1' %}no-effects reduced-motion{% elif (request.path or '').startswith('/__telegram_') %}no-effects reduced-motion{% elif is_telegram_webview and 'android' in (request.headers.get('User-Agent','')|lower) %}no-effects reduced-motion{% endif %}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ bot_name }}{% endblock %}</title>
+
+    {% set _is_tg_android = is_telegram_webview and 'android' in (request.headers.get('User-Agent','')|lower) %}
+    {% set _is_lite = request.args.get('lite') == '1' %}
+    {% set _is_tg_test = (request.path or '').startswith('/__telegram_') %}
+    {% set _tg_force_full = request.args.get('full') == '1' %}
+    {% set _no_css = request.args.get('nocss') == '1' %}
+    {% set _is_tg_minimal = (_is_tg_android or _is_lite or _is_tg_test) and (not _tg_force_full) %}
+    {% set _no_css = _no_css or _is_tg_minimal %}
+
+    <!-- Telegram WebView marker (Android UA often doesn't contain "Telegram") -->
+    <script>
+        (function () {
+            try {
+                if (window.Telegram && window.Telegram.WebApp) {
+                    // Persist across navigations so the server can detect Telegram WebView reliably.
+                    document.cookie = "tg_webview=1; Path=/; SameSite=None; Secure";
+                }
+            } catch (_) {}
+        })();
+    </script>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='favicon/photo_2025-10-16_11-30-00 (2).jpg') }}{% if is_telegram_webview %}?v={{ static_version }}{% endif %}">
+    <link rel="shortcut icon" type="image/jpeg" href="{{ url_for('static', filename='favicon/photo_2025-10-16_11-30-00 (2).jpg') }}{% if is_telegram_webview %}?v={{ static_version }}{% endif %}">
+
+    <!-- Fonts -->
+    {% if not _is_tg_minimal %}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    {% endif %}
+
+    {% if _is_tg_minimal %}
+    <!-- Critical no-effects overrides (inline to apply before any CSS loads). -->
+    {% if not _is_tg_minimal %}
+    <style>
+        html.no-effects *, html.no-effects *::before, html.no-effects *::after {
+            -webkit-backdrop-filter: none !important;
+            backdrop-filter: none !important;
+            filter: none !important;
+        }
+        html.reduced-motion *, html.reduced-motion *::before, html.reduced-motion *::after {
+            animation: none !important;
+            transition: none !important;
+        }
+    </style>
+    {% endif %}
+    {% endif %}
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/static/css/performance.css{% if is_telegram_webview %}?v={{ static_version }}{% endif %}">
+    {% if not _no_css %}
+    <link rel="stylesheet" href="/static/css/style.css{% if is_telegram_webview %}?v={{ static_version }}{% endif %}">
+    <link rel="stylesheet" href="/static/css/modern-language-selector.css{% if is_telegram_webview %}?v={{ static_version }}{% endif %}">
+    <link rel="stylesheet" href="/static/css/unified.css{% if is_telegram_webview %}?v={{ static_version }}{% endif %}">
+    <link rel="stylesheet" href="/static/css/dropdown-fix.css{% if is_telegram_webview %}?v={{ static_version }}{% endif %}">
+    {% endif %}
+
+    <!-- Inline theme application to prevent flash -->
+    <script>
+        (function() {
+            try {
+                var theme = localStorage.getItem('theme') || 'current';
+                var cls = 'theme-' + theme;
+                document.documentElement.classList.add(cls);
+                if (document.body) {
+                    document.body.classList.add(cls);
+                } else {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        try { document.body.classList.add(cls); } catch(_) {}
+                    });
+                }
+            } catch(e) {}
+        })();
+    </script>
+
+    <style>
+    /* Telegram Web App Login Button Styles */
+    .telegram-web-app-login-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #0088cc, #0066aa);
+        color: white;
+        border: none;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0, 136, 204, 0.2);
+        margin-right: 0.5rem;
+    }
+
+    .telegram-web-app-login-btn:hover {
+        background: linear-gradient(135deg, #0066aa, #004488);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 136, 204, 0.3);
+    }
+
+    .telegram-web-app-login-btn:active {
+        transform: translateY(0);
+    }
+
+    .telegram-web-app-login-btn .btn-icon {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .telegram-web-app-login-btn.animate-spin {
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    /* Footer Theme Support */
+    .footer {
+        background: var(--onyx-black);
+        border-top: 1px solid var(--silver);
+        color: var(--white);
+        padding: 3rem 0 2rem;
+        margin-top: auto;
+    }
+
+    .theme-current .footer,
+    .theme-black .footer {
+        background: var(--onyx-black);
+        border-top-color: var(--silver);
+        color: var(--white);
+    }
+
+    .theme-white .footer {
+        background: #ffffff;
+        border-top-color: rgba(136, 136, 136, 0.3);
+        color: #1a1a1a;
+    }
+
+    .theme-current .footer-section h3,
+    .theme-current .footer-section h4,
+    .theme-black .footer-section h3,
+    .theme-black .footer-section h4 {
+        color: var(--white);
+    }
+
+    .theme-white .footer-section h3,
+    .theme-white .footer-section h4 {
+        color: #1a1a1a;
+    }
+
+    .theme-current .footer-section p,
+    .theme-black .footer-section p {
+        color: var(--gray);
+    }
+
+    .theme-white .footer-section p {
+        color: #555555;
+    }
+
+    .theme-current .footer-link,
+    .theme-black .footer-link {
+        color: var(--white);
+        border: 1px solid var(--silver);
+    }
+
+    .theme-current .footer-link:hover,
+    .theme-black .footer-link:hover {
+        background: var(--onyx-alpha-70);
+        border-color: var(--white);
+    }
+
+    .theme-white .footer-link {
+        color: #1a1a1a;
+        border: 1px solid rgba(136, 136, 136, 0.3);
+    }
+
+    .theme-white .footer-link:hover {
+        background: rgba(248, 249, 250, 0.8);
+        border-color: #1a1a1a;
+    }
+
+    /* Remove borders from specific footer buttons to make them look like text */
+    .theme-current .terms-btn,
+    .theme-current .support-chat-btn,
+    .theme-black .terms-btn,
+    .theme-black .support-chat-btn {
+        border: none;
+        background: transparent;
+    }
+
+    .theme-current .terms-btn:hover,
+    .theme-current .support-chat-btn:hover,
+    .theme-black .terms-btn:hover,
+    .theme-black .support-chat-btn:hover {
+        background: transparent;
+        text-decoration: underline;
+    }
+
+    .theme-white .terms-btn,
+    .theme-white .support-chat-btn {
+        border: none;
+        background: transparent;
+    }
+
+    .theme-white .terms-btn:hover,
+    .theme-white .support-chat-btn:hover {
+        background: transparent;
+        text-decoration: underline;
+    }
+
+    .theme-current .footer-bottom,
+    .theme-black .footer-bottom {
+        border-top: 1px solid var(--silver);
+    }
+
+    .theme-white .footer-bottom {
+        border-top: 1px solid rgba(136, 136, 136, 0.3);
+    }
+
+    /* Main Content Theme Support */
+    .main {
+      min-height: calc(var(--app-height, 100vh) - 80px); /* Account for header height */
+    }
+    
+    .theme-current .main {
+      background: var(--onyx-black);
+    }
+    
+    .theme-black .main {
+      background: #000000;
+    }
+    
+    .theme-white .main {
+      background: #ffffff;
+    }
+
+    /* Mobile Bottom Actions */
+    .mobile-bottom-nav {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: none;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 18px;
+        padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
+        z-index: 1030;
+    }
+
+    .mobile-bottom-btn {
+        width: 54px;
+        height: 54px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        color: var(--primary);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+        transition: transform var(--transition-fast, 0.15s ease-in-out), box-shadow var(--transition-fast, 0.15s ease-in-out), background var(--transition-fast, 0.15s ease-in-out);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        outline: none;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .mobile-bottom-btn svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .mobile-bottom-btn:hover {
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+        transform: translateY(-1px);
+    }
+
+    .mobile-bottom-btn:active {
+        transform: translateY(1px) scale(0.98);
+    }
+
+    .mobile-bottom-btn:focus-visible {
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35), 0 12px 28px rgba(0, 0, 0, 0.35);
+    }
+
+    .mobile-bottom-btn--primary {
+        width: 72px;
+        height: 72px;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        color: var(--primary);
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+        transform: translateY(-6px);
+    }
+
+    .mobile-bottom-btn--primary:hover {
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+        transform: translateY(-8px);
+    }
+
+    .mobile-bottom-btn--primary:active {
+        transform: translateY(-3px) scale(0.98);
+    }
+
+    @media (max-width: 768px) {
+        .mobile-bottom-nav {
+            display: flex;
+        }
+
+        .main {
+            padding-bottom: calc(120px + env(safe-area-inset-bottom));
+        }
+
+        .footer {
+            padding-bottom: calc(2rem + 120px + env(safe-area-inset-bottom));
+        }
+
+        .support-widget {
+            bottom: calc(100px + env(safe-area-inset-bottom));
+        }
+    }
+
+    /* Mobile responsive adjustments */
+    @media (max-width: 768px) {
+        .telegram-web-app-login-btn {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+        }
+    }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-unified">
+    {% if _is_tg_minimal %}
+    <div style="padding:12px 12px 0 12px;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif">
+        <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div style="font-weight:600">{{ bot_name }}</div>
+            {% if not (hide_tg_minimal_nav | default(false)) %}
+                <div style="display:flex;gap:10px;align-items:center">
+                    <a href="/__telegram_base_test" style="text-decoration:none;border:1px solid rgba(255,255,255,.15);padding:6px 10px;border-radius:10px;color:inherit">Test</a>
+                    <a href="/" style="text-decoration:none;border:1px solid rgba(255,255,255,.15);padding:6px 10px;border-radius:10px;color:inherit">Home</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <main id="main-content" role="main" style="padding:0 12px 24px 12px">
+        {{ self.content() }}
+    </main>
+    {% else %}
+    <!-- Modern Header -->
+    <header class="header diamond-accent" role="banner">
+        <div class="container">
+            <div class="header-content">
+                <!-- Logo -->
+                <a href="/" class="logo" aria-label="{{ bot_name }} - {{ t('web_home') }}">
+                    <svg class="logo-icon" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+                        <path d="M16 4L26 12L16 20L6 12L16 4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        <path d="M16 20L26 28L16 30L6 28L16 20Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        <line x1="6" y1="12" x2="16" y2="20" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        <line x1="26" y1="12" x2="16" y2="20" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="logo-text">{{ bot_name }}</span>
+                </a>
+
+                <!-- Desktop Navigation - Simplified -->
+                <nav class="nav" role="navigation" aria-label="Main navigation">
+                    <a href="/" class="nav-link" aria-current="{% if request.path == '/' %}page{% endif %}" title="{{ t('web_home') }}">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9,22 9,12 15,12 15,22"/>
+                        </svg>
+                        <span>{{ t('web_home') }}</span>
+                        <div class="nav-link-indicator"></div>
+                    </a>
+                </nav>
+
+                <!-- Desktop Actions - Simplified -->
+                <div class="header-actions">
+                    <!-- Standalone Theme Toggle Button -->
+                    <button class="theme-toggle-btn" id="themeToggleBtn" aria-label="{{ t('toggle_theme') }}" title="{{ t('toggle_theme') }}">
+                        <svg class="theme-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M12 2L13.09 8.26L19 9L13.09 9.74L12 16L10.91 9.74L5 9L10.91 8.26L12 2Z"/>
+                            <path d="M3 17V19H9V17H3Z"/>
+                            <path d="M3 20V22H15V20H3Z"/>
+                        </svg>
+                    </button>
+
+                    <!-- Modern Language Selector -->
+                    <div class="language-selector">
+                        <label for="languageSelect" class="sr-only">{{ t('language_select') }}</label>
+                        <div class="language-dropdown">
+                            <button class="language-btn" id="languageBtn" aria-expanded="false" aria-haspopup="true">
+                                <div class="language-btn-content">
+                                    <div class="current-language-display">
+                                        <span class="current-lang-code">
+                                            {% if current_lang == 'en' %}EN{% elif current_lang == 'ua' %}UA{% endif %}
+                                        </span>
+                                    </div>
+                                    <svg class="dropdown-arrow" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                        <path d="M7 10L12 15L17 10H7Z"/>
+                                    </svg>
+                                </div>
+                                <div class="language-btn-glow"></div>
+                            </button>
+                            <div class="language-dropdown-menu" id="languageDropdown" role="menu">
+                                <div class="language-menu-header">
+                                    <span class="menu-title">{{ t('select_language') }}</span>
+                                </div>
+                                <div class="language-options-grid">
+
+                                    <button class="language-option" data-lang="en" role="menuitem" {% if current_lang == 'en' %}aria-current="true"{% endif %}>
+                                        <div class="option-content">
+                                            <div class="flag-container">
+                                                <span class="language-flag">EN</span>
+                                                <div class="flag-glow"></div>
+                                            </div>
+                                            <div class="language-info">
+                                                <span class="language-name">{{ t('lang_en_name') }}</span>
+                                                <span class="language-code">EN</span>
+                                            </div>
+                                        </div>
+                                        {% if current_lang == 'en' %}
+                                        <div class="active-indicator">
+                                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                            </svg>
+                                        </div>
+                                        {% endif %}
+                                    </button>
+                                    <button class="language-option" data-lang="ua" role="menuitem" {% if current_lang == 'ua' %}aria-current="true"{% endif %}>
+                                        <div class="option-content">
+                                            <div class="flag-container">
+                                                <span class="language-flag">UA</span>
+                                                <div class="flag-glow"></div>
+                                            </div>
+                                            <div class="language-info">
+                                                <span class="language-name">{{ t('lang_ua_name') }}</span>
+                                                <span class="language-code">UA</span>
+                                            </div>
+                                        </div>
+                                        {% if current_lang == 'ua' %}
+                                        <div class="active-indicator">
+                                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                            </svg>
+                                        </div>
+                                        {% endif %}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if not session.get('user_id') %}
+                    {% if is_mobile_device %}
+                    <!-- Telegram Web App Login Button for Mobile -->
+                    <button class="telegram-web-app-login-btn" id="telegramWebAppLoginBtn" aria-label="Login via Telegram">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                        </svg>
+                        <span>Telegram</span>
+                    </button>
+                    {% endif %}
+                    {% endif %}
+
+                    {% if session.get('user_id') %}
+                    <!-- Quick Actions (moved to more convenient position after language selector) -->
+                    <div class="quick-actions-dropdown">
+                        <button class="quick-actions-btn-elegant"
+                                id="quickActionsBtn"
+                                aria-expanded="false"
+                                aria-haspopup="true"
+                                aria-controls="quickActionsDropdown"
+                                aria-label="{{ t('quick_actions') }}"
+                                title="{{ t('quick_actions') }}">
+                            <div class="btn-content">
+                                <svg class="btn-icon-elegant" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <line x1="3" y1="12" x2="21" y2="12"/>
+                                    <line x1="3" y1="6" x2="21" y2="6"/>
+                                    <line x1="3" y1="18" x2="21" y2="18"/>
+                                </svg>
+                                <span class="btn-text">{{ t('actions') }}</span>
+                            </div>
+                            <div class="btn-shine"></div>
+                        </button>
+                        <div class="quick-actions-menu" id="quickActionsDropdown" role="menu" aria-labelledby="quickActionsBtn">
+                            <a href="/create-deal" class="quick-action-item" role="menuitem" title="{{ t('create_deal') }} - {{ t('create_new_deal') }}">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M12 2L2 7L12 12L22 7L12 2Z"></path>
+                                    <path d="M2 17L12 22L22 17"></path>
+                                    <path d="M2 12L12 17L22 12"></path>
+                                </svg>
+                                <span>{{ t('create_deal') }}</span>
+                            </a>
+
+                            <a href="/join-deal" class="quick-action-item" role="menuitem" title="{{ t('join_deal_title') }} - {{ t('join_deal_prompt') }}">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M16 4C18.2 4 20 5.8 20 8C20 10.2 18.2 12 16 12C13.8 12 12 10.2 12 8C12 5.8 13.8 4 16 4Z"></path>
+                                    <path d="M8 12C10.2 12 12 13.8 12 16C12 18.2 10.2 20 8 20C5.8 20 4 18.2 4 16C4 13.8 5.8 12 8 12Z"></path>
+                                    <path d="M8 12C8 8 12 4 16 4"></path>
+                                </svg>
+                                <span>{{ t('join_deal') }}</span>
+                            </a>
+                            <a href="/profile" class="quick-action-item" role="menuitem" title="{{ t('profile_settings') }} - {{ t('profile_subtitle') }}">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                                <span>{{ t('profile_settings') }}</span>
+                            </a>
+
+                            {% if is_admin %}
+                            <a href="/admin" class="quick-action-item admin-item" role="menuitem" title="{{ t('admin_panel') }} - {{ t('admin_panel_subtitle') }}">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M5 4V19C5 20.1 5.9 21 7 21H17C18.1 21 19 20.1 19 19V4C19 2.9 18.1 2 17 2H7C5.9 2 5 2.9 5 4Z"></path>
+                                    <path d="M9 9H15V11H9V9Z"></path>
+                                    <path d="M9 13H15V15H9V13Z"></path>
+                                    <circle cx="12" cy="6" r="1"></circle>
+                                </svg>
+                                <span>{{ t('admin_panel_button') }}</span>
+                            </a>
+                            {% endif %}
+
+                            <div class="user-menu-divider" role="separator"></div>
+                            <a href="/logout" class="quick-action-item logout-item" role="menuitem" title="{{ t('logout') }}">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9"></path>
+                                    <path d="M16 17L21 12L16 7"></path>
+                                    <path d="M21 12H9"></path>
+                                </svg>
+                                <span>{{ t('logout') }}</span>
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            <!-- Mobile Menu - Simplified -->
+            <div class="mobile-menu" id="mobileMenu" role="navigation" aria-label="Mobile navigation">
+                <nav class="mobile-nav">
+                    <a href="/" class="mobile-nav-link" aria-current="{% if request.path == '/' %}page{% endif %}" title="{{ t('web_home') }}">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                            <polyline points="9,22 9,12 15,12 15,22"/>
+                        </svg>
+                        <span>{{ t('web_home') }}</span>
+                    </a>
+                </nav>
+                <div class="mobile-actions">
+                    <!-- Mobile Theme Toggle Button -->
+                    <button class="mobile-theme-toggle-btn" id="mobileThemeToggleBtn" aria-label="{{ t('toggle_theme') }}" title="{{ t('toggle_theme') }}">
+                        <svg class="theme-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M12 2L13.09 8.26L19 9L13.09 9.74L12 16L10.91 9.74L5 9L10.91 8.26L12 2Z"/>
+                            <path d="M3 17V19H9V17H3Z"/>
+                            <path d="M3 20V22H15V20H3Z"/>
+                        </svg>
+                        <span>{{ t('theme') }}</span>
+                    </button>
+
+                    {% if session.get('user_id') %}
+                    <div class="mobile-quick-actions-dropdown">
+                        <button class="mobile-quick-actions-btn-elegant"
+                                id="mobileQuickActionsBtn"
+                                aria-expanded="false"
+                                aria-haspopup="true"
+                                aria-controls="mobileQuickActionsDropdown"
+                                aria-label="{{ t('quick_actions') }}"
+                                title="{{ t('quick_actions') }}">
+                            <div class="btn-content">
+                                <svg class="btn-icon-elegant" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <line x1="3" y1="12" x2="21" y2="12"/>
+                                    <line x1="3" y1="6" x2="21" y2="6"/>
+                                    <line x1="3" y1="18" x2="21" y2="18"/>
+                                </svg>
+                                <span class="btn-text">{{ t('actions') }}</span>
+                            </div>
+                            <div class="btn-shine"></div>
+                        </button>
+                        <div class="mobile-quick-actions-menu"
+                              id="mobileQuickActionsDropdown"
+                              role="menu"
+                              aria-labelledby="mobileQuickActionsBtn">
+                            <a href="/create-deal" class="mobile-quick-action-item" role="menuitem" title="{{ t('create_deal') }} - {{ t('create_new_deal') }}">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M12 2L2 7L12 12L22 7L12 2Z"></path>
+                                    <path d="M2 17L12 22L22 17"></path>
+                                    <path d="M2 12L12 17L22 12"></path>
+                                </svg>
+                                <span>{{ t('create_deal') }}</span>
+                            </a>
+
+                            <a href="/join-deal" class="mobile-quick-action-item" role="menuitem" title="{{ t('join_deal_title') }} - {{ t('join_deal_prompt') }}">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M16 4C18.2 4 20 5.8 20 8C20 10.2 18.2 12 16 12C13.8 12 12 10.2 12 8C12 5.8 13.8 4 16 4Z"></path>
+                                    <path d="M8 12C10.2 12 12 13.8 12 16C12 18.2 10.2 20 8 20C5.8 20 4 18.2 4 16C4 13.8 5.8 12 8 12Z"></path>
+                                    <path d="M8 12C8 8 12 4 16 4"></path>
+                                </svg>
+                                <span>{{ t('join_deal') }}</span>
+                            </a>
+                            <a href="/profile" class="mobile-quick-action-item" role="menuitem" title="{{ t('profile_settings') }} - {{ t('profile_subtitle') }}">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                                <span>{{ t('profile_settings') }}</span>
+                            </a>
+
+                            {% if is_admin %}
+                            <a href="/admin" class="mobile-quick-action-item admin-item" role="menuitem" title="{{ t('admin_panel') }} - {{ t('admin_panel_subtitle') }}">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M5 4V19C5 20.1 5.9 21 7 21H17C18.1 21 19 20.1 19 19V4C19 2.9 18.1 2 17 2H7C5.9 2 5 2.9 5 4Z"></path>
+                                    <path d="M9 9H15V11H9V9Z"></path>
+                                    <path d="M9 13H15V15H9V13Z"></path>
+                                    <circle cx="12" cy="6" r="1"></circle>
+                                </svg>
+                                <span>{{ t('admin_panel_button') }}</span>
+                            </a>
+                            {% endif %}
+
+                            <div class="user-menu-divider" role="separator"></div>
+                            <a href="/logout" class="mobile-quick-action-item logout-item" role="menuitem" title="{{ t('logout') }}">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9"></path>
+                                    <path d="M16 17L21 12L16 7"></path>
+                                    <path d="M21 12H9"></path>
+                                </svg>
+                                <span>{{ t('logout') }}</span>
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Mobile User Menu (on authenticated pages) -->
+                    {% if request.path.startswith('/profile') or request.path.startswith('/statistics') %}
+                    <div class="mobile-user-menu">
+                        <button class="mobile-user-menu-btn"
+                                id="mobileUserMenuBtn"
+                                aria-expanded="false"
+                                aria-haspopup="true"
+                                aria-controls="mobileUserMenuDropdown">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M12.22 2H11.78C10.87 2 10.22 2.65 10.22 3.56V4.44C10.22 5.35 10.87 6 11.78 6H12.22C13.13 6 13.78 5.35 13.78 4.44V3.56C13.78 2.65 13.13 2 12.22 2Z"/>
+                                <path d="M12.22 18H11.78C10.87 18 10.22 18.65 10.22 19.56V20.44C10.22 21.35 10.87 22 11.78 22H12.22C13.13 22 13.78 21.35 13.78 20.44V19.56C13.78 18.65 13.13 18 12.22 18Z"/>
+                                <path d="M6 12.22V11.78C6 10.87 6.65 10.22 7.56 10.22H8.44C9.35 10.22 10 10.87 10 11.78V12.22C10 13.13 9.35 13.78 8.44 13.78H7.56C6.65 13.78 6 13.13 6 12.22Z"/>
+                                <path d="M18 12.22V11.78C18 10.87 17.35 10.22 16.44 10.22H15.56C14.65 10.22 14 10.87 14 11.78V12.22C14 13.13 14.65 13.78 15.56 13.78H16.44C17.35 13.78 18 13.13 18 12.22Z"/>
+                            </svg>
+                            <span>{{ t('settings') }}</span>
+                        </button>
+                        <div class="mobile-user-menu-dropdown"
+                             id="mobileUserMenuDropdown"
+                             role="menu"
+                             aria-labelledby="mobileUserMenuBtn">
+                            <a href="/profile" class="mobile-user-menu-item" role="menuitem">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                                <span>{{ t('profile_settings') }}</span>
+                            </a>
+                            <a href="/statistics" class="mobile-user-menu-item" role="menuitem">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M21 21V19C21 17.9391 20.5786 16.9217 19.8284 16.1716C19.0783 15.4214 18.0609 15 17 15H7C5.93913 15 4.92172 15.4214 4.17157 16.1716C3.42143 16.9217 3 17.9391 3 19V21"/>
+                                    <path d="M3 3V21"/>
+                                    <path d="M21 3V21"/>
+                                    <path d="M6 8H18"/>
+                                    <path d="M6 12H18"/>
+                                    <path d="M6 16H18"/>
+                                </svg>
+                                <span>{{ t('statistics') }}</span>
+                            </a>
+                            <div class="user-menu-divider" role="separator"></div>
+                            <a href="/logout" class="mobile-user-menu-item logout-item" role="menuitem">
+                                <svg class="menu-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9"/>
+                                    <path d="M16 17L21 12L16 7"/>
+                                    <path d="M21 12H9"/>
+                                </svg>
+                                <span>{{ t('logout') }}</span>
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="mobile-language">
+                    <label for="mobileLanguageSelect" class="sr-only">{{ t('language_select') }}</label>
+                    <select id="mobileLanguageSelect" class="language-select" aria-label="{{ t('language_select') }}">
+
+                        <option value="en" {% if current_lang == 'en' %}selected{% endif %}>EN</option>
+                        <option value="ua" {% if current_lang == 'ua' %}selected{% endif %}>UA</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content" class="main diamond-accent" role="main">
+        {% block content %}{% endblock %}
+    <!-- Universal Confirmation Modal -->
+    <div id="confirmationModal" class="modal" role="dialog" aria-labelledby="confirmationTitle" aria-hidden="true">
+        <div class="modal-overlay" id="confirmationModalOverlay"></div>
+        <div class="modal-content confirmation-modal-content">
+            <div class="modal-header confirmation-modal-header">
+                <div class="confirmation-header-content">
+                    <div class="confirmation-icon-wrapper">
+                        <svg class="confirmation-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                            <path d="M12 8V14M8 12H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h2 id="confirmationTitle" class="modal-title confirmation-title">{{ t('confirm_action') }}</h2>
+                </div>
+                <button class="modal-close confirmation-close" id="confirmationModalClose" aria-label="{{ t('close') }}">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M18 6L6 18M6 6L18 18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body confirmation-modal-body">
+                <div class="confirmation-message">
+                    <p id="confirmationMessage">{{ t('confirm_action_desc') }}</p>
+                </div>
+            </div>
+            <div class="modal-footer confirmation-modal-footer">
+                <button class="btn btn-secondary confirmation-btn-cancel" id="confirmationCancel">{{ t('cancel') }}</button>
+                <button class="btn btn-danger confirmation-btn-confirm" id="confirmationConfirm">{{ t('confirm') }}</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration Modal -->
+    <div id="registrationModal" class="modal" role="dialog" aria-labelledby="registrationTitle" aria-hidden="true">
+        <div class="modal-overlay" id="modalOverlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="registrationTitle" class="modal-title">{{ t('registration_title') }}</h2>
+                <button class="modal-close" id="modalClose" aria-label="{{ t('close') }}">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M18 6L6 18M6 6L18 18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="registration-content">
+                    <div class="registration-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M22 16.92V18C22 18.5304 21.7893 19.0391 21.4142 19.4142C21.0391 19.7893 20.5304 20 20 20H4C3.46957 20 2.96086 19.7893 2.58579 19.4142C2.21071 19.0391 2 18.5304 2 18V16.92C2 16.4367 2.14819 15.9645 2.42544 15.5613C2.70269 15.1581 3.09428 14.8424 3.553 14.658L7.447 13.106C7.786 12.965 8.214 12.965 8.553 13.106L12.447 14.658C12.9057 14.8424 13.2973 15.1581 13.5746 15.5613C13.8518 15.9645 14 16.4367 14 16.92V18"/>
+                            <path d="M8 12C10.2091 12 12 10.2091 12 8C12 5.79086 10.2091 4 8 4C5.79086 4 4 5.79086 4 8C4 10.2091 5.79086 12 8 12Z"/>
+                            <path d="M16 4H22V10"/>
+                            <path d="M22 4L16 10"/>
+                        </svg>
+                    </div>
+                    <p class="registration-description">{{ t('registration_desc') }}</p>
+                    <div class="registration-steps">
+                        <div class="step-item">
+                            <div class="step-text">{{ t('registration_instruction') }}</div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-text">{{ t('registration_step2') }}</div>
+                        </div>
+                        <div class="step-item">
+                            <div class="step-text">{{ t('registration_step3') }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modalCancel">{{ t('cancel') }}</button>
+                <a href="https://t.me/BlackDiamondGarantBot" class="btn btn-primary" id="telegramBtn" target="_blank">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                    </svg>
+                    <span>{{ t('open_telegram') }}</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    </main>
+
+    <nav class="mobile-bottom-nav" aria-label="{{ t('quick_actions') }}">
+        <a href="/join-deal" class="mobile-bottom-btn" aria-label="{{ t('join_deal') }}" title="{{ t('join_deal') }}">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M16 4C18.2 4 20 5.8 20 8C20 10.2 18.2 12 16 12C13.8 12 12 10.2 12 8C12 5.8 13.8 4 16 4Z"></path>
+                <path d="M8 12C10.2 12 12 13.8 12 16C12 18.2 10.2 20 8 20C5.8 20 4 18.2 4 16C4 13.8 5.8 12 8 12Z"></path>
+                <path d="M8 12C8 8 12 4 16 4"></path>
+            </svg>
+        </a>
+        <a href="/create-deal" class="mobile-bottom-btn mobile-bottom-btn--primary" aria-label="{{ t('create_deal') }}" title="{{ t('create_deal') }}">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <rect x="11" y="5" width="2" height="14" rx="1"></rect>
+                <rect x="5" y="11" width="14" height="2" rx="1"></rect>
+            </svg>
+        </a>
+        <a href="/profile" class="mobile-bottom-btn" aria-label="{{ t('profile_settings') }}" title="{{ t('profile_settings') }}">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+        </a>
+    </nav>
+
+    <!-- Login Instructions Modal -->
+    <div id="loginInstructionsModal" class="modal" role="dialog" aria-labelledby="loginInstructionsTitle" aria-hidden="true">
+        <div class="modal-overlay" id="loginInstructionsModalOverlay"></div>
+        <div class="modal-content login-instructions-modal-content">
+            <div class="modal-header">
+                <h2 id="loginInstructionsTitle" class="modal-title">{{ t('login_instructions_computer') }}</h2>
+                <button class="modal-close" id="loginInstructionsModalClose" aria-label="{{ t('close') }}">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M18 6L6 18M6 6L18 18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="login-instructions-content">
+                    <div class="login-instructions-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M21 3H3C1.9 3 1 3.9 1 5V19C1 20.1 1.9 21 3 21H21C22.1 21 23 20.1 23 19V5C23 3.9 22.1 3 21 3ZM21 19H3V5H21V19Z"/>
+                            <path d="M9 8H11V16H9V8ZM13 8H15V16H13V8Z"/>
+                        </svg>
+                    </div>
+                    <div class="login-instructions-description">
+                        <h3>{{ t('login_instructions_title') }}</h3>
+                        <p>{{ t('login_instructions_desc') }}</p>
+                    </div>
+                    <div class="login-instructions-steps">
+                        <div class="login-instructions-step">
+                            <div class="login-instructions-step-number">1</div>
+                            <div class="login-instructions-step-text">{{ t('step_get_token') }}: {{ t('web_login_step1') }}</div>
+                        </div>
+                        <div class="login-instructions-step">
+                            <div class="login-instructions-step-number">2</div>
+                            <div class="login-instructions-step-text">{{ t('step_enter_8_digit') }}: {{ t('web_login_step2') }}</div>
+                        </div>
+                        <div class="login-instructions-step">
+                            <div class="login-instructions-step-number">3</div>
+                            <div class="login-instructions-step-text">{{ t('step_confirm_participation') }}: {{ t('web_login_step3') }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>{{ bot_name }}</h3>
+                    <p>{{ t('footer_tagline') }}</p>
+                </div>
+                <div class="footer-section">
+                    <h4>{{ t('footer_support') }}</h4>
+                    <p>{{ t('footer_support_desc1') }}</p>
+                    <p>{{ t('footer_support_desc2') }}</p>
+                </div>
+                <div class="footer-section">
+                    <h4>{{ t('footer_currencies') }}</h4>
+                    <p>{{ t('footer_currencies_desc1') }}</p>
+                    <p>{{ t('footer_currencies_desc2') }}</p>
+                </div>
+                <div class="footer-section">
+                    <h4>{{ t('footer_legal') }}</h4>
+                    <button class="footer-link terms-btn" onclick="window.open('/terms', '_blank'); return false;">{{ t('footer_terms') }}</button>
+                    <button class="footer-link support-chat-btn" onclick="document.getElementById('supportButton').click(); return false;">{{ t('footer_support_chat') }}</button>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 {{ bot_name }}. {{ t('footer_rights') }}.</p>
+            </div>
+        </div>
+    </footer>
+    {% if is_admin %}
+    <div style="position:fixed;left:10px;bottom:10px;z-index:9999;font-size:12px;opacity:.75">
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if not _is_tg_minimal %}
+    <!-- Telegram Web App SDK (self-hosted to avoid Telegram Android WebView cross-origin "Script error." masking) -->
+    <script src="{{ url_for('static', filename='js/vendor/telegram-web-app.js') }}{% if is_telegram_webview %}?v={{ static_version }}{% endif %}"></script>
+    {% endif %}
+
+    <!-- QRCode Library is loaded only on pages that need it (see deal_detail.html) -->
+
+    <!-- Scripts -->
+    {% if not _is_tg_minimal %}
+    <script src="{{ url_for('static', filename='js/main.js') }}{% if is_telegram_webview %}?v={{ static_version }}{% endif %}"></script>
+    {% endif %}
+     
+     
+    {% if _is_tg_minimal %}
+    <script>
+    // Telegram Android / lite / diagnostic mode: keep JS extremely minimal to avoid WebView "duck" crashes.
+    (function() {
+        try {
+            if (typeof window.siteNotify !== 'function') {
+                window.siteNotify = function(message) {
+                    try { alert(String(message ?? '')); } catch (_) {}
+                };
+            }
+            // Telegram injects `window.Telegram.WebApp` in WebView; call ready() if present (non-fatal).
+            try {
+                if (window.Telegram && window.Telegram.WebApp && typeof window.Telegram.WebApp.ready === 'function') {
+                    window.Telegram.WebApp.ready();
+                }
+            } catch (_) {}
+        } catch (_) {}
+    })();
+    </script>
+    {% else %}
+    <script>
+    // Translation object for JavaScript
+    window.translations = {
+        alert_invalid_amount: {{ t("alert_invalid_amount")|tojson }},
+        alert_empty_description: {{ t("alert_empty_description")|tojson }},
+        alert_description_too_long: {{ t("alert_description_too_long")|tojson }},
+        alert_deal_created: {{ t("alert_deal_created")|tojson }},
+        alert_create_error: {{ t("alert_create_error")|tojson }},
+        alert_deal_cancelled: {{ t("alert_deal_cancelled")|tojson }},
+        alert_cancel_error: {{ t("alert_cancel_error")|tojson }},
+        alert_invalid_code: {{ t("alert_invalid_code")|tojson }},
+        alert_join_error: {{ t("alert_join_error")|tojson }},
+        alert_network_error: {{ t("alert_network_error")|tojson }},
+        commission_text_pattern: {{ t("commission_text_pattern")|tojson }},
+        commission_amount: {{ t("commission_amount")|tojson }},
+        seller_receives: {{ t("seller_receives")|tojson }}
+    };
+
+    // Site-styled notifications (avoid browser alert/confirm dialogs)
+    window.siteNotify = function(message, type = 'info', opts = {}) {
+        try {
+            if (typeof window.showToast === 'function') {
+                return window.showToast(message, type, opts);
+            }
+            if (typeof window.showNotification === 'function') {
+                return window.showNotification(message, type === 'error' ? 'error' : 'info', opts.duration || 3000);
+            }
+        } catch (_) {}
+        try { alert(String(message ?? '')); } catch (_) {}
+    };
+
+    // Universal Confirmation Modal Functions
+    let confirmationCallback = null;
+
+    function showConfirmationModal(message, callback) {
+        const modal = document.getElementById('confirmationModal');
+        const messageElement = document.getElementById('confirmationMessage');
+
+        if (modal && messageElement) {
+            messageElement.textContent = message;
+            confirmationCallback = callback;
+
+            modal.classList.add('show');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+
+            // Focus the confirm button
+            setTimeout(() => {
+                const confirmBtn = document.getElementById('confirmationConfirm');
+                if (confirmBtn) confirmBtn.focus();
+            }, 100);
+        }
+    }
+
+    function hideConfirmationModal() {
+        const modal = document.getElementById('confirmationModal');
+        if (modal) {
+            modal.classList.remove('show');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+            confirmationCallback = null;
+        }
+    }
+
+    function confirmAction() {
+        if (confirmationCallback) {
+            confirmationCallback();
+        }
+        hideConfirmationModal();
+    }
+
+    // SIMPLIFIED DROPDOWN FUNCTIONALITY - NO CONFLICTS
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Dropdown functionality initialized');
+
+        // Dynamic viewport height fix (Telegram Desktop/Mobile webviews + iOS address bars)
+        function setAppHeightVar() {
+            document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+        }
+        setAppHeightVar();
+        window.addEventListener('resize', setAppHeightVar);
+        
+        // Initialize theme system
+        if (typeof initTheme === 'function') {
+            initTheme();
+        }
+
+        // Enhanced Dropdown Management System - Ensures only one dropdown open at a time
+        let currentOpenDropdown = null;
+        let currentOpenButton = null;
+
+        function closeAllDropdowns() {
+            // Close all dropdowns
+            document.querySelectorAll('.language-dropdown-menu.show, .user-menu-dropdown.show, .quick-actions-menu.show, .mobile-quick-actions-menu.show, .mobile-user-menu-dropdown.show').forEach(dropdown => {
+                dropdown.classList.remove('show');
+            });
+            
+            // Reset all buttons
+            document.querySelectorAll('[aria-expanded="true"]').forEach(btn => {
+                btn.setAttribute('aria-expanded', 'false');
+            });
+            
+            currentOpenDropdown = null;
+            currentOpenButton = null;
+        }
+
+        function positionDropdown(dropdown, button) {
+            if (!dropdown || !button) return;
+
+            const computed = window.getComputedStyle(dropdown);
+            // Only dynamically position fixed dropdowns (language selector).
+            // Absolute-positioned menus (quick actions) are already placed via CSS and
+            // forcing viewport-based coordinates can move them off-screen.
+            if (computed.position !== 'fixed') return;
+
+            const margin = 10;
+            const buttonRect = button.getBoundingClientRect();
+            const dropdownRect = dropdown.getBoundingClientRect();
+
+            let top = buttonRect.bottom + 10;
+            let left = buttonRect.right - dropdownRect.width;
+
+            left = Math.max(margin, Math.min(left, window.innerWidth - dropdownRect.width - margin));
+
+            if (top + dropdownRect.height > window.innerHeight - margin) {
+                top = buttonRect.top - dropdownRect.height - 10;
+                top = Math.max(margin, top);
+            }
+
+            dropdown.style.top = `${Math.round(top)}px`;
+            dropdown.style.left = `${Math.round(left)}px`;
+        }
+
+        function openDropdown(dropdown, button) {
+            // Close all other dropdowns first
+            closeAllDropdowns();
+            
+            // Open the new dropdown
+            dropdown.classList.add('show');
+            button.setAttribute('aria-expanded', 'true');
+
+            // Clear any previous inline positioning; let CSS handle absolute dropdowns.
+            dropdown.style.top = '';
+            dropdown.style.left = '';
+
+            positionDropdown(dropdown, button);
+            
+            currentOpenDropdown = dropdown;
+            currentOpenButton = button;
+        }
+
+        function closeCurrentDropdown() {
+            if (currentOpenDropdown && currentOpenButton) {
+                currentOpenDropdown.classList.remove('show');
+                currentOpenButton.setAttribute('aria-expanded', 'false');
+                currentOpenDropdown = null;
+                currentOpenButton = null;
+            }
+        }
+
+        // Language Dropdown
+        const languageBtn = document.getElementById('languageBtn');
+        const languageDropdown = document.getElementById('languageDropdown');
+        const languageOptions = document.querySelectorAll('.language-option');
+
+        if (languageBtn && languageDropdown) {
+            console.log('Language dropdown elements found');
+            
+            // Toggle dropdown on button click
+            languageBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isOpen = languageDropdown.classList.contains('show');
+
+                if (isOpen) {
+                    closeCurrentDropdown();
+                } else {
+                    openDropdown(languageDropdown, languageBtn);
+                }
+            });
+
+            // Handle language option clicks
+            languageOptions.forEach(option => {
+                option.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    const lang = this.dataset.lang;
+
+                    if (lang) {
+                        localStorage.setItem('selectedLanguage', lang);
+
+                        try {
+                            const res = await fetch('/set-language', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ lang })
+                            });
+                            if (res.ok) {
+                                setTimeout(() => location.reload(), 300);
+                            } else {
+                                console.error('Language switch failed');
+                            }
+                        } catch (err) {
+                            console.error('Language switch error:', err);
+                        }
+                    }
+
+                    closeCurrentDropdown();
+                });
+            });
+        } else {
+            console.warn('Language dropdown elements not found');
+        }
+
+        // Quick Actions Dropdown
+        const quickActionsBtn = document.getElementById('quickActionsBtn');
+        const quickActionsDropdown = document.getElementById('quickActionsDropdown');
+
+        if (quickActionsBtn && quickActionsDropdown) {
+            console.log('Quick actions dropdown elements found');
+            
+            quickActionsBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isOpen = quickActionsDropdown.classList.contains('show');
+
+                if (isOpen) {
+                    closeCurrentDropdown();
+                } else {
+                    // Open dropdown using centralized system
+                    openDropdown(quickActionsDropdown, quickActionsBtn);
+                    
+                    // Focus first menu item
+                    const firstMenuItem = quickActionsDropdown.querySelector('.quick-action-item');
+                    if (firstMenuItem) firstMenuItem.focus();
+                }
+            });
+        } else {
+            console.warn('Quick actions dropdown elements not found');
+        }
+
+        // Mobile Quick Actions Dropdown
+        const mobileQuickActionsBtn = document.getElementById('mobileQuickActionsBtn');
+        const mobileQuickActionsDropdown = document.getElementById('mobileQuickActionsDropdown');
+
+        if (mobileQuickActionsBtn && mobileQuickActionsDropdown) {
+            console.log('Mobile quick actions dropdown elements found');
+            
+            mobileQuickActionsBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isOpen = mobileQuickActionsDropdown.classList.contains('show');
+
+                if (!isOpen) {
+                    mobileQuickActionsDropdown.classList.add('show');
+                    mobileQuickActionsBtn.setAttribute('aria-expanded', 'true');
+                    // Focus first menu item
+                    const firstMenuItem = mobileQuickActionsDropdown.querySelector('.mobile-quick-action-item');
+                    if (firstMenuItem) firstMenuItem.focus();
+                } else {
+                    mobileQuickActionsDropdown.classList.remove('show');
+                    mobileQuickActionsBtn.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }
+
+        // Universal Confirmation Modal Event Handlers
+        const confirmationModal = document.getElementById('confirmationModal');
+        const confirmationModalOverlay = document.getElementById('confirmationModalOverlay');
+        const confirmationModalClose = document.getElementById('confirmationModalClose');
+        const confirmationCancel = document.getElementById('confirmationCancel');
+        const confirmationConfirm = document.getElementById('confirmationConfirm');
+
+        if (confirmationModalClose) {
+            confirmationModalClose.addEventListener('click', hideConfirmationModal);
+        }
+
+        if (confirmationCancel) {
+            confirmationCancel.addEventListener('click', hideConfirmationModal);
+        }
+
+        if (confirmationConfirm) {
+            confirmationConfirm.addEventListener('click', confirmAction);
+        }
+
+        if (confirmationModalOverlay) {
+            confirmationModalOverlay.addEventListener('click', hideConfirmationModal);
+        }
+
+        // Handle escape key for confirmation modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && confirmationModal && confirmationModal.classList.contains('show')) {
+                hideConfirmationModal();
+            }
+        });
+
+        // Login/Registration Modal functionality
+        const loginBtn = document.getElementById('loginBtn');
+        const registrationModal = document.getElementById('registrationModal');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalClose = document.getElementById('modalClose');
+        const modalCancel = document.getElementById('modalCancel');
+
+        function showRegistrationModal() {
+            if (registrationModal) {
+                registrationModal.classList.add('show');
+                registrationModal.setAttribute('aria-hidden', 'false');
+
+                // Focus the first focusable element
+                const firstFocusable = registrationModal.querySelector('button, a, input, select, textarea, [tabindex]:not([tabindex="-1"])');
+                if (firstFocusable) {
+                    setTimeout(() => firstFocusable.focus(), 100);
+                }
+            }
+        }
+
+        function hideRegistrationModal() {
+            if (registrationModal) {
+                registrationModal.classList.remove('show');
+                registrationModal.setAttribute('aria-hidden', 'true');
+
+                // Return focus to login button
+                if (loginBtn) loginBtn.focus();
+            }
+        }
+
+        if (loginBtn) {
+            loginBtn.addEventListener('click', function() {
+                showRegistrationModal();
+            });
+        }
+
+        // Guest login button (on index page for unregistered users)
+        const guestLoginBtn = document.getElementById('guestLoginBtn');
+        if (guestLoginBtn) {
+            guestLoginBtn.addEventListener('click', function() {
+                showRegistrationModal();
+            });
+        }
+
+        if (modalClose) {
+            modalClose.addEventListener('click', hideRegistrationModal);
+        }
+
+        if (modalCancel) {
+            modalCancel.addEventListener('click', hideRegistrationModal);
+        }
+
+        if (modalOverlay) {
+            modalOverlay.addEventListener('click', hideRegistrationModal);
+        }
+
+        // Handle escape key for modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && registrationModal && registrationModal.classList.contains('show')) {
+                hideRegistrationModal();
+            }
+        });
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(e) {
+            // Check if click is outside any dropdown
+            const clickedOnButton = e.target.closest('#languageBtn, #quickActionsBtn, #mobileQuickActionsBtn');
+            const clickedOnDropdown = e.target.closest('.language-dropdown-menu, .quick-actions-menu, .mobile-quick-actions-menu');
+            
+            if (!clickedOnButton && !clickedOnDropdown) {
+                closeAllDropdowns();
+            }
+        });
+
+        // Keep dropdown positioned on resize/scroll
+        window.addEventListener('resize', function() {
+            if (currentOpenDropdown && currentOpenButton && window.getComputedStyle(currentOpenDropdown).position === 'fixed') {
+                positionDropdown(currentOpenDropdown, currentOpenButton);
+            }
+        });
+        window.addEventListener('scroll', function() {
+            if (currentOpenDropdown && currentOpenButton && window.getComputedStyle(currentOpenDropdown).position === 'fixed') {
+                positionDropdown(currentOpenDropdown, currentOpenButton);
+            }
+        }, true);
+    });
+    </script>
+    {% endif %}
+    {% if not _is_tg_minimal %}
+    {% block extra_scripts %}{% endblock %}
+
+    <!-- Support Chat Widget -->
+    <div class="support-widget" id="supportWidget">
+        <button class="support-button" id="supportButton" aria-label="{{ t('open_support_chat_aria') }}">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2ZM20 16H5.17L4 17.17V4H20V16Z"/>
+                <path d="M7 9H17V11H7V9ZM7 12H15V14H7V12Z"/>
+            </svg>
+            <span class="support-notification" id="supportNotification" style="display: none;"></span>
+        </button>
+
+        <div class="support-modal" id="supportModal" role="dialog" aria-labelledby="supportTitle" aria-hidden="true">
+            <div class="support-header">
+                <h2 class="support-title" id="supportTitle">{{ t('support_chat_title') }}</h2>
+                <button class="support-close" id="supportClose" aria-label="{{ t('support_close') }}">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="support-messages" id="supportMessages">
+                <div class="support-welcome">
+                    <div class="welcome-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                    </div>
+                    <h3>{{ t('support_chat_title') }}</h3>
+                    <p>{{ t('support_chat_subtitle') }}</p>
+                </div>
+            </div>
+
+            <div class="support-input-area">
+                <form class="support-form" id="supportForm">
+                    <div class="support-input-container">
+                        <input
+                            type="text"
+                            class="support-input"
+                            id="supportMessage"
+                            name="message"
+                            placeholder="{{ t('support_message_placeholder') }}"
+                            maxlength="1000"
+                            autocomplete="off"
+                        >
+                        <button type="submit" class="support-send-btn" id="supportSendBtn" disabled>
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Support Chat Widget Functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const supportButton = document.getElementById('supportButton');
+        const supportModal = document.getElementById('supportModal');
+        const supportClose = document.getElementById('supportClose');
+        const supportForm = document.getElementById('supportForm');
+        const supportMessage = document.getElementById('supportMessage');
+        const supportSendBtn = document.getElementById('supportSendBtn');
+        const supportMessages = document.getElementById('supportMessages');
+        const supportNotification = document.getElementById('supportNotification');
+
+        let messages = [];
+        let pollInterval = null;
+
+        // Toggle modal
+        function toggleSupportModal() {
+            const isOpen = supportModal.classList.contains('show');
+
+            if (!isOpen) {
+                supportModal.classList.add('show');
+                supportModal.setAttribute('aria-hidden', 'false');
+
+                // Load messages and start polling
+                loadMessages();
+                startPolling();
+
+                // Focus on input
+                setTimeout(() => {
+                    supportMessage.focus();
+                }, 100);
+
+                // Hide notification
+                supportNotification.style.display = 'none';
+            } else {
+                closeSupportModal();
+            }
+        }
+
+        function closeSupportModal() {
+            supportModal.classList.remove('show');
+            supportModal.setAttribute('aria-hidden', 'true');
+
+            // Stop polling
+            stopPolling();
+
+            // Reset form
+            supportForm.reset();
+            updateSendButton();
+        }
+
+        // Load messages from server
+        async function loadMessages() {
+            try {
+                const response = await fetch('/api/support/messages');
+                const data = await response.json();
+
+                if (data.success) {
+                    messages = data.messages;
+                    renderMessages();
+
+                    // Update notification if there are unread messages
+                    if (data.unread_count > 0) {
+                        supportNotification.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
+                        supportNotification.style.display = 'flex';
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading messages:', error);
+            }
+        }
+
+        // Render messages in chat
+        function renderMessages() {
+            const messagesContainer = supportMessages;
+
+            if (messages.length === 0) {
+                messagesContainer.innerHTML = `
+                    <div class="support-welcome">
+                        <div class="welcome-icon">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                        </div>
+                        <h3>{{ t('support_chat_title') }}</h3>
+                        <p>{{ t('support_chat_subtitle') }}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            messagesContainer.innerHTML = messages.map(msg => {
+                const isUser = msg.is_from_user === 1;
+                const roleLabel = isUser ? {{ t("support_role_user")|tojson }} : {{ t("support_role_admin")|tojson }};
+                const time = new Date(msg.created_at).toLocaleTimeString('{{ "uk-UA" if current_lang == "ua" else "en-US" }}', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                return `
+                    <div class="message message-${isUser ? 'user' : 'admin'}">
+                        <div class="message-bubble">
+                            <div class="message-role">${roleLabel}</div>
+                            ${msg.message}
+                            <div class="message-time">${time}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        // Send message
+        async function sendMessage(message) {
+            supportSendBtn.disabled = true;
+            supportMessage.disabled = true;
+
+            try {
+                const response = await fetch('/api/support/send-message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    supportMessage.value = '';
+                    updateSendButton();
+                    // Reload messages to show the sent message
+                    await loadMessages();
+                } else {
+                    const supportErrorFallback = {{ t("support_error")|tojson }};
+                    const supportErrorText = (typeof supportErrorFallback === 'string' && supportErrorFallback.startsWith('[missing:'))
+                        ? 'Error'
+                        : supportErrorFallback;
+                    window.siteNotify(
+                        (data.message || supportErrorText || 'Unknown error'),
+                        'error',
+                        { duration: 4000 }
+                    );
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                window.siteNotify({{ t("alert_network_error")|tojson }}, 'error', { duration: 4000 });
+            } finally {
+                supportSendBtn.disabled = false;
+                supportMessage.disabled = false;
+                supportMessage.focus();
+            }
+        }
+
+        // Update send button state
+        function updateSendButton() {
+            const message = supportMessage.value.trim();
+            supportSendBtn.disabled = message.length === 0 || message.length > 1000;
+        }
+
+        // Polling for new messages
+        function startPolling() {
+            pollInterval = setInterval(async () => {
+                if (supportModal.classList.contains('show')) {
+                    await loadMessages();
+                }
+            }, 5000); // Poll every 5 seconds
+        }
+
+        function stopPolling() {
+            if (pollInterval) {
+                clearInterval(pollInterval);
+                pollInterval = null;
+            }
+        }
+
+        // Event listeners
+        supportButton.addEventListener('click', toggleSupportModal);
+        supportClose.addEventListener('click', closeSupportModal);
+
+        supportMessage.addEventListener('input', updateSendButton);
+        supportMessage.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                const message = supportMessage.value.trim();
+                if (message && !supportSendBtn.disabled) {
+                    sendMessage(message);
+                }
+            }
+        });
+
+        // Form submission
+        supportForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const message = supportMessage.value.trim();
+            if (message && !supportSendBtn.disabled) {
+                sendMessage(message);
+            }
+        });
+
+        // Close on escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && supportModal.classList.contains('show')) {
+                closeSupportModal();
+            }
+        });
+
+        // Close on outside click
+        supportModal.addEventListener('click', function(e) {
+            if (e.target === supportModal) {
+                closeSupportModal();
+            }
+        });
+
+        // Initialize
+        updateSendButton();
+
+        // Check for unread messages on page load
+        setTimeout(() => {
+            fetch('/api/support/messages')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.unread_count > 0) {
+                        supportNotification.textContent = data.unread_count > 99 ? '99+' : data.unread_count;
+                        supportNotification.style.display = 'flex';
+                    }
+                })
+                .catch(error => console.error('Error checking unread messages:', error));
+        }, 1000);
+
+        // Telegram Web App Authentication
+        const isUserLoggedIn = {{ 'true' if session.get('user_id') else 'false' }};
+        const autoAuthAttemptedKey = 'tg_auto_auth_attempted_v1';
+
+        async function tryTelegramAutoAuth() {
+            if (isUserLoggedIn) return;
+            if (!(window.Telegram && window.Telegram.WebApp)) return;
+            // Android Telegram WebView can crash ("duck" screen) when we auto-auth/redirect
+            // while navigating to inner pages. Only attempt auto-auth on the main page.
+            if (window.location && window.location.pathname !== '/') return;
+            if (sessionStorage.getItem(autoAuthAttemptedKey) === '1') return;
+
+            const WebApp = window.Telegram.WebApp;
+            WebApp.ready();
+
+            const initData = WebApp.initData;
+            const initDataUnsafe = WebApp.initDataUnsafe;
+
+            if (!initData || !initDataUnsafe || !initDataUnsafe.user) return;
+
+            sessionStorage.setItem(autoAuthAttemptedKey, '1');
+
+            try {
+                const res = await fetch('/auth/telegram-web-app', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ initData })
+                });
+                const payload = await res.json();
+                if (payload && payload.success) {
+                    window.location.href = payload.redirect || window.location.pathname || '/';
+                }
+            } catch (e) {
+                console.error('Telegram auto-auth failed:', e);
+            }
+        }
+
+        tryTelegramAutoAuth();
+
+        const telegramWebAppLoginBtn = document.getElementById('telegramWebAppLoginBtn');
+        if (telegramWebAppLoginBtn) {
+            telegramWebAppLoginBtn.addEventListener('click', function() {
+                // Check if we're in Telegram Web App
+                if (window.Telegram && window.Telegram.WebApp) {
+                    const WebApp = window.Telegram.WebApp;
+
+                    // Show loading state
+                    this.innerHTML = `
+                        <svg class="btn-icon animate-spin" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" stroke-dasharray="8 8"/>
+                        </svg>
+                        <span>Loading...</span>
+                    `;
+
+                    // Request authentication
+                    WebApp.ready();
+
+                    // Get user data from Telegram Web App
+                    const initData = WebApp.initData;
+                    const initDataUnsafe = WebApp.initDataUnsafe;
+
+                    if (initDataUnsafe && initDataUnsafe.user) {
+                        const user = initDataUnsafe.user;
+
+                        // Add timeout to prevent hanging on mobile
+                        const authTimeout = setTimeout(() => {
+                            console.error('Telegram auth timeout - falling back to bot');
+                            this.innerHTML = `
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                                </svg>
+                                <span>Redirecting...</span>
+                            `;
+                            // Fallback to bot after timeout
+                            setTimeout(() => {
+                                window.open('https://t.me/BlackDiamondGarantBot', '_blank');
+                            }, 1000);
+                        }, 10000); // 10 second timeout
+
+                        // Safe hash extraction with fallback
+                        let hashValue = 'fallback_hash';
+                        try {
+                            if (initData && typeof initData === 'string') {
+                                const hashParam = initData.split('&').find(param => param.startsWith('hash='));
+                                if (hashParam) {
+                                    hashValue = hashParam.split('=')[1] || 'fallback_hash';
+                                }
+                            }
+                        } catch (hashError) {
+                            console.warn('Hash extraction failed, using fallback:', hashError);
+                        }
+
+                        // Send authentication request to server
+                        fetch('/auth/telegram-web-app', {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                id: user.id,
+                                first_name: user.first_name,
+                                username: user.username || '',
+                                hash: hashValue,
+                                initData: initData
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            clearTimeout(authTimeout);
+                            if (data.success) {
+                                // Show success message
+                                this.innerHTML = `
+                                    <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                    </svg>
+                                <span>Success!</span>
+                                `;
+
+                                // Redirect after short delay
+                                setTimeout(() => {
+                                    window.location.href = data.redirect || '/';
+                                }, 1000);
+                            } else {
+                                // Log detailed error for debugging
+                                console.error('Telegram auth failed:', data);
+                                throw new Error(data.message || 'Authorization error');
+                            }
+                        })
+                        .catch(error => {
+                            clearTimeout(authTimeout);
+                            console.error('Telegram Web App auth error:', error);
+                            console.error('Error details:', {
+                                name: error.name,
+                                message: error.message,
+                                stack: error.stack,
+                                initData: initData,
+                                user: user
+                            });
+
+                            // Show error state with better user feedback
+                            this.innerHTML = `
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                    <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                                </svg>
+                                <span>Error</span>
+                            `;
+
+                            // Reset to original state after delay
+                            setTimeout(() => {
+                                this.innerHTML = `
+                                    <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                                        </svg>
+                                        <span>Telegram</span>
+                                    `;
+                            }, 2000);
+                        });
+                    } else {
+                        // Fallback: redirect to Telegram bot
+                        window.open('https://t.me/BlackDiamondGarantBot', '_blank');
+                    }
+                } else {
+                    // Not in Telegram Web App, redirect to bot
+                    window.open('https://t.me/BlackDiamondGarantBot', '_blank');
+                }
+            });
+        }
+    });
+    </script>
+    {% endif %}
+    {% if not _is_tg_minimal %}
+    <script src="{{ url_for('static', filename='js/white_rollback.js') }}{% if is_telegram_webview %}?v={{ static_version }}{% endif %}"></script>
+    {% endif %}
+    <script>
+    // Lightweight client error reporting (helps debug Telegram Android "duck" WebView crashes).
+    (function() {
+        try {
+            const hasTgObject = !!(window.Telegram && window.Telegram.WebApp);
+            const cookie = String(document.cookie || '');
+            const qs = String((window.location && window.location.search) || '');
+            const hinted = hasTgObject || cookie.includes('tg_webview=1') || qs.includes('tgWebApp') || qs.includes('lite=1');
+            if (!hinted) return;
+
+            const ua = String(navigator.userAgent || '');
+            const uaLower = ua.toLowerCase();
+            const clientMeta = {
+                hasTgObject,
+                hinted,
+                isAndroid: uaLower.includes('android'),
+                uaHasTelegram: uaLower.includes('telegram')
+            };
+
+            function send(payload) {
+                try {
+                    payload = payload || {};
+                    payload.path = payload.path || (window.location && window.location.pathname) || '';
+                    const body = JSON.stringify(payload);
+                    if (navigator.sendBeacon) {
+                        const blob = new Blob([body], { type: 'application/json' });
+                        navigator.sendBeacon('/api/client-error', blob);
+                    } else {
+                        fetch('/api/client-error', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body,
+                            keepalive: true
+                        }).catch(() => {});
+                    }
+                } catch (_) {}
+            }
+
+            function addMaskedContext(ev, extra) {
+                try {
+                    const msg = (ev && ev.message) || '';
+                    const filename = (ev && ev.filename) || '';
+                    const lineno = ev && ev.lineno;
+                    if (msg !== 'Script error.' || filename || (lineno && lineno !== 0)) return;
+
+                    const origin = (window.location && window.location.origin) || '';
+                    const scripts = Array.from(document.scripts || []).map(s => s && s.src).filter(Boolean);
+                    const styles = Array.from(document.querySelectorAll('link[rel=\"stylesheet\"]') || []).map(l => l && l.href).filter(Boolean);
+                    const externalScripts = origin ? scripts.filter(src => !String(src).startsWith(origin)) : [];
+                    const externalStyles = origin ? styles.filter(href => !String(href).startsWith(origin)) : [];
+
+                    extra.masked = {
+                        scriptCount: scripts.length,
+                        styleCount: styles.length,
+                        externalScripts: externalScripts.slice(0, 20),
+                        externalStyles: externalStyles.slice(0, 20)
+                    };
+                } catch (_) {}
+            }
+
+            window.addEventListener('error', function(ev) {
+                const extra = {
+                    readyState: (document && document.readyState) || null,
+                    name: ev && ev.error && ev.error.name,
+                    client: clientMeta
+                };
+                addMaskedContext(ev, extra);
+                send({
+                    type: 'error',
+                    message: ev && ev.message,
+                    source: ev && ev.filename,
+                    lineno: ev && ev.lineno,
+                    colno: ev && ev.colno,
+                    stack: ev && ev.error && ev.error.stack,
+                    extra
+                });
+            });
+
+            // Resource/script load errors do NOT bubble; capture them.
+            window.addEventListener('error', function(ev) {
+                try {
+                    const target = ev && ev.target;
+                    if (!target || target === window) return;
+                    const tagName = (target.tagName || '').toLowerCase();
+                    const src = target.src || target.href || '';
+                    if (!src) return;
+                    send({
+                        type: 'resource_error',
+                        message: 'Resource failed to load',
+                        source: src,
+                        extra: {
+                            tagName,
+                            id: target.id || null,
+                            rel: target.rel || null
+                        }
+                    });
+                } catch (_) {}
+            }, true);
+
+            window.addEventListener('unhandledrejection', function(ev) {
+                const reason = ev && ev.reason;
+                send({
+                    type: 'unhandledrejection',
+                    message: (reason && (reason.message || String(reason))) || 'unhandledrejection',
+                    stack: reason && reason.stack,
+                    extra: { client: clientMeta }
+                });
+            });
+
+            // Basic lifecycle markers (helps determine whether the page reaches full load before "duck").
+            if (document && document.addEventListener) {
+                document.addEventListener('DOMContentLoaded', function() {
+                    send({ type: 'lifecycle', message: 'domcontentloaded', extra: { client: clientMeta } });
+                }, { once: true });
+            }
+            window.addEventListener('load', function() {
+                send({ type: 'lifecycle', message: 'window.load', extra: { client: clientMeta } });
+            });
+        } catch (_) {}
+    })();
+    </script>
+</body>
+</html>

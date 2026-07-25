@@ -1,0 +1,1484 @@
+{% extends "base.html" %}
+
+{% block title %}{{ bot_name }} - {{ t('page_title_suffix') }}{% endblock %}
+
+{% block content %}
+<!-- Modern Hero Section -->
+<section class="hero" role="banner">
+    <div class="container">
+        <div class="hero-content">
+            <!-- Hero Header -->
+            <div class="hero-header">
+                <h1 class="hero-title">
+                    <span class="title-main">{{ bot_name }}</span>
+                    <span class="title-sub">{{ t('web_tagline') }}</span>
+                </h1>
+            </div>
+
+            {% if session.get('user_id') %}
+            <!-- Hero Features Grid - Mobile Optimized -->
+            <div class="hero-features-grid">
+                <div class="hero-feature-card">
+                    <div class="feature-icon-wrapper">
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M12 12C14.21 12 16 10.21 16 8S14.21 4 12 4 8 5.79 8 8 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">{{ t('web_bot_simple') }}</h3>
+                    <p class="feature-description">{{ t('web_bot_simple_desc') }}</p>
+                </div>
+
+                <div class="hero-feature-card">
+                    <div class="feature-icon-wrapper">
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22 22 17.52 22 12 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12S7.59 4 12 4 20 7.59 20 12 16.41 20 12 20Z"/>
+                            <path d="M12.5 7H11V13L16.2 16.2L17 14.9L12.5 12.2V7Z"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">{{ t('web_bot_24_7') }}</h3>
+                    <p class="feature-description">{{ t('web_bot_24_7_desc') }}</p>
+                </div>
+            </div>
+
+            {% else %}
+            <!-- Centered Login Section for Non-Authenticated Users - Desktop Only -->
+            <div class="hero-login-section desktop-only" style="display: none !important;">
+                <div class="hero-login-content">
+                    <div class="hero-login-buttons">
+                        <button class="btn btn-primary btn-hero-login" id="heroLoginBtn" aria-label="{{ t('login_via_telegram') }}">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                            </svg>
+                            <span>{{ t('login_via_telegram') }}</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+
+        </div>
+    </div>
+</section>
+
+{% if session.get('user_id') %}
+<!-- Compact CTA Section -->
+<section class="section cta-section" aria-labelledby="cta-title">
+    <div class="container">
+        <div class="cta-content">
+            <div class="cta-header">
+                <h2 id="cta-title" class="cta-title">{{ t('web_cta_title') }}</h2>
+                <p class="cta-description">{{ t('web_cta_desc') }}</p>
+            </div>
+
+            <div class="cta-actions">
+                <div class="cta-buttons">
+                    <a href="/create-deal" class="btn btn-primary btn-cta">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z"/>
+                            <path d="M2 17L12 22L22 17"/>
+                            <path d="M2 12L12 17L22 12"/>
+                        </svg>
+                        <span>{{ t('web_cta_btn_create_first') }}</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% if session.get('user_id') %}
+<!-- Enhanced Features Section -->
+<section id="features" class="section features-section" aria-labelledby="features-title">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-badge">
+                <svg class="badge-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z"/>
+                </svg>
+                <span>{{ t('web_features') }}</span>
+            </div>
+            <h2 id="features-title" class="section-title">{{ t('web_section_features_title') }}</h2>
+            <p class="section-subtitle">{{ t('web_section_features_desc') }}</p>
+        </div>
+
+        <!-- Mobile Features Grid - Compact Version -->
+        <div class="mobile-features-grid">
+        <div class="features-grid">
+            <div class="feature-card" data-feature="payments">
+                <div class="feature-header">
+                    <div class="feature-number">01</div>
+                    <div class="feature-icon-container">
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M12 2C6.48 2 2 6.48 2 12S6.48 22 12 22 22 17.52 22 12 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="feature-content">
+                    <h3 class="feature-title">{{ t('feature_automatic_payments') }}</h3>
+                    <p class="feature-description">{{ t('feature_automatic_payments_desc') }}</p>
+                </div>
+            </div>
+
+            <div class="feature-card" data-feature="qr">
+                <div class="feature-header">
+                    <div class="feature-number">02</div>
+                    <div class="feature-icon-container">
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <rect x="6" y="6" width="3" height="3"/>
+                            <rect x="15" y="6" width="3" height="3"/>
+                            <rect x="6" y="15" width="3" height="3"/>
+                            <path d="M8 10h2v2H8v-2z"/>
+                            <path d="M14 10h2v2h-2v-2z"/>
+                            <path d="M8 14h2v2H8v-2z"/>
+                            <path d="M12 12h2v2h-2v-2z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="feature-content">
+                    <h3 class="feature-title">{{ t('feature_qr_codes') }}</h3>
+                    <p class="feature-description">{{ t('feature_qr_codes_desc') }}</p>
+                </div>
+            </div>
+
+            <div class="feature-card" data-feature="speed">
+                <div class="feature-header">
+                    <div class="feature-number">03</div>
+                    <div class="feature-icon-container">
+                        <svg class="feature-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="feature-content">
+                    <h3 class="feature-title">{{ t('feature_fast_confirmation') }}</h3>
+                    <p class="feature-description">{{ t('feature_fast_confirmation_desc') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% if session.get('user_id') %}
+<!-- How It Works - Mobile Optimized -->
+<section class="how-it-works">
+    <div class="container">
+        <h2 class="section-title">{{ t('web_section_how_title') }}</h2>
+        <div class="steps">
+            <div class="step step-1">
+                <div class="step-icon-wrapper">
+                    <svg class="step-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z"/>
+                        <polyline points="14,2 14,8 20,8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                </div>
+                <div class="step-number">1</div>
+                <h3>{{ t('web_how_step1_title') }}</h3>
+                <p>{{ t('web_how_step1_desc') }}</p>
+            </div>
+            <div class="step-connector">
+                <div class="connector-line"></div>
+                <div class="connector-arrow">→</div>
+            </div>
+            <div class="step step-2">
+                <div class="step-icon-wrapper">
+                    <svg class="step-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M16 4C18.2 4 20 5.8 20 8C20 10.2 18.2 12 16 12C13.8 12 12 10.2 12 8C12 5.8 13.8 4 16 4Z"/>
+                        <path d="M8 12C10.2 12 12 13.8 12 16C12 18.2 10.2 20 8 20C5.8 20 4 18.2 4 16C4 13.8 5.8 12 8 12Z"/>
+                        <path d="M8 12C8 8 12 4 16 4"/>
+                    </svg>
+                </div>
+                <div class="step-number">2</div>
+                <h3>{{ t('web_how_step2_title') }}</h3>
+                <p>{{ t('web_how_step2_desc') }}</p>
+            </div>
+            <div class="step-connector">
+                <div class="connector-line"></div>
+                <div class="connector-arrow">→</div>
+            </div>
+            <div class="step step-3">
+                <div class="step-icon-wrapper">
+                    <svg class="step-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M8 12L11 15L16 9"/>
+                        <path d="M12 8V16"/>
+                    </svg>
+                </div>
+                <div class="step-number">3</div>
+                <h3>{{ t('web_how_step3_title') }}</h3>
+                <p>{{ t('web_how_step3_desc') }}</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+
+<!-- Enhanced Stats Section -->
+<section id="stats" class="section stats-section" aria-labelledby="stats-title">
+    <div class="container">
+        <div class="section-header">
+            <div class="section-badge">
+                <svg class="badge-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>
+                </svg>
+                <span>{{ t('web_stats') }}</span>
+            </div>
+            <h2 id="stats-title" class="section-title">{{ t('web_section_stats_title') }}</h2>
+            <p class="section-subtitle">{{ t('web_section_stats_desc') }}</p>
+        </div>
+
+        <div class="stats-grid" id="stats-container">
+            <div class="stat-card-enhanced" data-stat="deals">
+                <div class="stat-header">
+                    <div class="stat-icon-container">
+                        <svg class="stat-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z"/>
+                            <polyline points="14,2 14,8 20,8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                        </svg>
+                    </div>
+                    <div class="stat-badge">
+                        <svg class="badge-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M16 21V19C16 17.9391 15.5786 16.9217 14.8284 16.1716C14.0783 15.4214 13.0609 15 12 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21"/>
+                            <path d="M8 7C8 4.79086 10.6863 3 12 3C13.3137 3 16 4.79086 16 7"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-title">{{ t('stat_deals_count') }}</h3>
+                    <div class="stat-value">
+                        <span class="stat-number" id="total-deals-count" data-target="0">0</span>
+                        <span class="stat-unit" id="deals-unit"></span>
+                    </div>
+                    <div class="stat-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="deals-progress"></div>
+                        </div>
+                    </div>
+                    <p class="stat-description">{{ t('stat_processed_through_platform') }}</p>
+                </div>
+                <div class="stat-footer">
+                </div>
+            </div>
+
+            <div class="stat-card-enhanced" data-stat="users">
+                <div class="stat-header">
+                    <div class="stat-icon-container">
+                        <svg class="stat-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M16 4C18.2 4 20 5.8 20 8C20 10.2 18.2 12 16 12C13.8 12 12 10.2 12 8C12 5.8 13.8 4 16 4Z"/>
+                            <path d="M8 12C10.2 12 12 13.8 12 16C12 18.2 10.2 20 8 20C5.8 20 4 18.2 4 16C4 13.8 5.8 12 8 12Z"/>
+                            <path d="M8 12C8 8 12 4 16 4"/>
+                        </svg>
+                    </div>
+                    <div class="stat-badge">
+                        <svg class="badge-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M8 12L11 15L16 9"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-title">{{ t('stat_active_users') }}</h3>
+                    <div class="stat-value">
+                        <span class="stat-number" id="active-users-volume" data-target="0">0</span>
+                        <span class="stat-unit" id="active-users-unit"></span>
+                    </div>
+                    <div class="stat-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="users-progress"></div>
+                        </div>
+                    </div>
+                    <p class="stat-description">{{ t('stat_daily_use_platform') }}</p>
+                </div>
+                <div class="stat-footer">
+                </div>
+            </div>
+
+            <div class="stat-card-enhanced" data-stat="volume">
+                <div class="stat-header">
+                    <div class="stat-icon-container">
+                        <svg class="stat-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M8 12L11 15L16 9"/>
+                            <path d="M12 8V16"/>
+                        </svg>
+                    </div>
+                    <div class="stat-badge">
+                        <svg class="badge-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-content">
+                    <h3 class="stat-title">{{ t('stat_total_volume') }}</h3>
+                    <div class="stat-value">
+                        <span class="stat-number" id="volume" data-target="0">0</span>
+                        <span class="stat-unit" id="volume-unit"></span>
+                    </div>
+                    <div class="stat-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="volume-progress"></div>
+                        </div>
+                    </div>
+                    <p class="stat-description">{{ t('stat_processed_transactions') }}</p>
+                </div>
+                <div class="stat-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+<style>
+/* ===== RADICAL MOBILE REDESIGN ===== */
+@media (max-width: 768px) {
+    /* Complete mobile layout overhaul */
+    body {
+        font-size: 16px;
+        line-height: 1.6;
+        -webkit-text-size-adjust: 100%;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    .container {
+        padding: 0 16px;
+        max-width: 100%;
+    }
+
+    /* ===== HERO SECTION - MOBILE OPTIMIZED ===== */
+    .hero {
+        padding: 80px 0 40px;
+        min-height: auto;
+        text-align: center;
+    }
+
+    .hero-content {
+        max-width: 100%;
+    }
+
+    .hero-title {
+        margin-bottom: 24px;
+    }
+
+    /* ===== HERO LOGIN SECTION ===== */
+    .hero-login-section {
+        margin-top: 40px;
+    }
+
+    .hero-login-content {
+        max-width: 400px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .hero-login-buttons {
+        display: flex;
+        justify-content: center;
+    }
+
+    .btn-hero-login {
+        width: 100%;
+        max-width: 320px;
+        padding: 18px 32px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 16px;
+        min-height: 64px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        background: linear-gradient(135deg, #0088cc, #0066aa);
+        color: white;
+        border: none;
+        box-shadow: 0 8px 25px rgba(0, 136, 204, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .btn-hero-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 35px rgba(0, 136, 204, 0.4);
+        background: linear-gradient(135deg, #0066aa, #004488);
+    }
+
+    .btn-hero-login .btn-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    /* Hide desktop-only elements on mobile */
+    @media (max-width: 767px) {
+        .hero-login-section.desktop-only {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            height: 0 !important;
+            overflow: hidden !important;
+        }
+    }
+
+
+    .title-main {
+        font-size: 2.5rem;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        margin-bottom: 8px;
+    }
+
+    .title-sub {
+        font-size: 1.1rem;
+        line-height: 1.4;
+        opacity: 0.9;
+    }
+
+    /* Hero features - stacked vertically */
+    .hero-features-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin: 32px 0;
+        max-width: 320px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .hero-feature-card {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        backdrop-filter: blur(10px);
+        text-align: left;
+    }
+
+    .feature-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .feature-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .hero-feature-card .feature-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+        margin: 0;
+    }
+
+    .hero-feature-card .feature-description {
+        font-size: 0.9rem;
+        line-height: 1.4;
+        opacity: 0.8;
+        margin: 0;
+    }
+
+    /* Hero buttons - full width, stacked */
+    .hero-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 32px;
+        max-width: 320px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .btn-hero {
+        width: 100%;
+        padding: 16px 24px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 12px;
+        min-height: 56px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    /* ===== SECTIONS - MOBILE OPTIMIZED ===== */
+    .section {
+        padding: 60px 0;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .section-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        margin-bottom: 16px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 12px;
+    }
+
+    .section-subtitle {
+        font-size: 1.1rem;
+        line-height: 1.5;
+        opacity: 0.9;
+        max-width: 100%;
+    }
+
+    /* ===== HORIZONTAL SCROLL SECTIONS ===== */
+    .steps,
+    .features-grid {
+        position: relative;
+        margin: 0 -20px;
+        padding: 0 20px;
+    }
+
+    /* Scroll indicators */
+    .steps::after,
+    .features-grid::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 30px;
+        background: linear-gradient(90deg, transparent, var(--bg-primary));
+        pointer-events: none;
+        opacity: 0.5;
+        border-radius: 0 20px 20px 0;
+    }
+
+    /* Scroll snap for better UX */
+    .step:first-child,
+    .feature-card:first-child {
+        margin-left: 0;
+    }
+
+    .step:last-child,
+    .feature-card:last-child {
+        margin-right: 0;
+    }
+
+    /* Enhanced scroll behavior */
+    .steps,
+    .features-grid {
+        scroll-behavior: smooth;
+    }
+
+    /* Hide scrollbars but keep functionality */
+    .steps::-webkit-scrollbar,
+    .features-grid::-webkit-scrollbar {
+        display: none;
+    }
+
+    .steps,
+    .features-grid {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    /* ===== FEATURES SECTION - HORIZONTAL MOBILE ===== */
+    .features-grid {
+        display: flex;
+        gap: 16px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .feature-card {
+        flex: 0 0 auto;
+        width: 260px;
+        padding: 20px;
+        border-radius: 16px;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-subtle);
+        transition: all 0.3s ease;
+        scroll-snap-align: center;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--border-glow);
+        box-shadow: var(--shadow-light);
+    }
+
+    .feature-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .feature-number {
+        font-size: 2rem;
+        font-weight: 900;
+        opacity: 0.3;
+        line-height: 1;
+    }
+
+    .feature-icon-container {
+        width: 48px;
+        height: 48px;
+        background: var(--gradient-primary);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .feature-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .feature-content {
+        flex: 1;
+    }
+
+    .feature-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        line-height: 1.3;
+    }
+
+    .feature-description {
+        font-size: 0.9rem;
+        line-height: 1.5;
+        opacity: 0.9;
+    }
+
+    .feature-footer {
+        display: none;
+    }
+
+    /* ===== STATS SECTION ===== */
+    .stats-section {
+        padding: 60px 0;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .stat-card-enhanced {
+        padding: 24px;
+        border-radius: 20px;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-subtle);
+        min-height: 180px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+
+    .stat-icon-container {
+        width: 56px;
+        height: 56px;
+        background: var(--gradient-primary);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .stat-icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .stat-badge {
+        padding: 4px 12px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .stat-content {
+        flex: 1;
+    }
+
+    .stat-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 16px;
+        line-height: 1.3;
+    }
+
+    .stat-value {
+        margin-bottom: 16px;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 900;
+        line-height: 1;
+        margin-bottom: 4px;
+    }
+
+    .stat-unit {
+        font-size: 1rem;
+        opacity: 0.7;
+        font-weight: 500;
+    }
+
+    .stat-progress {
+        margin-bottom: 16px;
+    }
+
+    .progress-bar {
+        height: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: var(--gradient-accent);
+        border-radius: 3px;
+        transition: width 1s ease;
+    }
+
+    .stat-description {
+        font-size: 1rem;
+        line-height: 1.5;
+        opacity: 0.9;
+    }
+
+    /* ===== HOW IT WORKS - HORIZONTAL MOBILE ===== */
+    .how-it-works {
+        padding: 60px 0;
+    }
+
+    .steps {
+        display: flex;
+        gap: 16px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .step {
+        flex: 0 0 auto;
+        width: 280px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 24px 20px;
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        box-shadow: var(--shadow-subtle);
+        scroll-snap-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .step:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-light);
+        border-color: var(--border-glow);
+    }
+
+    .step-icon-wrapper {
+        width: 64px;
+        height: 64px;
+        background: var(--gradient-primary);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+        box-shadow: var(--shadow-subtle);
+    }
+
+    .step-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .step-number {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 28px;
+        height: 28px;
+        background: var(--accent);
+        color: var(--darker);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 0.8rem;
+    }
+
+    .step h3 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        line-height: 1.3;
+    }
+
+    .step p {
+        font-size: 0.95rem;
+        line-height: 1.5;
+        opacity: 0.9;
+    }
+
+    .step-connector {
+        display: none;
+    }
+
+    /* ===== CTA SECTION ===== */
+    .cta-section {
+        padding: 60px 0;
+        text-align: center;
+    }
+
+    .cta-content {
+        max-width: 100%;
+    }
+
+    .cta-header {
+        margin-bottom: 40px;
+    }
+
+    .cta-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        margin-bottom: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .cta-title {
+        font-size: 2.25rem;
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 16px;
+    }
+
+    .cta-description {
+        font-size: 1.2rem;
+        line-height: 1.6;
+        opacity: 0.9;
+        margin-bottom: 32px;
+        max-width: 320px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .cta-actions {
+        margin-bottom: 40px;
+    }
+
+    .cta-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        max-width: 320px;
+        margin: 0 auto;
+    }
+
+    .btn-cta {
+        width: 100%;
+        padding: 18px 24px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 16px;
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .cta-footer {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 32px;
+    }
+
+    .cta-stats {
+        display: flex;
+        justify-content: center;
+        gap: 32px;
+        flex-wrap: wrap;
+    }
+
+    .cta-stat {
+        text-align: center;
+        min-width: 80px;
+    }
+
+    .cta-stat .stat-number {
+        font-size: 1.5rem;
+        font-weight: 900;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .cta-stat .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+
+    /* ===== FOOTER ===== */
+    .footer-content {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 32px;
+        text-align: center;
+    }
+
+    .footer-section {
+        text-align: center;
+    }
+
+    .footer-section h3,
+    .footer-section h4 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 16px;
+    }
+
+    .footer-section p {
+        font-size: 1rem;
+        line-height: 1.6;
+        opacity: 0.9;
+    }
+
+    .footer-link {
+        display: block;
+        padding: 8px 0;
+        color: var(--secondary);
+        text-decoration: none;
+        font-size: 1rem;
+        transition: color 0.3s ease;
+    }
+
+    .footer-link:hover {
+        color: var(--accent);
+    }
+
+    .footer-bottom {
+        padding-top: 32px;
+        border-top: 1px solid var(--border);
+        text-align: center;
+    }
+
+    .footer-bottom p {
+        font-size: 0.95rem;
+        opacity: 0.8;
+    }
+
+    /* ===== GENERAL MOBILE IMPROVEMENTS ===== */
+    .btn, .nav-link, .feature-card, .stat-card-enhanced, .step {
+        min-height: 48px;
+        touch-action: manipulation;
+    }
+
+    /* Better scrolling */
+    * {
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Prevent zoom on inputs */
+    input, textarea, select, button {
+        font-size: 16px !important;
+        touch-action: manipulation;
+    }
+
+    /* Better focus states */
+    .btn:focus, .feature-card:focus, .stat-card-enhanced:focus {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+        box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* ===== SMALL MOBILE DEVICES ===== */
+@media (max-width: 480px) {
+    .container {
+        padding: 0 12px;
+    }
+
+    .hero {
+        padding: 60px 0 30px;
+    }
+
+    .title-main {
+        font-size: 2.2rem;
+    }
+
+    .title-sub {
+        font-size: 1rem;
+    }
+
+    .hero-features-grid {
+        gap: 12px;
+        margin: 24px 0;
+    }
+
+    .hero-feature-card {
+        padding: 14px;
+        gap: 12px;
+    }
+
+    .feature-icon-wrapper {
+        width: 44px;
+        height: 44px;
+    }
+
+    .feature-icon {
+        width: 22px;
+        height: 22px;
+    }
+
+    .hero-feature-card .feature-title {
+        font-size: 0.95rem;
+    }
+
+    .hero-feature-card .feature-description {
+        font-size: 0.85rem;
+    }
+
+    .hero-buttons {
+        gap: 10px;
+        margin-top: 24px;
+    }
+
+    .btn-hero {
+        padding: 14px 20px;
+        font-size: 0.95rem;
+        min-height: 52px;
+    }
+
+    .section {
+        padding: 40px 0;
+    }
+
+    .section-header {
+        margin-bottom: 32px;
+    }
+
+    .section-badge {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+
+    .section-title {
+        font-size: 1.75rem;
+    }
+
+    .section-subtitle {
+        font-size: 1rem;
+    }
+
+    .features-grid {
+        gap: 16px;
+    }
+
+    .feature-card {
+        padding: 20px;
+        min-height: 180px;
+    }
+
+    .feature-header {
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .feature-number {
+        font-size: 2.2rem;
+    }
+
+    .feature-icon-container {
+        width: 56px;
+        height: 56px;
+    }
+
+    .feature-icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .feature-title {
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+    }
+
+    .feature-description {
+        font-size: 0.95rem;
+    }
+
+    .stats-grid {
+        gap: 16px;
+    }
+
+    .stat-card-enhanced {
+        padding: 20px;
+        min-height: 160px;
+    }
+
+    .stat-header {
+        margin-bottom: 16px;
+    }
+
+    .stat-icon-container {
+        width: 48px;
+        height: 48px;
+    }
+
+    .stat-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .stat-badge {
+        padding: 3px 10px;
+        font-size: 0.75rem;
+    }
+
+    .stat-title {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+    }
+
+    .stat-number {
+        font-size: 2.2rem;
+    }
+
+    .stat-description {
+        font-size: 0.95rem;
+    }
+
+    .steps {
+        gap: 12px;
+        padding: 0 16px;
+    }
+
+    .step {
+        width: 240px;
+        padding: 20px 16px;
+    }
+
+    .step-icon-wrapper {
+        width: 56px;
+        height: 56px;
+        margin-bottom: 12px;
+    }
+
+    .step-icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .step-number {
+        width: 24px;
+        height: 24px;
+        font-size: 0.75rem;
+    }
+
+    .step h3 {
+        font-size: 1.1rem;
+        margin-bottom: 6px;
+    }
+
+    .step p {
+        font-size: 0.9rem;
+    }
+
+    .features-grid {
+        gap: 12px;
+        padding: 0 16px;
+    }
+
+    .feature-card {
+        width: 220px;
+        padding: 16px;
+    }
+
+    .feature-icon-container {
+        width: 40px;
+        height: 40px;
+    }
+
+    .feature-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .feature-title {
+        font-size: 1rem;
+        margin-bottom: 6px;
+    }
+
+    .feature-description {
+        font-size: 0.85rem;
+    }
+
+    .cta-section {
+        padding: 40px 0;
+    }
+
+    .cta-title {
+        font-size: 2rem;
+    }
+
+    .cta-description {
+        font-size: 1.1rem;
+        margin-bottom: 24px;
+    }
+
+    .cta-buttons {
+        gap: 12px;
+    }
+
+    .btn-cta {
+        padding: 16px 20px;
+        font-size: 1rem;
+        min-height: 56px;
+    }
+
+    .cta-stats {
+        gap: 24px;
+    }
+
+    .cta-stat .stat-number {
+        font-size: 1.3rem;
+    }
+
+    .cta-stat .stat-label {
+        font-size: 0.85rem;
+    }
+
+    .footer-content {
+        gap: 24px;
+    }
+
+    .footer-section h3,
+    .footer-section h4 {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+    }
+
+    .footer-section p {
+        font-size: 0.95rem;
+    }
+
+    .footer-link {
+        padding: 6px 0;
+        font-size: 0.95rem;
+    }
+
+    .footer-bottom {
+        padding-top: 24px;
+    }
+
+    .footer-bottom p {
+        font-size: 0.9rem;
+    }
+}
+</style>
+
+{% block extra_scripts %}
+<script>
+// Cache for statistics
+let statsCache = null;
+let statsCacheTime = 0;
+const STATS_CACHE_DURATION = 30000; // 30 seconds
+
+// Load statistics with caching
+async function loadStats() {
+    const now = Date.now();
+
+    // Use cache if available and not expired
+    if (statsCache && (now - statsCacheTime) < STATS_CACHE_DURATION) {
+        updateStatsDisplay(statsCache);
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/stats');
+        const stats = await response.json();
+
+        // Cache the results
+        statsCache = stats;
+        statsCacheTime = now;
+
+        updateStatsDisplay(stats);
+
+    } catch (error) {
+        console.error('Error loading statistics:', error);
+        // Use cached data if available, even if expired
+        if (statsCache) {
+            updateStatsDisplay(statsCache);
+        }
+    }
+}
+
+function updateStatsDisplay(stats) {
+    const usersCount = stats.users_count || 0;
+    const dealsCount = stats.deals_count || 0;
+    const volume = Math.round(stats.total_volume || 0);
+
+    // Format numbers for better display
+    const formattedUsers = usersCount.toLocaleString();
+    const formattedDeals = dealsCount.toLocaleString();
+    const formattedVolume = volume.toLocaleString();
+
+    // Update other elements (bottom section)
+    const dealsElement = document.getElementById('total-deals-count');
+    const usersElement = document.getElementById('active-users-volume');
+    const volumeElement = document.getElementById('volume');
+
+    if (dealsElement) dealsElement.textContent = formattedDeals;
+    if (usersElement) usersElement.textContent = formattedUsers;
+    if (volumeElement) volumeElement.textContent = formattedVolume;
+
+    // Handle users unit - only show K+ for 1000+
+    const usersUnit = usersCount >= 1000 ? 'K+' : '';
+    const usersUnitElement = document.getElementById('active-users-unit');
+    if (usersUnitElement) usersUnitElement.textContent = usersUnit;
+
+    // Handle deals unit - removed plus sign
+    const dealsUnit = '';
+    const dealsUnitElement = document.getElementById('deals-unit');
+    if (dealsUnitElement) dealsUnitElement.textContent = dealsUnit;
+
+    // Handle volume unit - only show M+ for 1,000,000+
+    const volumeUnit = volume >= 1000000 ? 'M+' : '';
+    const volumeUnitElement = document.getElementById('volume-unit');
+    if (volumeUnitElement) volumeUnitElement.textContent = volumeUnit;
+
+    // Animate progress bars based on stats
+    animateProgressBars(usersCount, dealsCount, volume);
+}
+
+// Animate progress bars
+function animateProgressBars(usersCount, dealsCount, volume) {
+    // Calculate progress percentages (example logic - adjust as needed)
+    const maxUsers = 10000; // Example max for demo
+    const maxDeals = 5000;  // Example max for demo
+    const maxVolume = 10000000; // Example max for demo
+
+    const usersProgress = Math.min((usersCount / maxUsers) * 100, 100);
+    const dealsProgress = Math.min((dealsCount / maxDeals) * 100, 100);
+    const volumeProgress = Math.min((volume / maxVolume) * 100, 100);
+
+    // Animate progress bars with staggered timing
+    setTimeout(() => {
+        document.getElementById('users-progress').style.width = `${usersProgress}%`;
+    }, 200);
+
+    setTimeout(() => {
+        document.getElementById('deals-progress').style.width = `${dealsProgress}%`;
+    }, 400);
+
+    setTimeout(() => {
+        document.getElementById('volume-progress').style.width = `${volumeProgress}%`;
+    }, 600);
+}
+
+// Smooth scroll for navigation
+function initSmoothScroll() {
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+    loadStats();
+    initSmoothScroll();
+
+    // Update stats every 30 seconds
+    setInterval(loadStats, 30000);
+
+    // Hero login button functionality
+    const heroLoginBtn = document.getElementById('heroLoginBtn');
+
+    if (heroLoginBtn) {
+        heroLoginBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Always use desktop authentication modal
+            const registrationModal = document.getElementById('registrationModal');
+            if (registrationModal) {
+                registrationModal.classList.add('show');
+                registrationModal.setAttribute('aria-hidden', 'false');
+
+                // Focus the first focusable element
+                const firstFocusable = registrationModal.querySelector('button, a, input, select, textarea, [tabindex]:not([tabindex="-1"])');
+                if (firstFocusable) {
+                    setTimeout(() => firstFocusable.focus(), 100);
+                }
+            } else {
+                console.error('Registration modal not found');
+            }
+        });
+    }
+});
+
+</script>
+{% endblock %}

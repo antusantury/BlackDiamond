@@ -1,0 +1,20 @@
+__pycache__/
+*.py[cod]
+*.log
+
+# Runtime/generated
+web/sessions/
+logs/
+
+# Local secrets (do not commit)
+.env
+.env.*
+.vault.*
+
+# Local DB / SQLite artifacts
+*.db
+*.db-*
+
+# IDE/OS
+.DS_Store
+Thumbs.db

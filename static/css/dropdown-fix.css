@@ -1,0 +1,454 @@
+/* Dropdown Fix - Ensures all dropdowns work properly */
+/* This file overrides any conflicting CSS and ensures dropdowns are functional */
+
+/* Quick Actions Menu - Critical fixes */
+.quick-actions-dropdown {
+    position: relative;
+    display: inline-block;
+    z-index: 100;
+}
+
+.quick-actions-btn-elegant {
+    position: relative;
+    background: linear-gradient(145deg, rgba(15, 15, 15, 0.9) 0%, rgba(25, 25, 25, 0.8) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: #ffffff;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 48px;
+    min-height: 44px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quick-actions-btn-elegant:hover {
+    background: linear-gradient(145deg, rgba(25, 25, 25, 0.95) 0%, rgba(35, 35, 35, 0.9) 100%);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 20px rgba(255, 255, 255, 0.05);
+}
+
+.quick-actions-btn-elegant:focus {
+    outline: 2px solid #e5e5e5;
+    outline-offset: 2px;
+}
+
+.quick-actions-btn-elegant[aria-expanded="true"] {
+    background: linear-gradient(145deg, rgba(35, 35, 35, 0.98) 0%, rgba(45, 45, 45, 0.9) 100%);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.quick-actions-btn-elegant[aria-expanded="true"] .btn-icon-elegant {
+    color: #e5e5e5;
+}
+
+.quick-actions-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    left: auto;
+    transform-origin: top right;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.98) 0%, rgba(17, 17, 17, 0.95) 100%);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    box-shadow:
+        0 25px 50px rgba(0, 0, 0, 0.8),
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    min-width: 260px;
+    max-width: min(320px, calc(100vw - 24px));
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.98);
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+        visibility 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10000 !important;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.quick-actions-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.quick-actions-menu::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    right: 22px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid rgba(255, 255, 255, 0.1);
+    z-index: -1;
+}
+
+.quick-actions-menu::after {
+    content: '';
+    position: absolute;
+    top: -7px;
+    right: 23px;
+    width: 0;
+    height: 0;
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-bottom: 7px solid rgba(0, 0, 0, 0.98);
+    z-index: -1;
+}
+
+.quick-action-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    color: #ffffff;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.quick-action-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(4px);
+    color: #e5e5e5;
+}
+
+.quick-action-item .menu-icon {
+    width: 18px;
+    height: 18px;
+    color: #a0a0a0;
+    transition: color 0.3s ease;
+    flex-shrink: 0;
+}
+
+.quick-action-item:hover .menu-icon {
+    color: #e5e5e5;
+}
+
+.quick-action-item.admin-item {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 8px;
+    padding-top: 16px;
+}
+
+.user-menu-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 8px 0;
+}
+
+.quick-action-item.logout-item {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 8px;
+    padding-top: 16px;
+    color: #ff6b6b;
+}
+
+.quick-action-item.logout-item:hover {
+    background: rgba(255, 107, 107, 0.1);
+    color: #ff5252;
+}
+
+.quick-action-item.logout-item .menu-icon {
+    color: #ff6b6b;
+}
+
+.quick-action-item.logout-item:hover .menu-icon {
+    color: #ff5252;
+}
+
+/* Mobile Quick Actions */
+.mobile-quick-actions-dropdown {
+    position: relative;
+    display: inline-block;
+    z-index: 100;
+}
+
+.mobile-quick-actions-btn-elegant {
+    position: relative;
+    background: linear-gradient(145deg, rgba(15, 15, 15, 0.9) 0%, rgba(25, 25, 25, 0.8) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: #ffffff;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width: 48px;
+    min-height: 44px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mobile-quick-actions-btn-elegant:hover {
+    background: linear-gradient(145deg, rgba(25, 25, 25, 0.95) 0%, rgba(35, 35, 35, 0.9) 100%);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 20px rgba(255, 255, 255, 0.05);
+}
+
+.mobile-quick-actions-btn-elegant[aria-expanded="true"] {
+    background: linear-gradient(145deg, rgba(35, 35, 35, 0.98) 0%, rgba(45, 45, 45, 0.9) 100%);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.mobile-quick-actions-btn-elegant[aria-expanded="true"] .btn-icon-elegant {
+    color: #e5e5e5;
+}
+
+.mobile-quick-actions-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    left: auto;
+    transform-origin: top right;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.98) 0%, rgba(17, 17, 17, 0.95) 100%);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    box-shadow:
+        0 25px 50px rgba(0, 0, 0, 0.8),
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    min-width: 200px;
+    max-width: min(280px, calc(100vw - 24px));
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.98);
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+        visibility 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10000 !important;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.mobile-quick-actions-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.mobile-quick-action-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    color: #ffffff;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.mobile-quick-action-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(4px);
+    color: #e5e5e5;
+}
+
+.mobile-quick-action-item .menu-icon {
+    width: 18px;
+    height: 18px;
+    color: #a0a0a0;
+    transition: color 0.3s ease;
+    flex-shrink: 0;
+}
+
+.mobile-quick-action-item:hover .menu-icon {
+    color: #e5e5e5;
+}
+
+/* Button content and icon styles */
+.quick-actions-btn-elegant .btn-content,
+.mobile-quick-actions-btn-elegant .btn-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    z-index: 2;
+}
+
+.quick-actions-btn-elegant .btn-icon-elegant,
+.mobile-quick-actions-btn-elegant .btn-icon-elegant {
+    width: 20px;
+    height: 20px;
+    color: #a0a0a0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+}
+
+.quick-actions-btn-elegant:hover .btn-icon-elegant,
+.mobile-quick-actions-btn-elegant:hover .btn-icon-elegant {
+    color: #e5e5e5;
+    transform: translateY(1px);
+}
+
+.quick-actions-btn-elegant .btn-text,
+.mobile-quick-actions-btn-elegant .btn-text {
+    display: none;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.quick-actions-btn-elegant .btn-shine,
+.mobile-quick-actions-btn-elegant .btn-shine {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+.quick-actions-btn-elegant:hover .btn-shine,
+.mobile-quick-actions-btn-elegant:hover .btn-shine {
+    left: 100%;
+}
+
+/* Theme overrides for white theme */
+.theme-white .quick-actions-btn-elegant,
+.theme-white .mobile-quick-actions-btn-elegant {
+    background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid rgba(2, 6, 23, 0.15);
+    color: #0f172a;
+    box-shadow: 0 10px 24px rgba(2, 6, 23, 0.06), 0 0 0 1px rgba(2, 6, 23, 0.05);
+}
+
+.theme-white .quick-actions-btn-elegant:hover,
+.theme-white .mobile-quick-actions-btn-elegant:hover {
+    background: linear-gradient(145deg, #ffffff 0%, #eef2f7 100%);
+    border-color: rgba(2, 6, 23, 0.25);
+    color: #0f172a;
+    box-shadow: 0 14px 28px rgba(2, 6, 23, 0.08), 0 0 0 1px rgba(2, 6, 23, 0.06);
+}
+
+.theme-white .quick-actions-menu,
+.theme-white .mobile-quick-actions-menu {
+    /* Opaque background to avoid tinted/glassy (gold) look on white theme */
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    box-shadow: 0 20px 40px rgba(2, 6, 23, 0.08), 0 0 0 1px rgba(2, 6, 23, 0.04) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+.theme-white .quick-actions-menu::before,
+.theme-white .mobile-quick-actions-menu::before {
+    border-bottom-color: #e5e7eb !important;
+}
+
+.theme-white .quick-actions-menu::after,
+.theme-white .mobile-quick-actions-menu::after {
+    border-bottom-color: #ffffff !important;
+}
+
+.theme-white .quick-action-item,
+.theme-white .mobile-quick-action-item {
+    color: #0f172a !important;
+}
+
+.theme-white .quick-action-item:hover,
+.theme-white .mobile-quick-action-item:hover {
+    background: #f3f4f6 !important;
+    color: #0f172a !important;
+}
+
+.theme-white .quick-action-item .menu-icon,
+.theme-white .mobile-quick-action-item .menu-icon {
+    color: #64748b !important;
+}
+
+.theme-white .quick-action-item:hover .menu-icon,
+.theme-white .mobile-quick-action-item:hover .menu-icon {
+    color: #0f172a !important;
+}
+
+.theme-white .quick-actions-btn-elegant .btn-icon-elegant,
+.theme-white .mobile-quick-actions-btn-elegant .btn-icon-elegant {
+    color: #64748b;
+}
+
+.theme-white .quick-actions-btn-elegant:hover .btn-icon-elegant,
+.theme-white .mobile-quick-actions-btn-elegant:hover .btn-icon-elegant {
+    color: #0f172a;
+}
+
+/* Ensure no pointer events issues */
+.quick-actions-dropdown,
+.mobile-quick-actions-dropdown {
+    pointer-events: auto;
+}
+
+.quick-actions-btn-elegant,
+.mobile-quick-actions-btn-elegant {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+/* Fix any z-index issues */
+.header {
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.header-actions {
+    z-index: 1001;
+    position: relative;
+}
+
+.quick-actions-dropdown,
+.mobile-quick-actions-dropdown {
+    z-index: 1002;
+    position: relative;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .quick-actions-menu {
+        min-width: 200px;
+        max-width: 280px;
+    }
+    
+    .mobile-quick-actions-menu {
+        min-width: 180px;
+    }
+}

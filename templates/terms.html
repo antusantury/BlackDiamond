@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('footer_terms') }} - {{ bot_name }}{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="content-wrapper">
+            <div class="content-header">
+                <h1 class="section-title">{{ t('footer_terms') }}</h1>
+                <p class="section-subtitle">{{ t('web_tagline') }}</p>
+            </div>
+
+            <div class="content-card">
+                <div class="terms-content">
+                    {{ t('terms_of_service_content') | replace('\n', '<br>') | safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+.content-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.content-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.content-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3rem;
+    backdrop-filter: blur(15px);
+    box-shadow: var(--shadow);
+}
+
+.terms-content {
+    color: var(--primary);
+}
+
+.terms-content h2 {
+    color: var(--primary);
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 2rem 0 1rem 0;
+}
+
+.terms-content h2:first-child {
+    margin-top: 0;
+}
+
+.terms-content h3 {
+    color: var(--primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 1.5rem 0 0.75rem 0;
+}
+
+.terms-content p {
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+
+.terms-content ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+}
+
+.terms-content li {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+.terms-date {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    opacity: 0.7;
+}
+
+@media (max-width: 768px) {
+    .content-card {
+        padding: 2rem 1.5rem;
+    }
+
+    .terms-content h2 {
+        font-size: 1.25rem;
+    }
+
+    .terms-content h3 {
+        font-size: 1.1rem;
+    }
+}
+</style>
+{% endblock %}

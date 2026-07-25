@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('join_deal') }} - {{ bot_name }}{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/join-deal.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="join-deal-container" aria-labelledby="join-deal-title">
+  <!-- Join Deal Card -->
+  <article class="join-deal-card" role="region" aria-labelledby="join-deal-title">
+    <header class="join-deal-header">
+      <h2 id="join-deal-title" class="join-deal-title">{{ t('join_deal_form_title') }}</h2>
+      <p class="join-deal-subtitle">{{ t('join_deal_subtitle') }}</p>
+    </header>
+
+
+    <form id="joinDealForm" class="join-deal-form" novalidate aria-describedby="form-instructions"
+          data-empty-message="{{ t('deal_code_empty') }}"
+          data-length-message="{{ t('deal_code_error_length') }}"
+          data-format-message="{{ t('deal_code_error_format') }}">
+      <p id="form-instructions" class="sr-only">{{ t('join_deal_instructions') }}</p>
+
+      <!-- Deal Code Input -->
+      <div class="form-group">
+        <label for="dealCode" class="form-label">
+          <span>{{ t('deal_code_label') }}</span>
+          <span class="required-indicator" aria-label="required">*</span>
+        </label>
+        <input
+          type="text"
+          id="dealCode"
+          name="dealCode"
+          class="form-input"
+          placeholder="{{ t('deal_code_placeholder') }}"
+          maxlength="8"
+          autocomplete="off"
+          required
+          aria-describedby="dealCodeHelp"
+          aria-invalid="false"
+        />
+        <div id="dealCodeHelp" class="form-help">
+          <span>{{ t('deal_code_help') }}</span>
+        </div>
+      </div>
+
+            <!-- Validation Message -->
+            <div id="validationMessage" class="validation-message" role="status" aria-live="polite" hidden>
+              <div class="message-content">
+                <svg class="message-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span id="validationText"></span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="form-actions">
+              <button type="submit" id="joinDealButton" class="btn btn-primary" aria-describedby="join-button-description">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" aria-hidden="true">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22,4 12,14.01 9,11.01"></polyline>
+                </svg>
+                <span id="join-button-description">{{ t('join_deal_button') }}</span>
+              </button>
+              <a href="/" class="back-link" aria-label="{{ t('back_to_home_aria') }}">
+                ← {{ t('back_to_home_button') }}
+              </a>
+            </div>
+          </form>
+      </article>
+</section>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    /**
+     * Join Deal Page JavaScript
+     * Handles form validation, API calls, and user interactions
+     */
+
+    // DOM Elements
+    const form = document.getElementById('joinDealForm');
+    const dealCodeInput = document.getElementById('dealCode');
+    const validationMessage = document.getElementById('validationMessage');
+    const validationText = document.getElementById('validationText');
+    const joinDealButton = document.getElementById('joinDealButton');
+
+    // State Management
+    let isVerifying = false;
+    let isJoining = false;
+
+    /**
+     * Utility Functions
+     */
+    function showValidation(message, isError = true) {
+        validationText.textContent = message;
+        validationMessage.classList.toggle('error', isError);
+        validationMessage.classList.toggle('success', !isError);
+        validationMessage.classList.add('visible');
+        dealCodeInput.classList.toggle('error', isError);
+        joinDealButton.disabled = isError;
+
+        // Update icon
+        const iconPath = validationMessage.querySelector('.message-icon path');
+        if (isError) {
+            iconPath.setAttribute('d', 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z');
+        } else {
+            iconPath.setAttribute('d', 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z');
+        }
+    }
+
+    function hideValidation() {
+        validationMessage.classList.remove('visible', 'error', 'success');
+        dealCodeInput.classList.remove('error');
+        joinDealButton.disabled = false;
+    }
+
+    function setButtonState(loading, text = null) {
+        if (loading) {
+            joinDealButton.classList.add('loading');
+            joinDealButton.disabled = true;
+            if (text) {
+                joinDealButton.textContent = text;
+            }
+        } else {
+            joinDealButton.classList.remove('loading');
+            joinDealButton.disabled = false;
+            joinDealButton.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22,4 12,14.01 9,11.01"></polyline>
+                </svg>
+                {{ t('join_deal_button') }}
+            `;
+        }
+    }
+
+    /**
+     * Validation Functions
+     */
+    function validateDealCode(code) {
+        if (!code || code.trim().length === 0) {
+            return { valid: false, message: form.dataset.emptyMessage };
+        }
+
+        if (code.length !== 8) {
+            return { valid: false, message: form.dataset.lengthMessage };
+        }
+
+        // Allow alphanumeric characters only
+        if (!/^[a-zA-Z0-9]{8}$/.test(code)) {
+            return { valid: false, message: form.dataset.formatMessage };
+        }
+
+        return { valid: true };
+    }
+
+    /**
+     * API Functions
+     */
+    async function verifyDealCode(code) {
+        try {
+            const response = await fetch(`/api/deals/verify/${encodeURIComponent(code)}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error verifying deal code:', error);
+            throw error;
+        }
+    }
+
+    async function joinDeal(code) {
+        try {
+            const response = await fetch('/api/deals/join', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    dealCode: code
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error joining deal:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Event Handlers
+     */
+    dealCodeInput.addEventListener('input', () => {
+        hideValidation();
+    });
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const code = dealCodeInput.value.trim();
+        const validation = validateDealCode(code);
+
+        if (!validation.valid) {
+            showValidation(validation.message, true);
+            return;
+        }
+
+        if (isJoining) return;
+
+        try {
+            isJoining = true;
+            setButtonState(true, 'Joining deal...');
+
+            const result = await joinDeal(code);
+
+            // Success - redirect to deal details
+            window.location.href = `/deal/${encodeURIComponent(code)}`;
+
+        } catch (error) {
+            if (error.message.includes('409')) {
+                showValidation('You have already joined this deal.', true);
+            } else if (error.message.includes('403')) {
+                showValidation('This deal is no longer available.', true);
+            } else if (error.message.includes('422')) {
+                showValidation('Deal verification failed. Please try again.', true);
+            } else {
+                showValidation('Failed to join deal. Please try again later.', true);
+            }
+        } finally {
+            isJoining = false;
+            setButtonState(false);
+        }
+    });
+
+    /**
+     * Initialize
+     */
+    document.addEventListener('DOMContentLoaded', () => {
+        // Set focus to deal code input
+        dealCodeInput.focus();
+
+        // Add some visual feedback for loading states
+        console.log('Join Deal page loaded successfully');
+    });
+</script>
+{% endblock %}

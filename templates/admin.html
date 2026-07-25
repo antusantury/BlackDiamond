@@ -1,0 +1,493 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('page_title_admin') }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+.admin-dashboard {
+    max-width: 1200px;
+    margin: 2rem auto 4rem;
+    padding: 0 1.5rem 2rem;
+    display: grid;
+    gap: 2rem;
+    color: var(--primary);
+}
+
+.admin-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    box-shadow: var(--shadow-subtle);
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-hero {
+    padding: 2rem 2.25rem;
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 2rem;
+}
+
+.admin-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-diamond);
+    opacity: 0.08;
+    pointer-events: none;
+}
+
+.admin-hero::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.5;
+}
+
+.hero-main {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    position: relative;
+    z-index: 1;
+}
+
+.hero-icon {
+    width: 62px;
+    height: 62px;
+    border-radius: 18px;
+    background: var(--gradient-accent);
+    border: 1px solid var(--border-glow);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    box-shadow: var(--shadow-light);
+}
+
+.hero-icon svg {
+    width: 30px;
+    height: 30px;
+    display: block;
+}
+
+.hero-copy h1 {
+    margin: 0 0 0.5rem;
+    font-size: clamp(1.9rem, 2.2vw + 1rem, 2.6rem);
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.hero-copy p {
+    margin: 0;
+    color: var(--secondary);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    background: var(--gradient-primary);
+    border: 1px solid var(--border-light);
+    color: var(--primary);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    margin-bottom: 0.75rem;
+}
+
+.hero-summary {
+    display: grid;
+    gap: 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+.summary-card {
+    background: var(--gradient-primary);
+    border: 1px solid var(--border-light);
+    border-radius: 16px;
+    padding: 1.1rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--shadow-subtle);
+}
+
+.summary-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: var(--gradient-diamond);
+    border: 1px solid var(--border-light);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    font-size: 1.1rem;
+}
+
+.summary-label {
+    color: var(--secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.7rem;
+    margin-bottom: 0.35rem;
+}
+
+.summary-value,
+.summary-note {
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 1.05rem;
+}
+
+.admin-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: 2rem;
+}
+
+.admin-kpis {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+}
+
+.kpi-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 1.4rem;
+    display: grid;
+    gap: 1.1rem;
+    box-shadow: var(--shadow-subtle);
+    position: relative;
+    overflow: hidden;
+    animation: admin-rise 0.6s ease forwards;
+    animation-delay: var(--delay, 0s);
+    opacity: 0;
+}
+
+.kpi-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.kpi-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-light);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    color: var(--kpi-accent, var(--accent));
+}
+
+.kpi-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.kpi-label {
+    font-size: 0.8rem;
+    color: var(--secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+}
+
+.admin-actions {
+    display: grid;
+    gap: 1rem;
+}
+
+.action-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 1.2rem 1.4rem;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--shadow-subtle);
+    position: relative;
+    overflow: hidden;
+    animation: admin-rise 0.6s ease forwards;
+    animation-delay: var(--delay, 0s);
+    opacity: 0;
+}
+
+.action-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-left: 3px solid var(--action-accent, var(--accent));
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.action-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: var(--gradient-accent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 1.1rem;
+    box-shadow: var(--shadow-subtle);
+}
+
+.action-copy h3 {
+    margin: 0 0 0.35rem;
+    font-size: 1.05rem;
+    color: var(--primary);
+}
+
+.action-copy p {
+    margin: 0;
+    color: var(--secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.action-cta {
+    white-space: nowrap;
+}
+
+@keyframes admin-rise {
+    from {
+        transform: translateY(12px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .kpi-card,
+    .action-card {
+        animation: none;
+        opacity: 1;
+    }
+}
+
+@media (max-width: 980px) {
+    .admin-hero {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    .admin-dashboard {
+        margin: 1.5rem auto 3rem;
+        padding: 0 1rem 2rem;
+    }
+
+    .admin-hero {
+        padding: 1.5rem;
+    }
+
+    .hero-main {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .admin-kpis {
+        grid-template-columns: 1fr;
+    }
+
+    .action-card {
+        grid-template-columns: 1fr;
+    }
+
+    .action-cta {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <section class="admin-hero admin-card">
+        <div class="hero-main">
+            <div class="hero-icon">
+                <svg viewBox="0 0 32 32" aria-hidden="true">
+                    <path d="M16 4L26 12L16 20L6 12L16 4Z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                    <path d="M16 20L26 28L16 30L6 28L16 20Z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                    <line x1="6" y1="12" x2="16" y2="20" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                    <line x1="26" y1="12" x2="16" y2="20" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <div class="hero-copy">
+                <span class="hero-tag">{{ bot_name }}</span>
+                <h1>{{ t('admin_panel_title') }}</h1>
+                <p>{{ t('admin_panel_subtitle') }}</p>
+            </div>
+        </div>
+        <div class="hero-summary">
+            <div class="summary-card">
+                <div class="summary-icon"><i class="fas fa-signal"></i></div>
+                <div>
+                    <div class="summary-label">{{ t('admin_status') }}</div>
+                    <div class="summary-value" id="systemStatus">{{ t('admin_loading') }}</div>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon"><i class="fas fa-clock"></i></div>
+                <div>
+                    <div class="summary-label">{{ t('admin_last_update') }}</div>
+                    <div class="summary-note" id="statsUpdated">{{ t('admin_loading') }}</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="admin-grid">
+        <section class="admin-kpis">
+            <div class="kpi-card" style="--delay: 0.05s; --kpi-accent: var(--info);">
+                <div class="kpi-top">
+                    <div class="kpi-label">{{ t('admin_total_users') }}</div>
+                    <div class="kpi-icon"><i class="fas fa-users"></i></div>
+                </div>
+                <div class="kpi-value" id="totalUsers">-</div>
+            </div>
+            <div class="kpi-card" style="--delay: 0.1s; --kpi-accent: var(--warning);">
+                <div class="kpi-top">
+                    <div class="kpi-label">{{ t('admin_total_deals') }}</div>
+                    <div class="kpi-icon"><i class="fas fa-handshake"></i></div>
+                </div>
+                <div class="kpi-value" id="totalDeals">-</div>
+            </div>
+            <div class="kpi-card" style="--delay: 0.15s; --kpi-accent: var(--success);">
+                <div class="kpi-top">
+                    <div class="kpi-label">{{ t('admin_active_deals') }}</div>
+                    <div class="kpi-icon"><i class="fas fa-clock"></i></div>
+                </div>
+                <div class="kpi-value" id="activeDeals">-</div>
+            </div>
+            <div class="kpi-card" style="--delay: 0.2s; --kpi-accent: var(--accent);">
+                <div class="kpi-top">
+                    <div class="kpi-label">{{ t('admin_total_volume') }}</div>
+                    <div class="kpi-icon"><i class="fas fa-dollar-sign"></i></div>
+                </div>
+                <div class="kpi-value" id="totalVolume">0.00 USD</div>
+            </div>
+        </section>
+
+        <section class="admin-actions">
+            <div class="action-card" style="--delay: 0.25s; --action-accent: var(--info);">
+                <div class="action-icon"><i class="fas fa-users-cog"></i></div>
+                <div class="action-copy">
+                    <h3>{{ t('admin_user_management') }}</h3>
+                    <p>{{ t('admin_user_management_desc') }}</p>
+                </div>
+                <a href="/admin/users" class="btn btn-primary action-cta">
+                    {{ t('admin_manage_users') }}
+                </a>
+            </div>
+
+            <div class="action-card" style="--delay: 0.3s; --action-accent: var(--warning);">
+                <div class="action-icon"><i class="fas fa-exchange-alt"></i></div>
+                <div class="action-copy">
+                    <h3>{{ t('admin_deal_management') }}</h3>
+                    <p>{{ t('admin_deal_management_desc') }}</p>
+                </div>
+                <a href="/admin/deals" class="btn btn-primary action-cta">
+                    {{ t('admin_manage_deals') }}
+                </a>
+            </div>
+
+            <div class="action-card" style="--delay: 0.35s; --action-accent: var(--success);">
+                <div class="action-icon"><i class="fas fa-cogs"></i></div>
+                <div class="action-copy">
+                    <h3>{{ t('admin_system_settings') }}</h3>
+                    <p>{{ t('admin_system_settings_desc') }}</p>
+                </div>
+                <a href="/admin/settings" class="btn btn-primary action-cta">
+                    {{ t('admin_manage_settings') }}
+                </a>
+            </div>
+
+            <div class="action-card" style="--delay: 0.4s; --action-accent: var(--accent);">
+                <div class="action-icon"><i class="fas fa-comments"></i></div>
+                <div class="action-copy">
+                    <h3>{{ t('admin_support_chat') }}</h3>
+                    <p>{{ t('admin_support_chat_desc') }}</p>
+                </div>
+                <a href="/admin/support" class="btn btn-primary action-cta">
+                    {{ t('admin_open_support_chat') }}
+                </a>
+            </div>
+
+            <div class="action-card" style="--delay: 0.45s; --action-accent: var(--error);">
+                <div class="action-icon"><i class="fas fa-balance-scale"></i></div>
+                <div class="action-copy">
+                    <h3>{{ t('admin_disputes') }}</h3>
+                    <p>{{ t('admin_disputes_desc') }}</p>
+                </div>
+                <a href="/admin/disputes" class="btn btn-primary action-cta">
+                    {{ t('admin_manage_disputes') }}
+                </a>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadStats();
+});
+
+async function loadStats() {
+    const statusEl = document.getElementById('systemStatus');
+    const updatedEl = document.getElementById('statsUpdated');
+
+    try {
+        const response = await fetch('/api/stats');
+        const stats = await response.json();
+
+        document.getElementById('totalUsers').textContent = stats.users_count || 0;
+        document.getElementById('totalDeals').textContent = stats.deals_count || 0;
+        document.getElementById('activeDeals').textContent = stats.active_deals || 0;
+        document.getElementById('totalVolume').textContent = `${(stats.total_volume || 0).toFixed(2)} USD`;
+
+        statusEl.textContent = '{{ t('admin_status_live') }}';
+        updatedEl.textContent = '{{ t('admin_updated_now') }}';
+    } catch (error) {
+        console.error('Error loading stats:', error);
+        statusEl.textContent = '{{ t('admin_status_offline') }}';
+        updatedEl.textContent = '{{ t('admin_updated_failed') }}';
+    }
+}
+</script>
+{% endblock %}

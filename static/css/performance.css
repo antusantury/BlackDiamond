@@ -1,0 +1,44 @@
+/* Performance / stability overrides.
+   - `html.reduced-motion` is toggled by JS on low-end devices / Telegram Android.
+   - `html.no-effects` is toggled by JS and/or server-side template hints for Telegram Android.
+*/
+
+html.reduced-motion,
+html.reduced-motion * {
+  scroll-behavior: auto !important;
+}
+
+html.reduced-motion *,
+html.reduced-motion *::before,
+html.reduced-motion *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Backdrop blur and heavy filters are common WebView crash triggers on older Android GPUs. */
+html.no-effects *,
+html.no-effects *::before,
+html.no-effects *::after {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+html.no-effects * {
+  filter: none !important;
+}
+
+/* Reduce expensive shadows/glows on common "glass" components. */
+html.no-effects .feature-card,
+html.no-effects .currency-card,
+html.no-effects .stat-card,
+html.no-effects .hero-feature-card,
+html.no-effects .card,
+html.no-effects .modal,
+html.no-effects .navbar,
+html.no-effects header,
+html.no-effects .glass,
+html.no-effects .glass-panel,
+html.no-effects .panel {
+  box-shadow: none !important;
+}
+

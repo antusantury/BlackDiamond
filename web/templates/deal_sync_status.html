@@ -1,0 +1,478 @@
+{% extends "base.html" %}
+
+{% block title %}Deal Synchronization - Black Diamond{% endblock %}
+
+{% block head %}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
+
+:root {
+    --sync-bg: #0b0f17;
+    --sync-surface: rgba(15, 23, 42, 0.9);
+    --sync-surface-2: rgba(17, 24, 39, 0.92);
+    --sync-border: rgba(148, 163, 184, 0.2);
+    --sync-text: #f8fafc;
+    --sync-muted: #94a3b8;
+    --sync-accent: #22c55e;
+    --sync-warning: #f59e0b;
+    --sync-danger: #ef4444;
+    --sync-info: #38bdf8;
+    --sync-radius: 16px;
+}
+
+.sync-status-container {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 32px 20px 56px;
+    font-family: "Manrope", sans-serif;
+    color: var(--sync-text);
+}
+
+.sync-card {
+    background: var(--sync-surface);
+    border: 1px solid var(--sync-border);
+    border-radius: calc(var(--sync-radius) + 4px);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.sync-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.sync-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 8px;
+}
+
+.sync-subtitle {
+    color: var(--sync-muted);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.sync-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, 0.08);
+    border: 1px solid var(--sync-border);
+    font-weight: 600;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.status-dot.synced { background-color: var(--sync-accent); }
+.status-dot.syncing { background-color: var(--sync-warning); }
+.status-dot.error { background-color: var(--sync-danger); }
+
+.platform-status {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+}
+
+.platform-card {
+    background: var(--sync-surface-2);
+    border-radius: var(--sync-radius);
+    padding: 18px;
+    border: 1px solid var(--sync-border);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.platform-card h4 {
+    margin: 0 0 6px;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.platform-card.bot { border-color: rgba(34, 197, 94, 0.3); }
+.platform-card.web { border-color: rgba(56, 189, 248, 0.3); }
+
+.platform-card p {
+    margin: 0;
+    color: var(--sync-muted);
+    font-size: 0.92rem;
+}
+
+.participants-list,
+.activity-log {
+    background: var(--sync-surface-2);
+    border-radius: var(--sync-radius);
+    padding: 18px;
+    border: 1px solid var(--sync-border);
+}
+
+.participants-list h4,
+.activity-log h4 {
+    margin: 0 0 12px;
+    font-size: 1rem;
+}
+
+.participant,
+.activity-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.participant:last-child,
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgba(148, 163, 184, 0.15);
+    color: var(--sync-text);
+}
+
+.badge-primary { background: rgba(56, 189, 248, 0.2); color: var(--sync-info); }
+.badge-success { background: rgba(34, 197, 94, 0.2); color: var(--sync-accent); }
+.badge-sm { font-size: 0.7rem; padding: 2px 8px; }
+
+.text-success { color: var(--sync-accent); }
+.text-muted { color: var(--sync-muted); }
+
+.activity-log {
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.activity-time {
+    font-size: 0.8rem;
+    color: var(--sync-muted);
+    min-width: 86px;
+}
+
+.controls,
+.conflict-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.btn-sync {
+    background: #f8fafc;
+    color: #0f172a;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-sync:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.2);
+}
+
+.btn-sync:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.conflict-alert {
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: var(--sync-text);
+    padding: 16px;
+    border-radius: var(--sync-radius);
+}
+
+.conflict-alert h4 {
+    margin: 0 0 8px;
+}
+
+.conflict-alert p {
+    margin: 0;
+    color: var(--sync-muted);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="sync-status-container">
+    <div class="sync-card">
+        <div class="sync-header">
+            <div>
+                <h2 class="sync-title">Deal Synchronization</h2>
+                <p class="sync-subtitle">Live status for the bot and web platforms.</p>
+            </div>
+            <div class="sync-indicator">
+                <span class="status-dot {{ 'synced' if sync_status.is_synced else 'syncing' if sync_status.is_syncing else 'error' }}"></span>
+                <span>{{ 'Synchronized' if sync_status.is_synced else 'Syncing...' if sync_status.is_syncing else 'Sync Error' }}</span>
+            </div>
+        </div>
+
+        {% if conflicts %}
+        <div class="conflict-alert">
+            <h4>Synchronization Conflicts Detected</h4>
+            <p>The following conflicts need manual resolution:</p>
+            <ul>
+                {% for conflict in conflicts %}
+                <li>{{ conflict.description }}</li>
+                {% endfor %}
+            </ul>
+            <div class="conflict-actions">
+                <button class="btn-sync" onclick="resolveConflicts()">Resolve Conflicts</button>
+                <button class="btn-sync" onclick="refreshStatus()">Refresh Status</button>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="platform-status">
+            <div class="platform-card bot">
+                <h4>Telegram Bot</h4>
+                <p><strong>Status:</strong> {{ bot_status.status }}</p>
+                <p><strong>Last Activity:</strong> {{ bot_status.last_activity }}</p>
+                <p><strong>Active Sessions:</strong> {{ bot_status.active_sessions }}</p>
+            </div>
+
+            <div class="platform-card web">
+                <h4>Web Platform</h4>
+                <p><strong>Status:</strong> {{ web_status.status }}</p>
+                <p><strong>Last Activity:</strong> {{ web_status.last_activity }}</p>
+                <p><strong>Active Sessions:</strong> {{ web_status.active_sessions }}</p>
+            </div>
+        </div>
+
+        <div class="participants-list">
+            <h4>Deal Participants</h4>
+            {% for participant in participants %}
+            <div class="participant">
+                <div>
+                    <strong>{{ participant.name }}</strong>
+                    <span class="badge {{ 'badge-primary' if participant.role == 'buyer' else 'badge-success' }}">
+                        {{ participant.role.title() }}
+                    </span>
+                </div>
+                <div>
+                    <span class="{{ 'text-success' if participant.online else 'text-muted' }}">
+                        {{ 'Online' if participant.online else 'Offline' }}
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="activity-log">
+            <h4>Recent Activity</h4>
+            {% for activity in activities %}
+            <div class="activity-item">
+                <div class="activity-time">{{ activity.timestamp }}</div>
+                <div class="activity-content">
+                    <strong>{{ activity.user }}</strong> {{ activity.action }}
+                    {% if activity.platform %}
+                    <span class="badge badge-sm {{ 'badge-success' if activity.platform == 'bot' else 'badge-primary' }}">
+                        {{ activity.platform.upper() }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="controls">
+            <button class="btn-sync" onclick="forceSync()" {{ 'disabled' if sync_status.is_syncing else '' }}>
+                {{ 'Syncing...' if sync_status.is_syncing else 'Force Sync' }}
+            </button>
+            <button class="btn-sync" onclick="refreshStatus()">
+                Refresh Status
+            </button>
+            <button class="btn-sync" onclick="viewDealDetails()">
+                View Deal Details
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Real-time synchronization status
+let syncStatus = {{ sync_status|tojson|safe }};
+let eventSource = null;
+
+// Initialize real-time updates
+function initRealTimeUpdates() {
+    if (eventSource) {
+        eventSource.close();
+    }
+
+    eventSource = new EventSource('/api/cross-platform/events/{{ session_id }}');
+
+    eventSource.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+
+        if (data.type === 'sync_update') {
+            updateSyncStatus(data);
+        } else if (data.type === 'conflict_detected') {
+            showConflictAlert(data);
+        } else if (data.type === 'deal_update') {
+            updateDealInfo(data);
+        }
+    };
+
+    eventSource.onerror = function(error) {
+        console.error('EventSource error:', error);
+        // Retry connection after delay
+        setTimeout(initRealTimeUpdates, 5000);
+    };
+}
+
+// Update synchronization status display
+function updateSyncStatus(data) {
+    syncStatus = data;
+    const indicator = document.querySelector('.sync-indicator');
+
+    // Update status dot
+    const statusDot = indicator.querySelector('.status-dot');
+    statusDot.className = 'status-dot';
+
+    if (data.is_synced) {
+        statusDot.classList.add('synced');
+        indicator.querySelector('span:last-child').textContent = 'Synchronized';
+    } else if (data.is_syncing) {
+        statusDot.classList.add('syncing');
+        indicator.querySelector('span:last-child').textContent = 'Syncing...';
+    } else {
+        statusDot.classList.add('error');
+        indicator.querySelector('span:last-child').textContent = 'Sync Error';
+    }
+
+    // Update platform status
+    updatePlatformStatus(data.platforms);
+}
+
+// Update platform status cards
+function updatePlatformStatus(platforms) {
+    // Update bot status
+    if (platforms.bot) {
+        const botCard = document.querySelector('.platform-card.bot');
+        botCard.querySelector('p:nth-child(2)').textContent = `Status: ${platforms.bot.status}`;
+        botCard.querySelector('p:nth-child(3)').textContent = `Last Activity: ${platforms.bot.last_activity}`;
+        botCard.querySelector('p:nth-child(4)').textContent = `Active Sessions: ${platforms.bot.active_sessions}`;
+    }
+
+    // Update web status
+    if (platforms.web) {
+        const webCard = document.querySelector('.platform-card.web');
+        webCard.querySelector('p:nth-child(2)').textContent = `Status: ${platforms.web.status}`;
+        webCard.querySelector('p:nth-child(3)').textContent = `Last Activity: ${platforms.web.last_activity}`;
+        webCard.querySelector('p:nth-child(4)').textContent = `Active Sessions: ${platforms.web.active_sessions}`;
+    }
+}
+
+// Show conflict alert
+function showConflictAlert(data) {
+    const alertHtml = `
+        <div class="conflict-alert">
+            <h4>Synchronization Conflict</h4>
+            <p>${data.description}</p>
+            <div class="conflict-actions">
+                <button class="btn-sync" onclick="resolveConflict('${data.conflict_id}')">Resolve</button>
+                <button class="btn-sync" onclick="ignoreConflict('${data.conflict_id}')">Ignore</button>
+            </div>
+        </div>
+    `;
+
+    const container = document.querySelector('.sync-status-container');
+    container.insertBefore(
+        new DOMParser().parseFromString(alertHtml, 'text/html').body.firstChild,
+        container.firstChild
+    );
+}
+
+// Force synchronization
+async function forceSync() {
+    const button = document.querySelector('button[onclick="forceSync()"]');
+    button.disabled = true;
+    button.textContent = 'Syncing...';
+
+    try {
+        const response = await fetch('/api/cross-platform/deal/{{ deal_code }}/force-sync', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        if (response.ok) {
+            // Refresh status will be handled by real-time updates
+            setTimeout(() => {
+                button.disabled = false;
+                button.textContent = 'Force Sync';
+            }, 2000);
+        } else {
+            throw new Error('Sync failed');
+        }
+    } catch (error) {
+        console.error('Force sync error:', error);
+        button.disabled = false;
+        button.textContent = 'Sync failed - retry';
+    }
+}
+
+// Refresh status
+async function refreshStatus() {
+    try {
+        const response = await fetch('/api/cross-platform/deal/{{ deal_code }}/sync');
+        if (response.ok) {
+            const data = await response.json();
+            updateSyncStatus(data);
+        }
+    } catch (error) {
+        console.error('Refresh status error:', error);
+    }
+}
+
+// Resolve conflicts
+async function resolveConflicts() {
+    // Implementation for conflict resolution
+    console.log('Resolving conflicts...');
+}
+
+// View deal details
+function viewDealDetails() {
+    window.location.href = '/deal/{{ deal_code }}';
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initRealTimeUpdates();
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+    if (eventSource) {
+        eventSource.close();
+    }
+});
+</script>
+{% endblock %}

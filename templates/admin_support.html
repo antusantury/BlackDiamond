@@ -1,0 +1,591 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('admin_support_chat') }} - {{ bot_name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.admin-support-container {
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 2rem;
+    height: calc(100vh - 200px);
+}
+
+.conversations-panel {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    overflow-y: auto;
+    box-shadow: var(--shadow-subtle);
+}
+
+.conversations-panel h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.conversation-item {
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: var(--card-bg);
+}
+
+.conversation-item:hover {
+    background: var(--gradient-primary);
+    border-color: var(--border-glow);
+    transform: translateX(2px);
+}
+
+.conversation-item.active {
+    background: var(--gradient-primary);
+    border-color: var(--diamond-blue);
+    box-shadow: var(--shadow);
+}
+
+.conversation-user {
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 0.25rem;
+}
+
+.conversation-last-message {
+    font-size: 0.85rem;
+    color: var(--secondary);
+    margin-bottom: 0.25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.conversation-time {
+    font-size: 0.75rem;
+    color: var(--secondary);
+    opacity: 0.7;
+}
+
+.conversation-unread {
+    background: var(--error);
+    color: white;
+    padding: 0.125rem 0.375rem;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-left: auto;
+}
+
+.chat-panel {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-subtle);
+    overflow: hidden;
+}
+
+.chat-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--gradient-primary);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.chat-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.chat-close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+    opacity: 0.8;
+}
+
+.chat-close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    opacity: 1;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.message {
+    max-width: 70%;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    position: relative;
+}
+
+.message-user {
+    align-self: flex-end;
+    background: var(--diamond-gradient);
+    color: white;
+    border-bottom-right-radius: 4px;
+}
+
+.message-admin {
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--primary);
+    border-bottom-left-radius: 4px;
+}
+
+.message-time {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    margin-top: 0.25rem;
+}
+
+.message-role {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+    opacity: 0.8;
+    text-transform: uppercase;
+}
+
+.message-user .message-role {
+    color: rgba(255, 255, 255, 0.85);
+    text-align: right;
+}
+
+.message-admin .message-role {
+    color: var(--secondary);
+    text-align: left;
+}
+
+.chat-input-container {
+    border-top: 1px solid var(--border);
+    padding: 1.5rem;
+    background: var(--card-bg);
+}
+
+.chat-input-form {
+    display: flex;
+    gap: 1rem;
+}
+
+.chat-input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--primary);
+    font-size: 0.9rem;
+    transition: var(--transition-normal);
+    backdrop-filter: blur(10px);
+}
+
+.chat-input:focus {
+    outline: none;
+    border-color: var(--diamond-blue);
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+}
+
+.chat-send-btn {
+    background: var(--diamond-gradient);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    box-shadow: var(--shadow-button);
+}
+
+.chat-send-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(30, 58, 138, 0.4);
+}
+
+.chat-send-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.no-conversation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--secondary);
+    text-align: center;
+    padding: 2rem;
+}
+
+.no-conversation i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--diamond-blue);
+    animation: spin 1s ease-in-out infinite;
+}
+
+.loading-icon {
+    width: 20px;
+    height: 20px;
+    margin-bottom: 0.5rem;
+}
+
+.loading-text {
+    font-size: 0.9rem;
+    color: var(--secondary);
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 1024px) {
+    .admin-support-container {
+        grid-template-columns: 1fr;
+        height: auto;
+        gap: 1rem;
+    }
+
+    .conversations-panel {
+        max-height: 300px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-support-container">
+    <!-- Conversations List -->
+    <div class="conversations-panel">
+        <h3><i class="fas fa-comments"></i> {{ t('admin_support_conversations') }}</h3>
+        <div id="conversationsList">
+            <div style="text-align: center; padding: 2rem;">
+                <img src="/static/icons/loading.svg" alt="Loading" class="loading-icon">
+                <p class="loading-text">{{ t('admin_support_loading_conversations') }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Panel -->
+    <div class="chat-panel">
+        <div id="chatHeader" class="chat-header" style="display: none;">
+            <h3 id="chatUserName">{{ t('admin_support_select_conversation') }}</h3>
+            <button class="chat-close-btn" onclick="closeConversation()" title="{{ t('admin_support_close_conversation') }}">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div id="chatMessages" class="chat-messages">
+            <div class="no-conversation">
+                <div>
+                    <i class="fas fa-comments"></i>
+                    <p>{{ t('admin_support_select_conversation_hint') }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="chatInput" class="chat-input-container" style="display: none;">
+            <form id="chatForm" class="chat-input-form">
+                <input
+                    type="text"
+                    id="messageInput"
+                    class="chat-input"
+                    placeholder="{{ t('admin_support_message_placeholder') }}"
+                    maxlength="1000"
+                    required
+                >
+                <button type="submit" id="sendButton" class="chat-send-btn">
+                    {{ t('admin_send_message') }}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+let currentUserId = null;
+let conversations = [];
+let pollInterval = null;
+
+async function loadConversations() {
+    try {
+        const response = await fetch('/api/support/conversations');
+        const data = await response.json();
+
+        if (data.success) {
+            conversations = data.conversations;
+            displayConversations();
+        } else {
+            showError('{{ t("admin_support_load_conversations_failed") }}');
+        }
+    } catch (error) {
+        console.error('Error loading conversations:', error);
+        showError('{{ t("admin_network_error") }}');
+    }
+}
+
+function displayConversations() {
+    const container = document.getElementById('conversationsList');
+
+    if (conversations.length === 0) {
+        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--secondary);">{{ t("admin_support_no_conversations") }}</div>';
+        return;
+    }
+
+    container.innerHTML = conversations.map(conv => {
+        const lastMessage = conv.last_message || '{{ t("admin_no_support_messages") }}';
+        const time = conv.last_message_time ? formatTime(conv.last_message_time) : '';
+        const isActive = currentUserId === conv.user_id;
+        const unreadCount = conv.unread_count || 0;
+
+        return `
+            <div class="conversation-item ${isActive ? 'active' : ''}" onclick="selectConversation('${conv.user_id}', '${conv.first_name || '{{ t("admin_unknown") }}'}', '${conv.username || '{{ t("admin_unknown_username") }}'}')">
+                <div class="conversation-user">${conv.first_name || '{{ t("admin_unknown") }}'} (@${conv.username || '{{ t("admin_unknown_username") }}'})</div>
+                <div class="conversation-last-message">${lastMessage}</div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div class="conversation-time">${time}</div>
+                    ${unreadCount > 0 ? `<div class="conversation-unread">${unreadCount}</div>` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function selectConversation(userId, firstName, username) {
+    currentUserId = userId;
+
+    // Update UI
+    document.getElementById('chatUserName').textContent = `${firstName} (@${username})`;
+    document.getElementById('chatHeader').style.display = 'block';
+    document.getElementById('chatInput').style.display = 'block';
+    document.getElementById('chatMessages').innerHTML = '<div style="text-align: center; padding: 2rem;"><img src="/static/icons/loading.svg" alt="Loading" class="loading-icon"><p class="loading-text">{{ t("admin_support_loading_messages") }}</p></div>';
+
+    // Update active conversation
+    document.querySelectorAll('.conversation-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    event.currentTarget.classList.add('active');
+
+    // Load messages
+    loadMessages();
+
+    // Stop previous polling and start new
+    stopPolling();
+    startPolling();
+}
+
+function closeConversation() {
+    currentUserId = null;
+
+    // Hide chat elements
+    document.getElementById('chatHeader').style.display = 'none';
+    document.getElementById('chatInput').style.display = 'none';
+    document.getElementById('chatMessages').innerHTML = `
+        <div class="no-conversation">
+            <div>
+                <i class="fas fa-comments"></i>
+                <p>{{ t("admin_support_select_conversation_hint") }}</p>
+            </div>
+        </div>
+    `;
+
+    // Remove active state from conversations
+    document.querySelectorAll('.conversation-item').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Stop polling
+    stopPolling();
+}
+
+async function loadMessages() {
+    if (!currentUserId) return;
+
+    try {
+        const response = await fetch(`/api/support/messages?user_id=${currentUserId}`);
+        const data = await response.json();
+
+        if (data.success) {
+            displayMessages(data.messages);
+        } else {
+            showError('{{ t("admin_support_load_messages_failed") }}');
+        }
+    } catch (error) {
+        console.error('Error loading messages:', error);
+        showError('{{ t("admin_network_error") }}');
+    }
+}
+
+function displayMessages(messages) {
+    const container = document.getElementById('chatMessages');
+
+    if (messages.length === 0) {
+        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--secondary);">{{ t("admin_no_support_messages") }}</div>';
+        return;
+    }
+
+    container.innerHTML = messages.map(msg => {
+        const roleLabel = msg.is_from_user ? '{{ t("support_role_user") }}' : '{{ t("support_role_admin") }}';
+        return `
+            <div class="message message-${msg.is_from_user ? 'user' : 'admin'}">
+                <div class="message-role">${roleLabel}</div>
+                ${msg.message}
+                <div class="message-time">${formatTime(msg.created_at)}</div>
+            </div>
+        `;
+    }).join('');
+
+    // Scroll to bottom
+    container.scrollTop = container.scrollHeight;
+}
+
+function formatTime(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        day: '2-digit',
+        month: '2-digit'
+    });
+}
+
+async function sendMessage(event) {
+    event.preventDefault();
+
+    if (!currentUserId) return;
+
+    const input = document.getElementById('messageInput');
+    const button = document.getElementById('sendButton');
+    const message = input.value.trim();
+
+    if (!message) return;
+
+    // Disable input and button
+    input.disabled = true;
+    button.disabled = true;
+    button.innerHTML = '<div class="loading"></div>';
+
+    try {
+        const response = await fetch('/api/support/admin/send-message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user_id: currentUserId,
+                message: message
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            input.value = '';
+            // Reload messages and conversations
+            await loadMessages();
+            await loadConversations();
+        } else {
+            showError(data.message || '{{ t("admin_support_send_failed") }}');
+        }
+    } catch (error) {
+        console.error('Error sending message:', error);
+        showError('{{ t("admin_network_error") }}');
+    } finally {
+        // Re-enable input and button
+        input.disabled = false;
+        button.disabled = false;
+        button.textContent = '{{ t("admin_send_message") }}';
+    }
+}
+
+function startPolling() {
+    pollInterval = setInterval(async () => {
+        if (currentUserId) {
+            await loadMessages();
+            await loadConversations();
+        }
+    }, 10000); // Poll every 10 seconds
+}
+
+function stopPolling() {
+    if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
+    }
+}
+
+function showError(message) {
+    if (typeof window.siteNotify === 'function') {
+        window.siteNotify(message, 'error', { duration: 4000 });
+        return;
+    }
+    if (typeof window.showToast === 'function') {
+        window.showToast(message, 'error', { duration: 4000 });
+        return;
+    }
+    alert(message);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadConversations();
+
+    // Handle form submission
+    document.getElementById('chatForm').addEventListener('submit', sendMessage);
+
+    // Handle Enter key
+    document.getElementById('messageInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage(e);
+        }
+    });
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+    stopPolling();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('maintenance_title') }} - {{ bot_name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.maintenance-container {
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.maintenance-content {
+    text-align: center;
+    max-width: 600px;
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 3rem;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color);
+}
+
+.maintenance-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.7;
+}
+
+.maintenance-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.maintenance-message {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.maintenance-apology {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    font-style: italic;
+}
+
+.maintenance-support {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--accent-bg);
+    color: var(--accent-text);
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.maintenance-support:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.maintenance-support-icon {
+    font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+    .maintenance-content {
+        padding: 2rem 1.5rem;
+    }
+
+    .maintenance-title {
+        font-size: 1.75rem;
+    }
+
+    .maintenance-message {
+        font-size: 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="maintenance-container">
+    <div class="maintenance-content">
+        <div class="maintenance-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor" style="width: 4rem; height: 4rem; opacity: 0.7;">
+                <path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/>
+            </svg>
+        </div>
+        <h1 class="maintenance-title">{{ t('maintenance_title') }}</h1>
+        {% if custom_maintenance_message %}
+            <p class="maintenance-message">{{ custom_maintenance_message }}</p>
+        {% else %}
+            <p class="maintenance-message">{{ t('maintenance_message') }}</p>
+        {% endif %}
+        <p class="maintenance-apology">{{ t('maintenance_apology') }}</p>
+
+        <div class="maintenance-support-info">
+            <svg class="maintenance-support-icon" viewBox="0 0 24 24" fill="currentColor" style="width: 1.1rem; height: 1.1rem; opacity: 0.6;">
+                <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2ZM20 16H5.17L4 17.17V4H20V16Z"/>
+                <path d="M7 9H17V11H7V9ZM7 12H15V14H7V12Z"/>
+            </svg>
+            <span style="color: var(--text-muted); font-size: 0.9rem;">{{ t('maintenance_support_unavailable') }}</span>
+        </div>
+    </div>
+</div>
+{% endblock %}

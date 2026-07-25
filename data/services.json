@@ -1,0 +1,133 @@
+{
+  "services": [
+    {
+      "key": "telegram_bot",
+      "name": "Telegram Bot",
+      "description": "Main Telegram bot functionality",
+      "is_enabled": true,
+      "maintenance_message": "Telegram bot is temporarily under maintenance. Please try again later.",
+      "last_updated": "2026-02-05T18:49:25.916150"
+    },
+    {
+      "key": "web_interface",
+      "name": "Web Interface",
+      "description": "Web application interface",
+      "is_enabled": true,
+      "maintenance_message": "Web interface is temporarily under maintenance. Please try again later.",
+      "last_updated": "2026-02-05T18:49:25.917110"
+    },
+    {
+      "key": "bot_deal_creation",
+      "name": "Bot: Deal Creation",
+      "description": "Deal creation via Telegram bot",
+      "is_enabled": true,
+      "maintenance_message": "Deal creation via Telegram bot is temporarily disabled.",
+      "last_updated": "2026-01-12T13:04:07.448688"
+    },
+    {
+      "key": "bot_deal_joining",
+      "name": "Bot: Deal Joining",
+      "description": "Deal joining via Telegram bot",
+      "is_enabled": true,
+      "maintenance_message": "Deal joining via Telegram bot is temporarily disabled.",
+      "last_updated": "2026-01-12T13:04:07.448691"
+    },
+    {
+      "key": "bot_profile_view",
+      "name": "Bot: Profile Viewing",
+      "description": "Profile viewing via Telegram bot",
+      "is_enabled": true,
+      "maintenance_message": "Profile viewing via Telegram bot is temporarily disabled.",
+      "last_updated": "2026-01-12T13:04:07.448694"
+    },
+    {
+      "key": "bot_support",
+      "name": "Bot: Support Chat",
+      "description": "Support chat via Telegram bot",
+      "is_enabled": true,
+      "maintenance_message": "Support chat via Telegram bot is temporarily disabled.",
+      "last_updated": "2026-01-12T13:04:07.448697"
+    },
+    {
+      "key": "web_deal_creation",
+      "name": "Web: Deal Creation",
+      "description": "Deal creation via web interface",
+      "is_enabled": true,
+      "maintenance_message": "Deal creation via web interface is temporarily disabled.",
+      "last_updated": "2026-01-12T13:04:07.448700"
+    },
+    {
+      "key": "web_deal_joining",
+      "name": "Web: Deal Joining",
+      "description": "Deal joining via web interface",
+      "is_enabled": true,
+      "maintenance_message": "Deal joining via web interface is temporarily disabled.",
+      "last_updated": "2026-01-12T13:04:07.448703"
+    },
+    {
+      "key": "web_deal_viewing",
+      "name": "Web: Deal Viewing",
+      "description": "Deal detail viewing via web interface",
+      "is_enabled": true,
+      "maintenance_message": "Deal viewing via web interface is temporarily disabled.",
+      "last_updated": "2026-01-12T13:04:07.448707"
+    },
+    {
+      "key": "web_profile",
+      "name": "Web: Profile Management",
+      "description": "Profile management via web interface",
+      "is_enabled": true,
+      "maintenance_message": "Profile management via web interface is temporarily disabled.",
+      "last_updated": "2026-01-12T13:04:07.448712"
+    },
+    {
+      "key": "web_support",
+      "name": "Web: Support Chat",
+      "description": "Support chat via web interface",
+      "is_enabled": true,
+      "maintenance_message": "Support chat via web interface is temporarily disabled.",
+      "last_updated": "2026-01-12T13:04:07.448717"
+    },
+    {
+      "key": "web_admin_panel",
+      "name": "Web: Admin Panel",
+      "description": "Admin panel access via web interface",
+      "is_enabled": true,
+      "maintenance_message": "Admin panel access is temporarily disabled.",
+      "last_updated": "2026-01-12T13:04:07.448725"
+    },
+    {
+      "key": "web_statistics",
+      "name": "Web: Statistics",
+      "description": "Statistics and analytics viewing",
+      "is_enabled": true,
+      "maintenance_message": "Statistics viewing is temporarily disabled.",
+      "last_updated": "2026-01-12T13:04:07.448730"
+    },
+    {
+      "key": "payments",
+      "name": "Payment System",
+      "description": "Cryptocurrency payment processing",
+      "is_enabled": true,
+      "maintenance_message": "Payment system is temporarily under maintenance. Please try again later.",
+      "last_updated": "2026-02-05T18:49:25.917903"
+    },
+    {
+      "key": "notifications",
+      "name": "Notifications",
+      "description": "User notification system",
+      "is_enabled": true,
+      "maintenance_message": "Notification system is temporarily under maintenance. Please try again later.",
+      "last_updated": "2026-02-05T18:49:25.918642"
+    },
+    {
+      "key": "api",
+      "name": "API Services",
+      "description": "REST API endpoints",
+      "is_enabled": true,
+      "maintenance_message": "API services are temporarily under maintenance. Please try again later.",
+      "last_updated": "2026-02-05T18:49:25.919356"
+    }
+  ],
+  "last_updated": "2026-02-05T18:49:25.919474"
+}

@@ -1,0 +1,791 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('my_deals') }} - {{ bot_name }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="/static/css/basic-deals.css">
+{% endblock %}
+
+{% block content %}
+<div class="my-deals-container" data-user-id="{{ session.get('user_id', 0) }}">
+    <!-- Skip to main content link for accessibility -->
+    <a href="#dealsContainer" class="skip-to-deals">{{ t('skip_to_deals') }}</a>
+    
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <div class="page-title">
+                <div class="title-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15M9 5C9 6.10457 9.89543 7 11 7H13C14.1046 7 15 6.10457 15 5M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5M12 12H15M12 16H15M9 12H9.01M9 16H9.01"/>
+                    </svg>
+                </div>
+                <div class="title-text">
+                    <h1>{{ t('my_deals') }}</h1>
+                    <p>{{ t('my_deals_subtitle') }}</p>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="header-actions">
+                <a href="/create-deal" class="btn btn-primary">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 5V19M5 12H19"/>
+                    </svg>
+                    {{ t('create_new_deal') }}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deals Content -->
+    <div class="deals-content">
+        <!-- Filter Tabs -->
+        <nav class="filter-tabs" role="tablist" aria-label="{{ t('deal_filter_tabs') }}">
+            <button class="filter-tab active" data-filter="all" role="tab" aria-selected="true" aria-controls="dealsContainer">
+                {{ t('all_deals') }}
+                <span class="tab-count" id="allCount" aria-label="{{ t('all_deals_count') }}">0</span>
+            </button>
+            <button class="filter-tab" data-filter="active" role="tab" aria-selected="false" aria-controls="dealsContainer">
+                {{ t('active_deals') }}
+                <span class="tab-count" id="activeCount" aria-label="{{ t('active_deals_count') }}">0</span>
+            </button>
+            <button class="filter-tab" data-filter="completed" role="tab" aria-selected="false" aria-controls="dealsContainer">
+                {{ t('completed_deals') }}
+                <span class="tab-count" id="completedCount" aria-label="{{ t('completed_deals_count') }}">0</span>
+            </button>
+            <button class="filter-tab" data-filter="cancelled" role="tab" aria-selected="false" aria-controls="dealsContainer">
+                {{ t('cancelled_deals') }}
+                <span class="tab-count" id="cancelledCount" aria-label="{{ t('cancelled_deals_count') }}">0</span>
+            </button>
+        </nav>
+
+        <!-- Deals Container -->
+        <div id="dealsContainer" class="deals-container" role="tabpanel" aria-labelledby="all">
+            <div class="loading-state" role="status" aria-live="polite">
+                <p class="loading-text">{{ t('loading_deals') }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* My Deals Page Styles */
+.my-deals-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+/* Page Header */
+.page-header {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-subtle);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+}
+
+.page-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.title-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--gradient-primary);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+}
+
+.title-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.title-text h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.title-text p {
+    margin: 0;
+    color: var(--secondary);
+    font-size: 1.1rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Filter Tabs */
+.filter-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.5rem;
+    box-shadow: var(--shadow-subtle);
+}
+
+.filter-tab {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: var(--secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.filter-tab:hover {
+    background: var(--gradient-primary);
+    color: var(--primary);
+    transform: translateY(-1px);
+}
+
+.filter-tab.active {
+    background: var(--primary);
+    color: white;
+    box-shadow: var(--shadow-subtle);
+}
+
+.tab-count {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.125rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    min-width: 1.5rem;
+    text-align: center;
+}
+
+.filter-tab.active .tab-count {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Deals Container */
+.deals-container {
+    min-height: 400px;
+}
+
+.loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 400px;
+    color: var(--secondary);
+}
+
+.loading-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 1rem;
+}
+
+.loading-text {
+    font-size: 1rem;
+    color: var(--secondary);
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Deal Cards */
+.deals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.deal-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-subtle);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.deal-card:hover {
+    background: var(--gradient-primary);
+    border-color: var(--accent);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.deal-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    transition: left 0.6s ease;
+}
+
+.deal-card:hover::before {
+    left: 100%;
+}
+
+.deal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.deal-code {
+    font-family: monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary);
+    background: var(--bg-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+}
+
+.deal-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.deal-status.active {
+    background: var(--warning);
+    color: white;
+}
+
+.deal-status.completed {
+    background: var(--success);
+    color: white;
+}
+
+.deal-status.cancelled {
+    background: var(--error);
+    color: white;
+}
+
+.deal-info {
+    margin-bottom: 1rem;
+}
+
+.deal-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+}
+
+.deal-description {
+    color: var(--secondary);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
+}
+
+.deal-date {
+    color: var(--secondary);
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.deal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.deal-role {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--secondary);
+}
+
+.deal-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-secondary);
+    color: var(--primary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.action-btn:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    transform: translateY(-1px);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--secondary);
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 2rem;
+    opacity: 0.5;
+    color: var(--secondary);
+}
+
+.empty-state h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.empty-state p {
+    margin: 0 0 2rem 0;
+    font-size: 1rem;
+    line-height: 1.5;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .my-deals-container {
+        margin: 1rem auto;
+        padding: 0 0.75rem;
+    }
+    
+    .page-header {
+        padding: 1.5rem;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .page-title {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+    }
+    
+    .title-text h1 {
+        font-size: 1.75rem;
+    }
+    
+    .filter-tabs {
+        overflow-x: auto;
+        padding: 0.5rem;
+        margin: 0 -0.5rem 1.5rem;
+    }
+    
+    .filter-tab {
+        flex-shrink: 0;
+        padding: 0.625rem 1.25rem;
+        font-size: 0.85rem;
+    }
+    
+    .deals-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .deal-card {
+        padding: 1.25rem;
+    }
+    
+    .deal-header {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: stretch;
+    }
+    
+    .deal-status {
+        align-self: flex-start;
+    }
+    
+    .deal-amount {
+        font-size: 1.25rem;
+    }
+    
+    .deal-footer {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: stretch;
+    }
+    
+    .deal-actions {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header {
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .title-text h1 {
+        font-size: 1.5rem;
+    }
+    
+    .title-text p {
+        font-size: 1rem;
+    }
+    
+    .filter-tab {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+    
+    .deal-card {
+        padding: 1rem;
+    }
+    
+    .deal-code {
+        font-size: 1rem;
+        padding: 0.375rem 0.75rem;
+    }
+    
+    .deal-amount {
+        font-size: 1.125rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('My Deals page loaded');
+    
+    // Get user ID from data attribute
+    var container = document.querySelector('.my-deals-container');
+    var currentUserId = container ? container.getAttribute('data-user-id') : 0;
+    
+    // Make it globally available
+    window.myDealsUserId = currentUserId;
+    
+    // Load deals on page load
+    loadDeals();
+    
+    // Setup filter tabs
+    setupFilterTabs();
+});
+
+var allDeals = [];
+var currentFilter = 'all';
+
+function setupFilterTabs() {
+    var tabs = document.querySelectorAll('.filter-tab');
+    
+    for (var i = 0; i < tabs.length; i++) {
+        tabs[i].addEventListener('click', function() {
+            // Remove active class from all tabs
+            for (var j = 0; j < tabs.length; j++) {
+                tabs[j].classList.remove('active');
+            }
+            
+            // Add active class to clicked tab
+            this.classList.add('active');
+            
+            // Update current filter
+            currentFilter = this.getAttribute('data-filter');
+            
+            // Filter and display deals
+            displayDeals();
+        });
+    }
+}
+
+async function loadDeals() {
+    var container = document.getElementById('dealsContainer');
+    
+    try {
+        var response = await fetch('/api/user/deals');
+        if (!response.ok) {
+            throw new Error('Failed to load deals');
+        }
+        
+        var data = await response.json();
+        allDeals = data.all_deals || [];
+        
+        console.log('Loaded deals:', allDeals);
+        
+        // Update tab counts
+        updateTabCounts();
+        
+        // Display deals
+        displayDeals();
+        
+    } catch (error) {
+        console.error('Error loading deals:', error);
+        container.innerHTML = 
+            '<div class="empty-state">' +
+                '<div class="empty-icon">' +
+                    '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+                        '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>' +
+                    '</svg>' +
+                '</div>' +
+                '<h3>{{ t("error_loading_deals") }}</h3>' +
+                '<p>{{ t("error_loading_deals_desc") }}</p>' +
+                '<button class="btn btn-primary" onclick="loadDeals()">' +
+                    '{{ t("try_again") }}' +
+                '</button>' +
+            '</div>';
+    }
+}
+
+function updateTabCounts() {
+    var counts = {
+        all: allDeals.length,
+        active: allDeals.filter(function(deal) { return deal.status === 'active'; }).length,
+        completed: allDeals.filter(function(deal) { return deal.status === 'completed'; }).length,
+        cancelled: allDeals.filter(function(deal) { return deal.status === 'cancelled'; }).length
+    };
+    
+    // Update count displays
+    document.getElementById('allCount').textContent = counts.all;
+    document.getElementById('activeCount').textContent = counts.active;
+    document.getElementById('completedCount').textContent = counts.completed;
+    document.getElementById('cancelledCount').textContent = counts.cancelled;
+}
+
+function displayDeals() {
+    var container = document.getElementById('dealsContainer');
+    
+    // Filter deals based on current filter
+    var filteredDeals = allDeals;
+    if (currentFilter !== 'all') {
+        filteredDeals = allDeals.filter(function(deal) { return deal.status === currentFilter; });
+    }
+    
+    if (filteredDeals.length === 0) {
+        var emptyMessage = getEmptyMessage(currentFilter);
+        container.innerHTML = 
+            '<div class="empty-state">' +
+                '<h3 class="empty-title">' + emptyMessage.title + '</h3>' +
+                '<p class="empty-description">' + emptyMessage.description + '</p>' +
+                '<a href="/create-deal" class="btn-primary">Create New Deal</a>' +
+            '</div>';
+        return;
+    }
+    
+    // Create deals grid
+    var dealsGrid = document.createElement('div');
+    dealsGrid.className = 'deals-grid';
+    
+    for (var i = 0; i < filteredDeals.length; i++) {
+        var dealCard = createDealCard(filteredDeals[i]);
+        dealsGrid.appendChild(dealCard);
+    }
+    
+    container.innerHTML = '';
+    container.appendChild(dealsGrid);
+}
+
+function createDealCard(deal) {
+    var card = document.createElement('div');
+    card.className = 'deal-card';
+    card.setAttribute('role', 'article');
+    card.setAttribute('tabindex', '0');
+    
+    // Create accessible deal description (escape for safe HTML insertion)
+    var dealDescription = escapeHtml(deal.description || 'No description');
+    var statusText = deal.status.charAt(0).toUpperCase() + deal.status.slice(1);
+    var createdDate = new Date(deal.created_at).toLocaleDateString('en', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    var isBuyer = deal.buyer_id == window.myDealsUserId;
+    // If user is buyer (created deal), show seller. If user is seller (joined deal), show buyer.
+    var counterpartyRaw = isBuyer ? deal.seller_username : deal.buyer_username;
+    var counterparty = counterpartyRaw ? escapeHtml(counterpartyRaw) : '';
+    var counterpartyHtml = counterparty ? ('<div class="deal-counterparty">' + counterparty + '</div>') : '';
+
+    var formattedAmount = formatDealAmount(deal.amount, deal.currency);
+    var ariaLabel = 'Deal ' + deal.deal_code + ' for ' + formattedAmount + ', status: ' + statusText + ', created on ' + createdDate;
+    card.setAttribute('aria-label', ariaLabel);
+    
+    card.onclick = function() { window.location.href = '/deal/' + deal.deal_code; };
+    
+    // Add keyboard navigation support
+    card.onkeydown = function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            window.location.href = '/deal/' + deal.deal_code;
+        }
+    };
+    
+    card.innerHTML = 
+        '<div class="deal-header">' +
+            '<div class="deal-code">#' + deal.deal_code + '</div>' +
+            '<div class="deal-status status-' + deal.status + '">' +
+                statusText +
+            '</div>' +
+        '</div>' +
+        
+        '<div class="deal-amount">' +
+            formattedAmount +
+        '</div>' +
+        
+        '<div class="deal-date">' +
+            createdDate +
+        '</div>' +
+        
+        '<div class="deal-description">' +
+            dealDescription +
+        '</div>' +
+        
+        '<div class="deal-footer">' +
+            counterpartyHtml +
+            '<div class="deal-actions">' +
+                '<a href="/deal/' + deal.deal_code + '" class="btn-action" title="View Deal">' +
+                    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">' +
+                        '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>' +
+                        '<circle cx="12" cy="12" r="3"></circle>' +
+                    '</svg>' +
+                '</a>' +
+            '</div>' +
+        '</div>';
+    
+    return card;
+}
+
+function formatDealAmount(amount, currency) {
+    var value = parseFloat(amount);
+    if (!Number.isFinite(value)) {
+        return amount + ' ' + currency;
+    }
+    var decimals = currency === 'TON' ? 4 : 2;
+    return value.toFixed(decimals) + ' ' + currency;
+}
+
+function getEmptyMessage(filter) {
+    var messages = {
+        all: {
+            title: 'No deals yet',
+            description: 'Create your first deal to get started!'
+        },
+        active: {
+            title: 'No active deals',
+            description: 'You don\'t have any active deals at the moment.'
+        },
+        completed: {
+            title: 'No completed deals',
+            description: 'You haven\'t completed any deals yet.'
+        },
+        cancelled: {
+            title: 'No cancelled deals',
+            description: 'You don\'t have any cancelled deals.'
+        }
+    };
+    
+    return messages[filter] || messages.all;
+}
+
+function getEmptyIcon(filter) {
+    var icons = {
+        all: '<path d="M9 5H7C5.89543 5 5 5.89543 5 7V19C5 20.1046 5.89543 21 7 21H17C18.1046 21 19 20.1046 19 19V7C19 5.89543 18.1046 5 17 5H15M9 5C9 6.10457 9.89543 7 11 7H13C14.1046 7 15 6.10457 15 5M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5M12 12H15M12 16H15M9 12H9.01M9 16H9.01" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+        active: '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+        completed: '<path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+        cancelled: '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+    };
+    
+    return icons[filter] || icons.all;
+}
+
+// Enhanced error handling with accessibility
+async function loadDeals() {
+    var container = document.getElementById('dealsContainer');
+    
+    try {
+        var response = await fetch('/api/user/deals');
+        if (!response.ok) {
+            throw new Error('Failed to load deals');
+        }
+        
+        var data = await response.json();
+        allDeals = data.all_deals || [];
+        
+        console.log('Loaded deals:', allDeals);
+        
+        // Update tab counts
+        updateTabCounts();
+        
+        // Display deals
+        displayDeals();
+        
+    } catch (error) {
+        console.error('Error loading deals:', error);
+        container.innerHTML = 
+            '<div class="empty-state" role="alert" aria-live="assertive">' +
+                '<div class="empty-icon" aria-hidden="true">' +
+                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor">' +
+                        '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+                    '</svg>' +
+                '</div>' +
+                '<h3 class="empty-title">Error loading deals</h3>' +
+                '<p class="empty-description">There was a problem loading your deals. Please try again.</p>' +
+                '<button class="btn-primary" onclick="loadDeals()" aria-label="Try again">Try Again</button>' +
+            '</div>';
+    }
+}
+</script>
+{% endblock %}

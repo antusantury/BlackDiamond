@@ -1,0 +1,1232 @@
+﻿
+{% extends "base.html" %}
+
+{% block title %}{{ t('admin_disputes_title') }} - {{ bot_name }}{% endblock %}
+
+{% block content %}
+<div class="admin-disputes disputes-shell">
+    <div id="disputesToast" class="disputes-toast" role="status" aria-live="polite" aria-atomic="true"></div>
+    <section class="disputes-hero">
+        <div class="hero-top">
+            <div class="hero-text">
+                <h1>{{ t('admin_disputes_title') }}</h1>
+                <p>{{ t('admin_disputes_subtitle') }}</p>
+            </div>
+            <div class="hero-actions">
+                <a href="/admin" class="btn btn-secondary">{{ t('admin_back_to_panel') }}</a>
+            </div>
+        </div>
+    </section>
+    <section class="disputes-panel">
+        <div class="disputes-toolbar">
+            <div class="toolbar-field">
+                <label for="statusSelectTrigger">{{ t('admin_status') }}</label>
+                <div class="select-shell custom-select" id="statusSelect">
+                    <input type="hidden" id="statusFilter" value="all">
+                    <button type="button" class="custom-select-trigger" id="statusSelectTrigger" aria-haspopup="listbox" aria-expanded="false">
+                        <span id="statusSelectLabel">{{ t('admin_all_disputes') }}</span>
+                        <svg class="select-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M7 10l5 5 5-5H7z"/>
+                        </svg>
+                    </button>
+                    <div class="custom-select-menu" id="statusSelectMenu" role="listbox" aria-labelledby="statusSelectTrigger">
+                        <button type="button" class="custom-select-option" role="option" data-value="all">{{ t('admin_all_disputes') }}</button>
+                        <button type="button" class="custom-select-option" role="option" data-value="open">{{ t('status_dispute_open') }}</button>
+                        <button type="button" class="custom-select-option" role="option" data-value="resolved">{{ t('status_dispute_resolved') }}</button>
+                    </div>
+                </div>
+            </div>
+            <div class="toolbar-actions">
+                <button id="applyFilters" class="btn btn-primary">{{ t('admin_apply_filters') }}</button>
+                <button id="clearFilters" class="btn btn-secondary">{{ t('admin_clear_filters') }}</button>
+            </div>
+        </div>
+
+        <div class="table-meta">
+            <div class="meta-pill">
+                <span class="meta-label">{{ t('admin_disputes') }}</span>
+                <span class="meta-value" id="visibleDisputes">0</span>
+            </div>
+            <span id="pageInfo" class="page-info">{{ t('admin_page') }} 1</span>
+        </div>
+
+        <div class="disputes-surface">
+            <div id="loadingIndicator" class="loading-indicator">
+                <div class="spinner"></div>
+                <p>{{ t('admin_loading_disputes') }}</p>
+            </div>
+
+            <table id="disputesTable" class="disputes-table admin-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>{{ t('admin_dispute_id') }}</th>
+                        <th>{{ t('admin_deal_code') }}</th>
+                        <th>{{ t('admin_buyer') }}</th>
+                        <th>{{ t('admin_seller') }}</th>
+                        <th>{{ t('admin_amount') }}</th>
+                        <th>{{ t('admin_status') }}</th>
+                        <th>{{ t('admin_created') }}</th>
+                        <th>{{ t('admin_actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody id="disputesTableBody"></tbody>
+            </table>
+
+            <div id="noDisputes" class="no-data" style="display: none;">
+                <div class="no-data-card">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M21 7H3a1 1 0 0 0-1 1v9a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1zM4 9h16v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9z"/>
+                        <path d="M7 4h10l2 3H5l2-3z"/>
+                    </svg>
+                    <h3>{{ t('admin_no_disputes_found') }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div id="pagination" class="pagination" style="display: none;">
+            <button id="prevPage" class="pagination-btn">{{ t('admin_previous') }}</button>
+            <button id="nextPage" class="pagination-btn">{{ t('admin_next') }}</button>
+        </div>
+    </section>
+</div>
+<div id="disputeModal" class="modal" role="dialog" aria-labelledby="disputeModalTitle" aria-hidden="true">
+    <div class="modal-overlay" id="disputeModalOverlay"></div>
+    <div class="modal-content admin-modal">
+        <div class="modal-header">
+            <h2 id="disputeModalTitle" class="modal-title">{{ t('admin_dispute_details') }}</h2>
+            <button class="modal-close" id="disputeModalClose" aria-label="{{ t('admin_close') }}">x</button>
+        </div>
+        <div class="modal-body" id="disputeModalBody"></div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="disputeModalCancel">{{ t('admin_close') }}</button>
+            <button class="btn btn-primary" id="resolveDisputeBtn">{{ t('admin_resolve_dispute') }}</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-disputes {
+    max-width: 1400px;
+    margin: 2.5rem auto 4rem;
+    padding: 0 1.5rem 2.5rem;
+    position: relative;
+}
+
+.disputes-hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.8rem 2rem;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: linear-gradient(135deg, var(--card-bg), var(--bg-primary));
+    overflow: hidden;
+    animation: heroIn 0.6s ease both;
+}
+
+.hero-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.5rem;
+}
+
+.hero-text h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: clamp(2rem, 3vw, 2.6rem);
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.hero-text p {
+    margin: 0;
+    color: var(--secondary);
+    max-width: 64ch;
+    line-height: 1.6;
+}
+
+.hero-actions {
+    display: flex;
+    align-items: center;
+}
+.disputes-panel {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    position: relative;
+    overflow: hidden;
+    animation: panelIn 0.6s ease both;
+    animation-delay: 0.1s;
+}
+
+.disputes-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 60%);
+    pointer-events: none;
+}
+
+.disputes-toolbar {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1rem;
+    align-items: end;
+    z-index: 1;
+}
+
+.toolbar-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.toolbar-field label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--secondary);
+}
+
+.select-shell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.6rem 0.75rem;
+    background: var(--bg-primary);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.select-shell:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
+}
+
+.select-shell {
+    position: relative;
+}
+
+.select-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--secondary);
+    pointer-events: none;
+}
+
+.custom-select {
+    padding: 0;
+    background: transparent;
+    border: none;
+}
+
+.custom-select-trigger {
+    width: 100%;
+    min-width: 220px;
+    padding: 0.6rem 0.75rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.custom-select-trigger:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.12);
+}
+
+.custom-select-menu {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    width: 100%;
+    background: rgba(12, 12, 12, 0.98);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 0.4rem;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+    display: none;
+    z-index: 5;
+}
+
+.custom-select.open .custom-select-menu {
+    display: block;
+}
+
+.custom-select-option {
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    text-align: left;
+    padding: 0.5rem 0.6rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.custom-select-option:hover,
+.custom-select-option.is-active {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.custom-select-option.is-selected {
+    background: rgba(46, 131, 255, 0.6);
+    color: #ffffff;
+}
+
+.disputes-toast {
+    position: fixed;
+    top: 110px;
+    right: 24px;
+    max-width: 320px;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    background: rgba(12, 12, 12, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f5f5f5;
+    font-size: 0.9rem;
+    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    z-index: 1200;
+}
+
+.disputes-toast.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.disputes-toast.is-success {
+    border-color: rgba(28, 199, 126, 0.5);
+    color: #d9ffe9;
+}
+
+.disputes-toast.is-error {
+    border-color: rgba(255, 107, 107, 0.5);
+    color: #ffe1e1;
+}
+
+.toolbar-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.table-meta {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.meta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--bg-primary);
+    font-size: 0.85rem;
+    color: var(--secondary);
+}
+
+.meta-value {
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.page-info {
+    font-size: 0.85rem;
+    color: var(--secondary);
+}
+
+.disputes-surface {
+    position: relative;
+    min-height: 200px;
+}
+
+.loading-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    gap: 1rem;
+    color: var(--secondary);
+}
+
+.spinner {
+    width: 42px;
+    height: 42px;
+    border: 4px solid var(--border);
+    border-top: 4px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+.disputes-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 0.6rem;
+}
+
+.disputes-table thead th {
+    text-align: left;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--secondary);
+}
+
+.disputes-table tbody tr {
+    animation: rowIn 0.35s ease both;
+    animation-delay: var(--row-delay, 0ms);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.disputes-table tbody tr:hover {
+    transform: translateY(-2px);
+}
+
+.disputes-table tbody td {
+    background: var(--bg-primary);
+    border-top: 1px solid var(--border-light);
+    border-bottom: 1px solid var(--border-light);
+    padding: 0.9rem 0.75rem;
+    color: var(--text-primary);
+    font-size: 0.92rem;
+}
+
+.disputes-table tbody td:first-child {
+    border-left: 1px solid var(--border-light);
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+}
+
+.disputes-table tbody td:last-child {
+    border-right: 1px solid var(--border-light);
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+.cell-strong {
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.cell-code {
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.cell-amount {
+    font-weight: 600;
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.status-pill[data-status="open"] {
+    color: #ff9d00;
+    background: rgba(255, 157, 0, 0.16);
+    border-color: rgba(255, 157, 0, 0.4);
+}
+
+.status-pill[data-status="resolved"] {
+    color: #1cc77e;
+    background: rgba(28, 199, 126, 0.16);
+    border-color: rgba(28, 199, 126, 0.4);
+}
+
+.status-pill[data-status="unknown"] {
+    color: var(--secondary);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--border);
+}
+
+.btn-sm {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
+}
+
+.no-data {
+    text-align: center;
+    padding: 3rem 1rem;
+}
+
+.no-data-card {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 2rem 2.5rem;
+    border-radius: 14px;
+    border: 1px dashed var(--border);
+    background: var(--bg-primary);
+    color: var(--secondary);
+}
+
+.no-data-card svg {
+    width: 40px;
+    height: 40px;
+    color: var(--secondary);
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.pagination-btn {
+    padding: 0.55rem 1.2rem;
+    border: 1px solid var(--border);
+    background: var(--bg-primary);
+    color: var(--primary);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: var(--primary);
+    color: white;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.admin-modal {
+    max-width: 900px;
+    width: 90vw;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border);
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.dispute-modal-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 1.5rem;
+}
+
+.modal-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.summary-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.summary-id {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.summary-deal {
+    font-size: 0.85rem;
+    color: var(--secondary);
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.summary-item {
+    padding: 0.75rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+    background: var(--bg-primary);
+}
+
+.detail-label {
+    display: block;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--secondary);
+    margin-bottom: 0.35rem;
+}
+
+.detail-value {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.modal-section {
+    padding: 0.9rem;
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
+    background: var(--bg-primary);
+}
+
+.detail-text {
+    color: var(--text-primary);
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.modal-response {
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px dashed var(--border);
+    background: var(--bg-primary);
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.response-area {
+    width: 100%;
+    min-height: 140px;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    resize: vertical;
+}
+
+.response-area.is-invalid {
+    border-color: rgba(255, 107, 107, 0.7);
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2);
+}
+
+.form-error {
+    display: none;
+    font-size: 0.85rem;
+    color: #ffb3b3;
+}
+
+.form-error.is-visible {
+    display: block;
+}
+
+.response-area:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.modal-footer .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes heroIn {
+    0% { opacity: 0; transform: translateY(12px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes panelIn {
+    0% { opacity: 0; transform: translateY(16px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes rowIn {
+    0% { opacity: 0; transform: translateY(8px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 1100px) {
+    .hero-top {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .hero-actions {
+        width: 100%;
+    }
+
+    .hero-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .dispute-modal-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 900px) {
+    .disputes-toolbar {
+        grid-template-columns: 1fr;
+    }
+
+    .toolbar-actions {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .table-meta {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .disputes-table {
+        border-spacing: 0;
+    }
+
+    .disputes-table thead {
+        display: none;
+    }
+
+    .disputes-table tbody tr {
+        display: block;
+        margin-bottom: 1rem;
+    }
+
+    .disputes-table tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 0;
+        border-left: 1px solid var(--border-light);
+        border-right: 1px solid var(--border-light);
+        padding: 0.75rem 0.9rem;
+    }
+
+    .disputes-table tbody td:first-child {
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .disputes-table tbody td:last-child {
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .disputes-table tbody td::before {
+        content: attr(data-label);
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--secondary);
+    }
+}
+
+</style>
+<script>
+let currentPage = 1;
+let currentStatus = 'all';
+const itemsPerPage = 50;
+let activeDisputeId = null;
+let lastDisputes = [];
+let lastTotalCount = 0;
+let toastTimer = null;
+
+const statusLabels = {
+    all: "{{ t('admin_all_disputes') }}",
+    open: "{{ t('status_dispute_open') }}",
+    resolved: "{{ t('status_dispute_resolved') }}"
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadDisputes();
+
+    setupStatusSelect();
+
+    document.getElementById('applyFilters').addEventListener('click', function() {
+        currentStatus = document.getElementById('statusFilter').value;
+        currentPage = 1;
+        loadDisputes();
+    });
+
+    document.getElementById('clearFilters').addEventListener('click', function() {
+        updateStatusSelection('all');
+        currentStatus = 'all';
+        currentPage = 1;
+        loadDisputes();
+    });
+
+    document.getElementById('prevPage').addEventListener('click', () => changePage(currentPage - 1));
+    document.getElementById('nextPage').addEventListener('click', () => changePage(currentPage + 1));
+
+    document.getElementById('disputeModalClose').addEventListener('click', closeDisputeModal);
+    document.getElementById('disputeModalCancel').addEventListener('click', closeDisputeModal);
+    document.getElementById('disputeModalOverlay').addEventListener('click', closeDisputeModal);
+    document.getElementById('resolveDisputeBtn').addEventListener('click', resolveDispute);
+});
+function normalizeStatus(status) {
+    const value = String(status || '').toLowerCase();
+    if (!value) {
+        return 'unknown';
+    }
+    if (value.includes('resolved')) {
+        return 'resolved';
+    }
+    if (value.includes('open')) {
+        return 'open';
+    }
+    return value;
+}
+
+function getStatusLabel(statusKey, fallback) {
+    return statusLabels[statusKey] || fallback || '-';
+}
+
+function buildStatusBadge(status) {
+    const statusKey = normalizeStatus(status);
+    const label = getStatusLabel(statusKey, status);
+    return `<span class="status-pill" data-status="${statusKey}">${label}</span>`;
+}
+
+function updateHeaderStats(totalCount) {
+    const totalEl = document.getElementById('totalDisputes');
+    if (totalEl) {
+        totalEl.textContent = totalCount;
+    }
+
+    const filterEl = document.getElementById('currentFilterLabel');
+    if (filterEl) {
+        filterEl.textContent = statusLabels[currentStatus] || statusLabels.all;
+    }
+}
+
+function updateVisibleCount(count) {
+    const visibleEl = document.getElementById('visibleDisputes');
+    if (visibleEl) {
+        visibleEl.textContent = count;
+    }
+}
+
+function updateStatusSelection(value) {
+    const statusInput = document.getElementById('statusFilter');
+    const label = document.getElementById('statusSelectLabel');
+    const menu = document.getElementById('statusSelectMenu');
+    const options = menu ? Array.from(menu.querySelectorAll('.custom-select-option')) : [];
+
+    if (statusInput) {
+        statusInput.value = value;
+    }
+    if (label) {
+        label.textContent = statusLabels[value] || statusLabels.all;
+    }
+
+    options.forEach(option => {
+        const optionValue = option.getAttribute('data-value');
+        option.classList.toggle('is-selected', optionValue === value);
+    });
+}
+
+function toggleStatusSelect(open) {
+    const wrapper = document.getElementById('statusSelect');
+    const trigger = document.getElementById('statusSelectTrigger');
+    if (!wrapper || !trigger) {
+        return;
+    }
+
+    const isOpen = typeof open === 'boolean' ? open : !wrapper.classList.contains('open');
+    wrapper.classList.toggle('open', isOpen);
+    trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+}
+
+function setupStatusSelect() {
+    const wrapper = document.getElementById('statusSelect');
+    const trigger = document.getElementById('statusSelectTrigger');
+    const menu = document.getElementById('statusSelectMenu');
+
+    if (!wrapper || !trigger || !menu) {
+        return;
+    }
+
+    updateStatusSelection('all');
+
+    trigger.addEventListener('click', function(event) {
+        event.preventDefault();
+        toggleStatusSelect();
+    });
+
+    menu.addEventListener('click', function(event) {
+        const option = event.target.closest('.custom-select-option');
+        if (!option) {
+            return;
+        }
+
+        const value = option.getAttribute('data-value');
+        updateStatusSelection(value);
+        toggleStatusSelect(false);
+    });
+
+    document.addEventListener('click', function(event) {
+        if (!wrapper.contains(event.target)) {
+            toggleStatusSelect(false);
+        }
+    });
+}
+
+function showToast(message, type) {
+    const toast = document.getElementById('disputesToast');
+    if (!toast) {
+        return;
+    }
+
+    toast.textContent = message;
+    toast.classList.remove('is-success', 'is-error');
+    toast.classList.add('is-visible', type === 'success' ? 'is-success' : 'is-error');
+
+    if (toastTimer) {
+        clearTimeout(toastTimer);
+    }
+    toastTimer = setTimeout(() => {
+        toast.classList.remove('is-visible', 'is-success', 'is-error');
+    }, 3600);
+}
+
+function setResponseError(message) {
+    const errorEl = document.getElementById('disputeResponseError');
+    const textarea = document.getElementById('disputeResponse');
+    if (!errorEl || !textarea) {
+        return;
+    }
+
+    if (message) {
+        errorEl.textContent = message;
+        errorEl.classList.add('is-visible');
+        textarea.classList.add('is-invalid');
+    } else {
+        errorEl.textContent = '';
+        errorEl.classList.remove('is-visible');
+        textarea.classList.remove('is-invalid');
+    }
+}
+async function loadDisputes() {
+    showLoading();
+    let hadError = false;
+
+    try {
+        const params = new URLSearchParams({
+            status: currentStatus,
+            limit: itemsPerPage,
+            offset: (currentPage - 1) * itemsPerPage
+        });
+
+        const response = await fetch(`/api/admin/disputes?${params}`);
+        const data = await response.json();
+
+        if (data.success) {
+            lastDisputes = data.disputes || [];
+            lastTotalCount = data.total_count || lastDisputes.length;
+            updateHeaderStats(lastTotalCount);
+            renderDisputes(lastDisputes);
+            updatePagination(lastTotalCount);
+        } else {
+            showError();
+            hadError = true;
+        }
+    } catch (error) {
+        console.error('Error loading disputes:', error);
+        showError();
+        hadError = true;
+    }
+
+    if (!hadError) {
+        hideLoading();
+    }
+}
+
+function getDisplayName(primary, fallbackId) {
+    if (primary) {
+        return primary;
+    }
+    if (fallbackId) {
+        return `ID:${fallbackId}`;
+    }
+    return '-';
+}
+
+function renderDisputes(disputes) {
+    const table = document.getElementById('disputesTable');
+    const body = document.getElementById('disputesTableBody');
+    const noData = document.getElementById('noDisputes');
+
+    updateVisibleCount(disputes ? disputes.length : 0);
+
+    if (!disputes || disputes.length === 0) {
+        table.style.display = 'none';
+        noData.style.display = 'block';
+        return;
+    }
+
+    table.style.display = 'table';
+    noData.style.display = 'none';
+
+    body.innerHTML = disputes.map((dispute, index) => {
+        const buyerName = getDisplayName(dispute.buyer_username || dispute.buyer_name, dispute.buyer_id);
+        const sellerName = getDisplayName(dispute.seller_username || dispute.seller_name, dispute.seller_id);
+        const createdAt = dispute.created_at ? new Date(dispute.created_at).toLocaleDateString() : '-';
+        const amount = dispute.amount ? `${dispute.amount} ${dispute.currency || ''}`.trim() : '-';
+        const statusBadge = buildStatusBadge(dispute.status);
+
+        return `
+            <tr style="--row-delay: ${index * 45}ms;">
+                <td data-label="{{ t('admin_dispute_id') }}"><span class="cell-strong">#${dispute.dispute_id}</span></td>
+                <td data-label="{{ t('admin_deal_code') }}"><span class="cell-code">${dispute.deal_code || '-'}</span></td>
+                <td data-label="{{ t('admin_buyer') }}">${buyerName}</td>
+                <td data-label="{{ t('admin_seller') }}">${sellerName}</td>
+                <td data-label="{{ t('admin_amount') }}"><span class="cell-amount">${amount}</span></td>
+                <td data-label="{{ t('admin_status') }}">${statusBadge}</td>
+                <td data-label="{{ t('admin_created') }}">${createdAt}</td>
+                <td data-label="{{ t('admin_actions') }}">
+                    <button class="btn btn-secondary btn-sm" type="button" onclick="viewDispute(${dispute.dispute_id})">{{ t('admin_view') }}</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function updatePagination(totalCount) {
+    const totalPages = totalCount ? Math.ceil(totalCount / itemsPerPage) : 0;
+    const pagination = document.getElementById('pagination');
+    const pageInfo = document.getElementById('pageInfo');
+    const prevBtn = document.getElementById('prevPage');
+    const nextBtn = document.getElementById('nextPage');
+
+    if (pageInfo) {
+        if (totalPages === 0) {
+            pageInfo.textContent = `{{ t('admin_page') }} 0 {{ t('admin_of') }} 0`;
+        } else {
+            pageInfo.textContent = `{{ t('admin_page') }} ${currentPage} {{ t('admin_of') }} ${totalPages}`;
+        }
+    }
+
+    if (totalPages <= 1) {
+        pagination.style.display = 'none';
+        return;
+    }
+
+    pagination.style.display = 'flex';
+    prevBtn.disabled = currentPage <= 1;
+    nextBtn.disabled = currentPage >= totalPages;
+}
+
+function changePage(page) {
+    const totalPages = Math.ceil(lastTotalCount / itemsPerPage);
+    if (page < 1 || (totalPages && page > totalPages)) {
+        return;
+    }
+    currentPage = page;
+    loadDisputes();
+}
+async function viewDispute(disputeId) {
+    try {
+        const response = await fetch(`/api/admin/disputes/${disputeId}`);
+        const data = await response.json();
+        if (!data.success) {
+            showToast("{{ t('admin_dispute_load_failed') }}", 'error');
+            return;
+        }
+        showDisputeModal(data.dispute);
+    } catch (error) {
+        console.error('Error loading dispute:', error);
+        showToast("{{ t('admin_alert_network_error') }}", 'error');
+    }
+}
+
+function showDisputeModal(dispute) {
+    activeDisputeId = dispute.dispute_id;
+    const body = document.getElementById('disputeModalBody');
+    const createdAt = dispute.created_at ? new Date(dispute.created_at).toLocaleString() : '-';
+    const resolvedAt = dispute.resolved_at ? new Date(dispute.resolved_at).toLocaleString() : '-';
+    const buyerName = getDisplayName(dispute.buyer_username || dispute.buyer_name, dispute.buyer_id);
+    const sellerName = getDisplayName(dispute.seller_username || dispute.seller_name, dispute.seller_id);
+    const amount = dispute.amount ? `${dispute.amount} ${dispute.currency || ''}`.trim() : '-';
+    const statusBadge = buildStatusBadge(dispute.status);
+    const isResolved = normalizeStatus(dispute.status) === 'resolved';
+    const responseDisabled = isResolved ? 'disabled' : '';
+
+    const resolutionBlock = dispute.resolution ? `
+        <div class="modal-section">
+            <span class="detail-label">{{ t('admin_dispute_resolution') }}</span>
+            <div class="detail-text">${dispute.resolution}</div>
+        </div>
+    ` : '';
+
+    body.innerHTML = `
+        <div class="dispute-modal-grid">
+            <div class="modal-summary">
+                <div class="summary-header">
+                    <div>
+                        <div class="summary-id">#${dispute.dispute_id}</div>
+                        <div class="summary-deal">{{ t('admin_deal_code') }}: ${dispute.deal_code || '-'}</div>
+                    </div>
+                    ${statusBadge}
+                </div>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <span class="detail-label">{{ t('admin_buyer') }}</span>
+                        <span class="detail-value">${buyerName}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="detail-label">{{ t('admin_seller') }}</span>
+                        <span class="detail-value">${sellerName}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="detail-label">{{ t('admin_amount') }}</span>
+                        <span class="detail-value">${amount}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="detail-label">{{ t('admin_dispute_opened') }}</span>
+                        <span class="detail-value">${createdAt}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="detail-label">{{ t('admin_dispute_resolved') }}</span>
+                        <span class="detail-value">${resolvedAt}</span>
+                    </div>
+                </div>
+                <div class="modal-section">
+                    <span class="detail-label">{{ t('admin_dispute_reason') }}</span>
+                    <div class="detail-text">${dispute.reason || '-'}</div>
+                </div>
+                ${resolutionBlock}
+            </div>
+            <div class="modal-response">
+                <span class="detail-label">{{ t('admin_dispute_resolution') }}</span>
+                <textarea id="disputeResponse" class="response-area" placeholder="{{ t('admin_response_placeholder') }}" ${responseDisabled}></textarea>
+                <div class="form-error" id="disputeResponseError" role="alert"></div>
+            </div>
+        </div>
+    `;
+
+    const resolveBtn = document.getElementById('resolveDisputeBtn');
+    if (resolveBtn) {
+        resolveBtn.disabled = isResolved;
+    }
+
+    const responseInput = document.getElementById('disputeResponse');
+    if (responseInput && !responseInput.disabled) {
+        responseInput.addEventListener('input', () => setResponseError(''));
+    }
+
+    setResponseError('');
+    openDisputeModal();
+}
+
+async function resolveDispute() {
+    if (!activeDisputeId) {
+        return;
+    }
+
+    const resolveBtn = document.getElementById('resolveDisputeBtn');
+    if (resolveBtn && resolveBtn.disabled) {
+        return;
+    }
+
+    const responseText = document.getElementById('disputeResponse').value.trim();
+    if (responseText.length < 10) {
+        setResponseError("{{ t('admin_response_too_short') }}");
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/admin/disputes/${activeDisputeId}/resolve`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ response: responseText })
+        });
+        const data = await response.json();
+
+        if (data.success) {
+            showToast("{{ t('admin_dispute_resolved') }}", 'success');
+            closeDisputeModal();
+            loadDisputes();
+        } else {
+            showToast(data.message || "{{ t('admin_dispute_resolve_failed') }}", 'error');
+        }
+    } catch (error) {
+        console.error('Error resolving dispute:', error);
+        showToast("{{ t('admin_alert_network_error') }}", 'error');
+    }
+}
+
+function openDisputeModal() {
+    const modal = document.getElementById('disputeModal');
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden', 'false');
+}
+
+function closeDisputeModal() {
+    const modal = document.getElementById('disputeModal');
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
+    activeDisputeId = null;
+}
+
+function showLoading() {
+    const indicator = document.getElementById('loadingIndicator');
+    indicator.innerHTML = `
+        <div class="spinner"></div>
+        <p>{{ t('admin_loading_disputes') }}</p>
+    `;
+    indicator.style.display = 'flex';
+    document.getElementById('disputesTable').style.display = 'none';
+    document.getElementById('noDisputes').style.display = 'none';
+}
+
+function hideLoading() {
+    document.getElementById('loadingIndicator').style.display = 'none';
+}
+
+function showError() {
+    const indicator = document.getElementById('loadingIndicator');
+    indicator.innerHTML = `
+        <div class="no-data-card">
+            <h3>{{ t('admin_no_disputes_found') }}</h3>
+        </div>
+    `;
+    indicator.style.display = 'flex';
+    document.getElementById('disputesTable').style.display = 'none';
+    document.getElementById('noDisputes').style.display = 'none';
+    updateVisibleCount(0);
+}
+</script>
+{% endblock %}

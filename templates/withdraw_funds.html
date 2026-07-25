@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('page_title_withdraw') }}{% endblock %}
+
+{% block extra_head %}
+<style>
+.withdraw-section {
+  padding: 32px 0 48px;
+}
+
+.withdraw-container {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.withdraw-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.withdraw-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-white);
+  margin: 0 0 8px;
+}
+
+.withdraw-subtitle {
+  color: var(--text-medium);
+  margin: 0;
+}
+
+.withdraw-code {
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  background: var(--bg-dark);
+  padding: 12px 16px;
+  min-width: 180px;
+}
+
+.withdraw-code-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-medium);
+}
+
+.withdraw-code-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--accent-silver);
+  margin-top: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+.withdraw-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-medium);
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+}
+
+.summary-value {
+  font-weight: 600;
+  color: var(--text-white);
+}
+
+.withdraw-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.withdraw-form .form-label {
+  font-weight: 600;
+  color: var(--text-white);
+}
+
+.withdraw-form .form-input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-dark);
+  color: var(--text-white);
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.withdraw-form .form-input:focus {
+  outline: none;
+  border-color: var(--accent-silver);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08);
+}
+
+.form-help {
+  font-size: 0.875rem;
+  color: var(--text-medium);
+  white-space: pre-line;
+}
+
+.withdraw-warning {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  color: var(--text-medium);
+  white-space: pre-line;
+}
+
+.withdraw-warning strong {
+  color: var(--text-white);
+}
+
+.form-error {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  background: rgba(248, 113, 113, 0.12);
+  color: #f87171;
+  font-size: 0.9rem;
+  white-space: pre-line;
+}
+
+.form-actions {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.withdraw-actions .btn {
+  min-width: 160px;
+}
+
+@media (max-width: 900px) {
+  .withdraw-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .withdraw-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% set wallet_rules = t('wallet_address_rules', prefix=wallet_prefix, length=wallet_length) %}
+{% set invalid_wallet_message = t('invalid_wallet_address', currency=deal.currency, error_message=wallet_rules) %}
+<section class="withdraw-section">
+  <div class="withdraw-container">
+    <div class="withdraw-header">
+      <div>
+        <h1 class="withdraw-title">{{ t('withdraw_to_wallet_title') }}</h1>
+        <p class="withdraw-subtitle">{{ t('withdraw_to_wallet_message') }}</p>
+      </div>
+      <div class="withdraw-code">
+        <div class="withdraw-code-label">{{ t('deal_code') }}</div>
+        <div class="withdraw-code-value">{{ deal.deal_code }}</div>
+      </div>
+    </div>
+
+    <div class="withdraw-grid">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">{{ t('deal_summary') }}</h2>
+        </div>
+        <div class="card-content">
+          <div class="summary-row">
+            <span>{{ t('withdraw_amount_without_fee') }}</span>
+            <span class="summary-value">{{ seller_amount }} {{ deal.currency }}</span>
+          </div>
+          <div class="summary-row">
+            <span>{{ t('commission_amount') }}</span>
+            <span class="summary-value">{{ commission_amount }} {{ deal.currency }}</span>
+          </div>
+          <div class="summary-row">
+            <span>{{ t('deal_amount') }}</span>
+            <span class="summary-value">{{ deal.amount }} {{ deal.currency }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">{{ t('withdraw_to_wallet_title') }}</h2>
+        </div>
+        <div class="card-content">
+          <form id="withdrawForm" class="withdraw-form" novalidate>
+            <div class="form-group">
+              <label for="walletAddress" class="form-label">{{ t('enter_wallet_address') }}</label>
+              <input
+                type="text"
+                id="walletAddress"
+                name="walletAddress"
+                class="form-input"
+                placeholder="{{ wallet_prefix }}"
+                autocomplete="off"
+                required
+              />
+              <div class="form-help">{{ wallet_rules }}</div>
+            </div>
+
+            <div class="withdraw-warning">{{ t('withdrawal_warning') | safe }}</div>
+
+            <div id="withdrawError" class="form-error" role="alert" hidden></div>
+
+            <div class="form-actions withdraw-actions">
+              <button type="submit" class="btn btn-primary" id="confirmWithdrawBtn">
+                {{ t('confirm_withdrawal') }}
+              </button>
+              <a href="/deal/{{ deal.deal_code }}" class="btn btn-secondary">
+                {{ t('back') }}
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const dealCode = {{ deal.deal_code | default('', true) | tojson }};
+const walletPattern = new RegExp({{ wallet_pattern | default('.*', true) | tojson }});
+const withdrawMessages = {
+  required: {{ t('enter_wallet_address') | default('', true) | tojson }},
+  invalid: {{ invalid_wallet_message | default('', true) | tojson }},
+  confirm: {{ t('withdraw_to_wallet_prompt') | default('', true) | tojson }},
+  processing: {{ t('withdraw_to_wallet_processing') | default('', true) | tojson }},
+  success: {{ t('funds_withdrawn_to_wallet') | default('', true) | tojson }},
+  network: {{ t('network_error') | default('', true) | tojson }},
+  unknown: {{ t('unknown_error') | default('', true) | tojson }},
+  errorPrefix: {{ t('error_prefix') | default('', true) | tojson }}
+};
+
+const form = document.getElementById('withdrawForm');
+const addressInput = document.getElementById('walletAddress');
+const errorBox = document.getElementById('withdrawError');
+const confirmBtn = document.getElementById('confirmWithdrawBtn');
+const defaultConfirmText = confirmBtn.textContent.trim();
+
+function showError(message) {
+  if (!message) return;
+  errorBox.innerHTML = message;
+  errorBox.hidden = false;
+}
+
+function clearError() {
+  errorBox.hidden = true;
+  errorBox.innerHTML = '';
+}
+
+function setLoading(loading) {
+  confirmBtn.disabled = loading;
+  confirmBtn.textContent = loading ? withdrawMessages.processing : defaultConfirmText;
+}
+
+function showNotification(message, type = 'info') {
+  const notification = document.createElement('div');
+  notification.style.cssText = `position:fixed;top:20px;right:20px;background:${type==='success'?'#4ade80':type==='error'?'#f87171':'#60a5fa'};color:#000;padding:16px 24px;border-radius:8px;font-weight:600;z-index:10000;box-shadow:0 4px 16px rgba(0,0,0,0.3);`;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  setTimeout(() => notification.remove(), 3000);
+}
+
+async function submitWithdraw(address) {
+  setLoading(true);
+  try {
+    const response = await fetch(`/api/deal/${dealCode}/withdraw`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ method: 'wallet', address })
+    });
+    let data = null;
+    try {
+      data = await response.json();
+    } catch (parseError) {
+      const text = await response.text().catch(() => '');
+      const message = text || response.statusText || withdrawMessages.unknown;
+      showError(`${withdrawMessages.errorPrefix}: ${message}`);
+      return;
+    }
+
+    if (data && data.success) {
+      showNotification(withdrawMessages.success, 'success');
+      setTimeout(() => {
+        window.location.href = `/deal/${dealCode}`;
+      }, 1200);
+      return;
+    }
+    const errorText = (data && data.message) || response.statusText || withdrawMessages.unknown;
+    showError(`${withdrawMessages.errorPrefix}: ${errorText}`);
+  } catch (err) {
+    console.error(err);
+    showError(withdrawMessages.network);
+  } finally {
+    setLoading(false);
+  }
+}
+
+form.addEventListener('submit', (event) => {
+  event.preventDefault();
+  clearError();
+
+  const address = addressInput.value.trim();
+  if (!address) {
+    showError(withdrawMessages.required);
+    return;
+  }
+  if (!walletPattern.test(address)) {
+    showError(withdrawMessages.invalid);
+    return;
+  }
+
+  showConfirmationModal(withdrawMessages.confirm, () => submitWithdraw(address));
+});
+</script>
+{% endblock %}

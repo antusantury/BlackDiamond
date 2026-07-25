@@ -1,0 +1,25 @@
+/* Unified Background Mode: ensures all sections share the body background */
+
+/* Hide per-section decorative overlays */
+.bg-unified .hero::before,
+.bg-unified .features-section::before,
+.bg-unified .stats-section::before,
+.bg-unified .how-it-works::before {
+    display: none !important;
+}
+
+/* Remove per-section backgrounds so only the page background is visible */
+.bg-unified .features-section,
+.bg-unified .stats-section,
+.bg-unified .cta-section,
+.bg-unified .how-it-works {
+    background: transparent !important;
+}
+
+/* Keep section layout intact but avoid background seams */
+.bg-unified .section {
+    position: relative;
+    z-index: 0;
+    isolation: isolate;
+}
+

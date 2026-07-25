@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deal Timeline - Black Diamond</title>
+    <style>
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
+
+:root {
+    --tl-bg: #0b0f17;
+    --tl-surface: rgba(17, 24, 39, 0.92);
+    --tl-border: rgba(148, 163, 184, 0.2);
+    --tl-text: #f8fafc;
+    --tl-muted: #94a3b8;
+    --tl-accent: #22c55e;
+    --tl-info: #38bdf8;
+    --tl-warning: #f59e0b;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: "Manrope", sans-serif;
+    background: radial-gradient(circle at top, rgba(56, 189, 248, 0.08), transparent 55%),
+                radial-gradient(circle at 20% 20%, rgba(34, 197, 94, 0.08), transparent 50%),
+                var(--tl-bg);
+    color: var(--tl-text);
+    min-height: 100vh;
+    padding: 32px 20px 60px;
+}
+
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+.timeline-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.timeline-title {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.timeline-subtitle {
+    color: var(--tl-muted);
+    font-size: 1rem;
+    max-width: 720px;
+    line-height: 1.6;
+}
+
+.timeline-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding-left: 34px;
+}
+
+.timeline-line {
+    position: absolute;
+    left: 14px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(148, 163, 184, 0.2);
+}
+
+.timeline-item {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    animation: fadeIn 0.4s ease both;
+}
+
+.timeline-item:nth-child(1) { animation-delay: 0.05s; }
+.timeline-item:nth-child(2) { animation-delay: 0.1s; }
+.timeline-item:nth-child(3) { animation-delay: 0.15s; }
+.timeline-item:nth-child(4) { animation-delay: 0.2s; }
+.timeline-item:nth-child(5) { animation-delay: 0.25s; }
+.timeline-item:nth-child(6) { animation-delay: 0.3s; }
+
+.timeline-marker {
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
+    border: 1px solid var(--tl-border);
+    background: rgba(148, 163, 184, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--tl-muted);
+    flex-shrink: 0;
+}
+
+.timeline-marker svg {
+    width: 16px;
+    height: 16px;
+}
+
+.timeline-item.completed .timeline-marker {
+    background: rgba(34, 197, 94, 0.2);
+    border-color: rgba(34, 197, 94, 0.5);
+    color: var(--tl-text);
+}
+
+.timeline-item.active .timeline-marker {
+    background: rgba(56, 189, 248, 0.2);
+    border-color: rgba(56, 189, 248, 0.6);
+    color: var(--tl-text);
+}
+
+.timeline-content {
+    flex: 1;
+    background: var(--tl-surface);
+    border: 1px solid var(--tl-border);
+    border-radius: 14px;
+    padding: 16px;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.timeline-content:hover {
+    border-color: rgba(56, 189, 248, 0.4);
+    transform: translateY(-2px);
+}
+
+.timeline-step {
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--tl-muted);
+}
+
+.timeline-title-text {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 6px 0 6px;
+}
+
+.timeline-description {
+    color: var(--tl-muted);
+    font-size: 0.92rem;
+    line-height: 1.5;
+}
+
+.timeline-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 0.82rem;
+    color: var(--tl-muted);
+}
+
+.timeline-date svg {
+    width: 16px;
+    height: 16px;
+}
+
+.timeline-tooltip {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: rgba(148, 163, 184, 0.08);
+    color: var(--tl-muted);
+    font-size: 0.85rem;
+}
+
+.timeline-progress {
+    margin-top: 28px;
+    background: var(--tl-surface);
+    border: 1px solid var(--tl-border);
+    border-radius: 14px;
+    padding: 16px;
+}
+
+.progress-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.progress-title {
+    font-weight: 600;
+}
+
+.progress-percentage {
+    color: var(--tl-muted);
+    font-weight: 600;
+}
+
+.progress-bar {
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, 0.2);
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--tl-info), var(--tl-accent));
+    border-radius: inherit;
+    transition: width 0.4s ease;
+}
+
+.timeline-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.btn-primary {
+    background: #f8fafc;
+    color: #0f172a;
+}
+
+.btn-secondary {
+    background: rgba(148, 163, 184, 0.16);
+    color: var(--tl-text);
+}
+
+.btn-danger {
+    background: rgba(239, 68, 68, 0.18);
+    color: #fecaca;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(15, 23, 42, 0.35);
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    z-index: 2000;
+}
+
+.modal.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.7);
+}
+
+.modal-content {
+    position: relative;
+    background: var(--tl-surface);
+    border: 1px solid var(--tl-border);
+    border-radius: 16px;
+    width: min(520px, 90vw);
+    z-index: 1;
+}
+
+.modal-header,
+.modal-body,
+.modal-footer {
+    padding: 18px 20px;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--tl-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.modal-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    color: var(--tl-muted);
+    cursor: pointer;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--tl-border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 640px) {
+    body {
+        padding: 24px 16px 48px;
+    }
+    .timeline-container {
+        padding-left: 24px;
+    }
+    .timeline-line {
+        left: 8px;
+    }
+}
+</style>
+</head>
+<body>
+    <div class="container">
+        <header class="timeline-header">
+            <h1 class="timeline-title">Deal Progress Timeline</h1>
+            <p class="timeline-subtitle">
+                Track your deal progress through each stage. From creation to completion, 
+                every step is monitored and secured with our blockchain technology.
+            </p>
+        </header>
+
+        <div class="timeline-container">
+            <div class="timeline-line"></div>
+
+            <!-- Step 1: Deal Created -->
+            <div class="timeline-item completed" data-step="1">
+                <div class="timeline-marker">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                </div>
+                <div class="timeline-content focus-outline" tabindex="0" role="button" aria-label="Deal Created">
+                    <div class="timeline-step">Step 1</div>
+                    <h3 class="timeline-title-text">Deal Created</h3>
+                    <p class="timeline-description">
+                        The buyer has successfully created the deal and is ready to proceed. 
+                        This marks the beginning of our secure transaction process.
+                    </p>
+                    <div class="timeline-date">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 7V3M16 7V3M4 11H20M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21Z"/>
+                        </svg>
+                        <span>2024-01-15 - 14:30</span>
+                    </div>
+                    <div class="timeline-tooltip">
+                        <strong>What happens next:</strong>
+                        <p>The seller will be notified and can join the deal to proceed to the payment stage.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Seller Joined -->
+            <div class="timeline-item completed" data-step="2">
+                <div class="timeline-marker">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                </div>
+                <div class="timeline-content focus-outline" tabindex="0" role="button" aria-label="Seller Joined">
+                    <div class="timeline-step">Step 2</div>
+                    <h3 class="timeline-title-text">Seller Joined</h3>
+                    <p class="timeline-description">
+                        The seller has joined the deal and confirmed their participation. 
+                        Both parties are now ready for the payment process.
+                    </p>
+                    <div class="timeline-date">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 7V3M16 7V3M4 11H20M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21Z"/>
+                        </svg>
+                        <span>2024-01-15 - 15:00</span>
+                    </div>
+                    <div class="timeline-tooltip">
+                        <strong>What happens next:</strong>
+                        <p>The buyer will make the payment which will be held in escrow until delivery confirmation.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Payment Received -->
+            <div class="timeline-item active" data-step="3">
+                <div class="timeline-marker">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="timeline-content focus-outline" tabindex="0" role="button" aria-label="Payment Received">
+                    <div class="timeline-step">Step 3</div>
+                    <h3 class="timeline-title-text">Payment Received</h3>
+                    <p class="timeline-description">
+                        Payment has been received and is securely held in escrow. 
+                        The seller can now proceed with the delivery.
+                    </p>
+                    <div class="timeline-date">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 7V3M16 7V3M4 11H20M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21Z"/>
+                        </svg>
+                        <span>In Progress - 15:30</span>
+                    </div>
+                    <div class="timeline-tooltip">
+                        <strong>Current Status:</strong>
+                        <p>Waiting for seller to confirm delivery. Funds are securely held in escrow.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Delivery Confirmed -->
+            <div class="timeline-item pending" data-step="4">
+                <div class="timeline-marker">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z"/>
+                        <path d="M2 17L12 22L22 17"/>
+                        <path d="M2 12L12 17L22 12"/>
+                    </svg>
+                </div>
+                <div class="timeline-content focus-outline" tabindex="0" role="button" aria-label="Delivery Confirmed">
+                    <div class="timeline-step">Step 4</div>
+                    <h3 class="timeline-title-text">Delivery Confirmed</h3>
+                    <p class="timeline-description">
+                        The seller has confirmed delivery of the goods. 
+                        The buyer now needs to confirm receipt to complete the transaction.
+                    </p>
+                    <div class="timeline-date">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 7V3M16 7V3M4 11H20M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21Z"/>
+                        </svg>
+                        <span>Upcoming</span>
+                    </div>
+                    <div class="timeline-tooltip">
+                        <strong>What happens next:</strong>
+                        <p>The buyer will receive a notification to confirm receipt of the goods.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Receipt Confirmed -->
+            <div class="timeline-item pending" data-step="5">
+                <div class="timeline-marker">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                </div>
+                <div class="timeline-content focus-outline" tabindex="0" role="button" aria-label="Receipt Confirmed">
+                    <div class="timeline-step">Step 5</div>
+                    <h3 class="timeline-title-text">Receipt Confirmed</h3>
+                    <p class="timeline-description">
+                        The buyer has confirmed receipt of the goods. 
+                        The transaction is now complete and funds will be released to the seller.
+                    </p>
+                    <div class="timeline-date">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 7V3M16 7V3M4 11H20M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21Z"/>
+                        </svg>
+                        <span>Upcoming</span>
+                    </div>
+                    <div class="timeline-tooltip">
+                        <strong>What happens next:</strong>
+                        <p>Funds will be automatically released to the seller within 24 hours.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6: Deal Completed -->
+            <div class="timeline-item pending" data-step="6">
+                <div class="timeline-marker">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                </div>
+                <div class="timeline-content focus-outline" tabindex="0" role="button" aria-label="Deal Completed">
+                    <div class="timeline-step">Step 6</div>
+                    <h3 class="timeline-title-text">Deal Completed</h3>
+                    <p class="timeline-description">
+                        The deal has been successfully completed. Both parties are satisfied 
+                        and the transaction is now closed.
+                    </p>
+                    <div class="timeline-date">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M8 7V3M16 7V3M4 11H20M5 21H19C20.1046 21 21 20.1046 21 19V7C21 5.89543 20.1046 5 19 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21Z"/>
+                        </svg>
+                        <span>Upcoming</span>
+                    </div>
+                    <div class="timeline-tooltip">
+                        <strong>Congratulations!</strong>
+                        <p>The deal has been successfully completed. You can view the deal summary in your account.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Section -->
+        <div class="timeline-progress">
+            <div class="progress-header">
+                <div class="progress-title">Overall Progress</div>
+                <div class="progress-percentage" id="progressPercentage">50%</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="timeline-actions">
+            <button class="btn btn-primary" id="confirmDeliveryBtn">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+                Confirm Delivery
+            </button>
+            <button class="btn btn-secondary" id="viewDetailsBtn">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                </svg>
+                View Details
+            </button>
+            <button class="btn btn-secondary" id="cancelDealBtn">
+                <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+                </svg>
+                Cancel Deal
+            </button>
+        </div>
+    </div>
+
+    <div id="confirmationModal" class="modal" role="dialog" aria-labelledby="confirmationTitle" aria-hidden="true">
+        <div class="modal-overlay" id="confirmationModalOverlay"></div>
+        <div class="modal-content confirmation-modal-content">
+            <div class="modal-header confirmation-modal-header">
+                <div class="confirmation-header-content">
+                    <div class="confirmation-icon-wrapper">
+                        <svg class="confirmation-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
+                            <path d="M12 8V14M8 12H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h2 id="confirmationTitle" class="modal-title confirmation-title">Confirm action</h2>
+                </div>
+                <button class="modal-close confirmation-close" id="confirmationModalClose" aria-label="Close">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M18 6L6 18M6 6L18 18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body confirmation-modal-body">
+                <div class="confirmation-message">
+                    <p id="confirmationMessage">Are you sure you want to continue?</p>
+                </div>
+            </div>
+            <div class="modal-footer confirmation-modal-footer">
+                <button class="btn btn-secondary confirmation-btn-cancel" id="confirmationCancel">Cancel</button>
+                <button class="btn btn-danger confirmation-btn-confirm" id="confirmationConfirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const translations = {
+            confirm_action: 'Confirm action',
+            confirm_action_desc: 'Are you sure you want to continue?',
+            confirm_cancel_deal_text: 'Are you sure you want to cancel this deal?',
+            confirm: 'Confirm',
+            cancel: 'Cancel',
+            close: 'Close'
+        };
+
+        const t = (key) => translations[key] || key;
+
+        let confirmationCallback = null;
+
+        function showConfirmationModal(message, callback) {
+            const modal = document.getElementById('confirmationModal');
+            const messageElement = document.getElementById('confirmationMessage');
+
+            if (!modal || !messageElement) {
+                return;
+            }
+
+            messageElement.textContent = message;
+            confirmationCallback = callback;
+            modal.classList.add('show');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideConfirmationModal() {
+            const modal = document.getElementById('confirmationModal');
+            if (!modal) {
+                return;
+            }
+
+            modal.classList.remove('show');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+            confirmationCallback = null;
+        }
+
+        function confirmAction() {
+            if (confirmationCallback) {
+                confirmationCallback();
+            }
+            hideConfirmationModal();
+        }
+
+        function setupConfirmationModal() {
+            const modal = document.getElementById('confirmationModal');
+            const overlay = document.getElementById('confirmationModalOverlay');
+            const closeButton = document.getElementById('confirmationModalClose');
+            const title = document.getElementById('confirmationTitle');
+            const message = document.getElementById('confirmationMessage');
+            const cancelButton = document.getElementById('confirmationCancel');
+            const confirmButton = document.getElementById('confirmationConfirm');
+
+            if (title) {
+                title.textContent = t('confirm_action');
+            }
+
+            if (message) {
+                message.textContent = t('confirm_action_desc');
+            }
+
+            if (cancelButton) {
+                cancelButton.textContent = t('cancel');
+            }
+
+            if (confirmButton) {
+                confirmButton.textContent = t('confirm');
+            }
+
+            if (closeButton) {
+                closeButton.setAttribute('aria-label', t('close'));
+            }
+
+            if (closeButton) {
+                closeButton.addEventListener('click', hideConfirmationModal);
+            }
+
+            if (cancelButton) {
+                cancelButton.addEventListener('click', hideConfirmationModal);
+            }
+
+            if (confirmButton) {
+                confirmButton.addEventListener('click', confirmAction);
+            }
+
+            if (overlay) {
+                overlay.addEventListener('click', hideConfirmationModal);
+            }
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && modal && modal.classList.contains('show')) {
+                    hideConfirmationModal();
+                }
+            });
+        }
+        class DealTimeline {
+            constructor() {
+                this.steps = document.querySelectorAll('.timeline-item');
+                this.progressFill = document.getElementById('progressFill');
+                this.progressPercentage = document.getElementById('progressPercentage');
+                this.confirmDeliveryBtn = document.getElementById('confirmDeliveryBtn');
+                this.viewDetailsBtn = document.getElementById('viewDetailsBtn');
+                this.cancelDealBtn = document.getElementById('cancelDealBtn');
+                
+                this.currentStep = 3; // Payment Received (active)
+                this.totalSteps = this.steps.length;
+                
+                this.init();
+            }
+
+            init() {
+                this.updateProgress();
+                this.bindEvents();
+                this.setupKeyboardNavigation();
+            }
+
+            updateProgress() {
+                const percentage = (this.currentStep / this.totalSteps) * 100;
+                
+                // Update visual progress
+                this.progressFill.style.width = `${percentage}%`;
+                this.progressPercentage.textContent = `${Math.round(percentage)}%`;
+                
+                // Update timeline states
+                this.steps.forEach((step, index) => {
+                    const stepNumber = index + 1;
+                    
+                    if (stepNumber < this.currentStep) {
+                        step.classList.add('completed');
+                        step.classList.remove('active', 'pending');
+                    } else if (stepNumber === this.currentStep) {
+                        step.classList.add('active');
+                        step.classList.remove('completed', 'pending');
+                    } else {
+                        step.classList.add('pending');
+                        step.classList.remove('completed', 'active');
+                    }
+                });
+            }
+
+            bindEvents() {
+                // Confirm Delivery Button
+                this.confirmDeliveryBtn.addEventListener('click', () => {
+                    if (this.currentStep === 3) { // Payment Received
+                        this.advanceStep();
+                    }
+                });
+
+                // View Details Button
+                this.viewDetailsBtn.addEventListener('click', () => {
+                    alert('Deal Details:\n\nDeal Code: BD-12345\nAmount: 1000 USD\nStatus: Payment Received\nCreated: 2024-01-15');
+                });
+
+                // Cancel Deal Button
+                this.cancelDealBtn.addEventListener('click', () => {
+                    showConfirmationModal(t('confirm_cancel_deal_text'), () => {
+                        alert('Deal cancelled successfully.');
+                    });
+                });
+
+                // Timeline item interactions
+                this.steps.forEach(step => {
+                    step.addEventListener('click', () => {
+                        const stepNumber = parseInt(step.dataset.step);
+                        if (stepNumber <= this.currentStep) {
+                            this.showStepDetails(stepNumber);
+                        }
+                    });
+                });
+            }
+
+            setupKeyboardNavigation() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowRight') {
+                        this.advanceStep();
+                    } else if (e.key === 'ArrowLeft') {
+                        this.goBackStep();
+                    }
+                });
+            }
+
+            advanceStep() {
+                if (this.currentStep < this.totalSteps) {
+                    this.currentStep++;
+                    this.updateProgress();
+                    this.animateStepCompletion();
+                }
+            }
+
+            goBackStep() {
+                if (this.currentStep > 1) {
+                    this.currentStep--;
+                    this.updateProgress();
+                }
+            }
+
+            animateStepCompletion() {
+                const currentStepElement = this.steps[this.currentStep - 1];
+                if (currentStepElement) {
+                    currentStepElement.style.transform = 'scale(1.05)';
+                    setTimeout(() => {
+                        currentStepElement.style.transform = 'scale(1)';
+                    }, 300);
+                }
+            }
+
+            showStepDetails(stepNumber) {
+                const step = this.steps[stepNumber - 1];
+                const title = step.querySelector('.timeline-title-text').textContent;
+                const description = step.querySelector('.timeline-description').textContent;
+                const date = step.querySelector('.timeline-date span').textContent;
+                
+                alert(`Step ${stepNumber}: ${title}\n\n${description}\n\nDate: ${date}`);
+            }
+        }
+
+        // Initialize timeline when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            setupConfirmationModal();
+            new DealTimeline();
+        });
+    </script>
+</body>
+</html>
